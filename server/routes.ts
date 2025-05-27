@@ -5,6 +5,28 @@ import { completeTaskSchema, insertMilestoneSchema } from "@shared/schema";
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
 
+// Helper function to get localized content
+function getLocalizedCampaign(campaign: any, language: string = 'en') {
+  return {
+    id: campaign.id,
+    title: language === 'ar' ? campaign.title_ar : campaign.title_en,
+    description: language === 'ar' ? campaign.description_ar : campaign.description_en,
+    totalDays: campaign.total_days,
+    reward: {
+      title: language === 'ar' ? campaign.reward_title_ar : campaign.reward_title_en,
+      description: language === 'ar' ? campaign.reward_description_ar : campaign.reward_description_en
+    }
+  };
+}
+
+function getLocalizedMilestone(milestone: any, language: string = 'en') {
+  return {
+    id: milestone.id,
+    title: language === 'ar' ? milestone.title_ar : milestone.title_en,
+    description: language === 'ar' ? milestone.description_ar : milestone.description_en,
+  };
+}
+
 // Rate limiting for milestone completion
 const milestoneRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -100,10 +122,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasksWithCompletion = await Promise.all(
         currentDayMilestones.map(async (milestone) => {
           const completed = await storage.isTaskCompleted(userId, milestone.id);
+          const localizedMilestone = getLocalizedMilestone(milestone, 'en'); // Will add language detection later
           return {
             id: milestone.id,
-            title: milestone.title_en,
-            description: milestone.description_en,
+            title: localizedMilestone.title,
+            description: localizedMilestone.description,
             completed,
             number: milestone.order_index + 1
           };
@@ -126,17 +149,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         });
 
+      const localizedCampaign = getLocalizedCampaign(activeCampaign, 'en'); // Will add language detection later
+      
       res.json({
-        campaign: {
-          id: activeCampaign.id,
-          title: activeCampaign.title_en,
-          description: activeCampaign.description_en,
-          totalDays: activeCampaign.total_days,
-          reward: {
-            title: activeCampaign.reward_title_en,
-            description: activeCampaign.reward_description_en
-          }
-        },
+        campaign: localizedCampaign,
         progress: {
           currentDay,
           completedDays,
