@@ -67,7 +67,7 @@ export default function Progress() {
       <div className="max-w-md mx-auto space-y-6 pb-8">
         
         {/* Header */}
-        <div className="text-left space-y-2">
+        <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">Activity Streak</h1>
           <p className="text-gray-600 text-base">Complete daily tasks to maintain your streak</p>
         </div>
@@ -75,8 +75,8 @@ export default function Progress() {
         {/* Streak Progress */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-gray-900 font-bold">
-              Current Streak: <span className="text-primary font-bold">{streak.currentDays} days</span>
+            <span className="text-gray-900 font-medium">
+              Current Streak: <span className="text-primary font-semibold">{streak.currentDays} days</span>
             </span>
             <span className="text-gray-600 text-sm">{progress.percentage}% Complete</span>
           </div>
@@ -99,7 +99,7 @@ export default function Progress() {
                 <Bell className="text-white text-sm" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900 text-sm">Streak Reminders</h4>
+                <h4 className="font-medium text-gray-900 text-sm">Streak Reminders</h4>
                 <p className="text-gray-600 text-xs">Get notified to maintain your streak</p>
               </div>
             </div>
@@ -152,55 +152,49 @@ export default function Progress() {
 
         {/* Current Day Tasks */}
         {progress.currentDay <= campaign.totalDays && (
-          <div className="space-y-4">
-            {/* Tasks Header Card */}
-            <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Day {progress.currentDay} Tasks</h3>
-              <p className="text-blue-600 font-medium mb-4">
-                Complete all {tasks.length} tasks to unlock the next day
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex-1 bg-blue-200 rounded-full h-2 mr-4">
-                  <div 
-                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(tasks.filter(t => t.completed).length / tasks.length) * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-gray-600 font-medium">
-                  {tasks.filter(t => t.completed).length}/{tasks.length}
-                </span>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900">Day {progress.currentDay} Tasks</h3>
+              <div className="text-sm text-gray-600">
+                {tasks.filter(t => t.completed).length}/{tasks.length}
               </div>
             </div>
+            
+            <p className="text-sm text-gray-600">
+              Complete all {tasks.length} tasks to unlock the next day
+            </p>
 
-            {/* Individual Task Cards */}
-            <div className="space-y-4">
-              {tasks.map((task, index) => (
-                <div key={task.id} className="flex items-start space-x-4">
-                  {/* Task Number Circle */}
-                  <div className="flex flex-col items-center">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
-                      task.completed ? 'bg-green-500' : 'bg-blue-500'
-                    }`}>
-                      {task.completed ? <CheckCircle className="w-6 h-6" /> : task.number}
-                    </div>
-                    {/* Connection line to next task */}
-                    {index < tasks.length - 1 && (
-                      <div className="w-0.5 h-6 bg-blue-200 mt-2"></div>
-                    )}
-                  </div>
-                  
-                  {/* Task Content Card */}
-                  <div className="flex-1 bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
-                    <h4 className={`font-bold text-lg mb-2 ${task.completed ? 'text-green-800' : 'text-gray-900'}`}>
-                      {task.title}
-                    </h4>
-                    <p className={`text-base ${task.completed ? 'text-green-600' : 'text-gray-600'}`}>
-                      {task.description}
-                    </p>
-                  </div>
+            {tasks.map((task) => (
+              <div 
+                key={task.id}
+                className={`flex items-start space-x-4 p-4 border rounded-xl transition-colors ${
+                  task.completed 
+                    ? 'border-green-200 bg-green-50' 
+                    : 'border-gray-200 hover:border-primary/30 cursor-pointer'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 ${
+                  task.completed ? 'bg-green-500' : 'bg-primary'
+                }`}>
+                  {task.completed ? <CheckCircle className="w-4 h-4" /> : task.number}
                 </div>
-              ))}
-            </div>
+                <div className="flex-1">
+                  <h4 className={`font-medium ${task.completed ? 'text-green-800' : 'text-gray-900'}`}>
+                    {task.title}
+                  </h4>
+                  <p className={`text-sm mt-1 ${task.completed ? 'text-green-600' : 'text-gray-600'}`}>
+                    {task.description}
+                  </p>
+                </div>
+                <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center ${
+                  task.completed 
+                    ? 'border-green-500 bg-green-500' 
+                    : 'border-gray-300'
+                }`}>
+                  {task.completed && <CheckCircle className="text-white text-xs" />}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
