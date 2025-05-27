@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { completeTaskSchema } from "@shared/schema";
+import { completeTaskSchema, insertMilestoneSchema } from "@shared/schema";
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
 
