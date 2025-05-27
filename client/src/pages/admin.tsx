@@ -22,6 +22,14 @@ import { z } from "zod";
 
 const campaignFormSchema = insertCampaignSchema.extend({
   total_days: z.number().min(1).max(365),
+  title_en: z.string().min(1, "English title is required"),
+  title_ar: z.string().min(1, "Arabic title is required"),
+  description_en: z.string().min(1, "English description is required"),
+  description_ar: z.string().min(1, "Arabic description is required"),
+  reward_title_en: z.string().min(1, "English reward title is required"),
+  reward_title_ar: z.string().min(1, "Arabic reward title is required"),
+  reward_description_en: z.string().min(1, "English reward description is required"),
+  reward_description_ar: z.string().min(1, "Arabic reward description is required"),
 });
 
 const milestoneFormSchema = insertMilestoneSchema.extend({
@@ -115,10 +123,14 @@ export default function Admin() {
     const form = useForm({
       resolver: zodResolver(campaignFormSchema),
       defaultValues: campaign || {
-        title: "",
-        description: "",
-        reward_title: "",
-        reward_description: "",
+        title_en: "",
+        title_ar: "",
+        description_en: "",
+        description_ar: "",
+        reward_title_en: "",
+        reward_title_ar: "",
+        reward_description_en: "",
+        reward_description_ar: "",
         total_days: 7,
         is_active: false,
       },
@@ -137,10 +149,10 @@ export default function Admin() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="title"
+            name="title_en"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Campaign Title</FormLabel>
+                <FormLabel>English Campaign Title</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -150,10 +162,23 @@ export default function Admin() {
           />
           <FormField
             control={form.control}
-            name="description"
+            name="title_ar"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Arabic Campaign Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description_en"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>English Description</FormLabel>
                 <FormControl>
                   <Textarea {...field} />
                 </FormControl>
@@ -163,10 +188,23 @@ export default function Admin() {
           />
           <FormField
             control={form.control}
-            name="reward_title"
+            name="description_ar"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Reward Title</FormLabel>
+                <FormLabel>Arabic Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="reward_title_en"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>English Reward Title</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -176,10 +214,36 @@ export default function Admin() {
           />
           <FormField
             control={form.control}
-            name="reward_description"
+            name="reward_title_ar"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Reward Description</FormLabel>
+                <FormLabel>Arabic Reward Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="reward_description_en"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>English Reward Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="reward_description_ar"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Arabic Reward Description</FormLabel>
                 <FormControl>
                   <Textarea {...field} />
                 </FormControl>
