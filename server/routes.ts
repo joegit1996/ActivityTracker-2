@@ -84,9 +84,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid user ID" });
       }
 
-      // Detect language from referer URL or accept-language header
-      const referer = req.headers.referer || '';
-      const language = referer.includes('/ar/') ? 'ar' : 'en';
+      // Detect language from query parameter, referer, or default to English
+      const language = req.query.lang as string || 'en';
 
       // Get active campaign
       const activeCampaign = await storage.getActiveCampaign();

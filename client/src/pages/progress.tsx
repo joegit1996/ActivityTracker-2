@@ -24,9 +24,9 @@ export default function Progress() {
   }, [lang, i18n]);
   
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
-    queryKey: ["/api/progress", userId],
+    queryKey: ["/api/progress", userId, lang],
     queryFn: async () => {
-      const response = await fetch(`/api/progress/${userId}`);
+      const response = await fetch(`/api/progress/${userId}?lang=${lang || 'en'}`);
       if (!response.ok) {
         throw new Error("Failed to fetch progress");
       }
@@ -221,16 +221,16 @@ export default function Progress() {
                     key={dayNumber}
                     className="flex items-center justify-between p-4 rounded-xl border transition-colors border-gray-200 bg-gray-50"
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold bg-gray-400">
                         {dayNumber}
                       </div>
                       <div>
                         <p className="font-medium text-gray-600">
-                          Day {dayNumber}
+                          {t('progress.day', { number: dayNumber })}
                         </p>
                         <p className="text-sm text-gray-500">
-                          Locked
+                          {t('progress.lockedDay', { number: dayNumber })}
                         </p>
                       </div>
                     </div>
