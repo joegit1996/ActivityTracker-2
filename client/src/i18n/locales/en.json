@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "Activity Streak",
+    "subtitle": "Complete daily tasks to maintain your streak"
+  },
+  "progress": {
+    "currentStreak": "Current Streak",
+    "days": "days",
+    "complete": "Complete",
+    "daysCompleted": "days completed",
+    "streakReminders": "Streak Reminders",
+    "streakRemindersDesc": "Get notified to maintain your streak",
+    "dayCompleted": "Day {{number}} Completed",
+    "completedOn": "Completed on {{date}}",
+    "currentDayTasks": "Current Day Tasks",
+    "day": "Day {{number}}",
+    "completeTask": "Complete Task",
+    "taskCompleted": "Task completed!",
+    "allTasksCompleted": "All tasks completed for today!",
+    "remainingDays": "Remaining Days",
+    "lockedDay": "Day {{number}} - Locked",
+    "completeCurrentDay": "Complete current day to unlock",
+    "claimReward": "Claim Reward",
+    "completeToUnlock": "Complete Milestones to Unlock"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "campaigns": "Campaigns",
+    "completions": "Completions",
+    "createCampaign": "Create New Campaign",
+    "editCampaign": "Edit Campaign",
+    "campaignTitle": "Campaign Title",
+    "campaignDescription": "Description",
+    "rewardTitle": "Reward Title",
+    "rewardDescription": "Reward Description",
+    "totalDays": "Total Days",
+    "isActive": "Active",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "addMilestone": "Add Milestone",
+    "milestones": "Milestones",
+    "dayNumber": "Day",
+    "milestoneTitle": "Title",
+    "milestoneDescription": "Description",
+    "orderIndex": "Order",
+    "actions": "Actions"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "retry": "Retry",
+    "close": "Close"
+  }
+}
