@@ -73,12 +73,12 @@ export default function Progress() {
         </div>
 
         {/* Day Progress */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center space-y-4">
-          <div className="bg-primary rounded-2xl w-24 h-24 mx-auto flex flex-col items-center justify-center text-white">
-            <div className="text-3xl font-bold">{progress.currentDay}</div>
-            <div className="text-sm opacity-90">of {campaign.totalDays} days</div>
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center space-y-2">
+          <div className="bg-primary rounded-xl w-16 h-16 mx-auto flex flex-col items-center justify-center text-white">
+            <div className="text-xl font-bold">{progress.currentDay}</div>
+            <div className="text-xs opacity-90">of {campaign.totalDays} days</div>
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-xs text-gray-600">
             {progress.completedDays} days completed
           </div>
         </div>
