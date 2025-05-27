@@ -365,7 +365,7 @@ export default function Admin() {
                 <Card key={campaign.id} className="relative">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{campaign.title}</CardTitle>
+                      <CardTitle className="text-lg">{campaign.title_en}</CardTitle>
                       <div className="flex items-center space-x-2">
                         {campaign.is_active && (
                           <Badge variant="default" className="bg-green-500">
@@ -390,13 +390,13 @@ export default function Admin() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-600 mb-2">{campaign.description}</p>
+                    <p className="text-sm text-gray-600 mb-2">{campaign.description_en}</p>
                     <p className="text-xs text-gray-500 mb-3">
                       Duration: {campaign.total_days} days
                     </p>
                     <div className="bg-gray-50 p-3 rounded">
-                      <p className="font-medium text-sm">{campaign.reward_title}</p>
-                      <p className="text-xs text-gray-600">{campaign.reward_description}</p>
+                      <p className="font-medium text-sm">{campaign.reward_title_en}</p>
+                      <p className="text-xs text-gray-600">{campaign.reward_description_en}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -415,7 +415,7 @@ export default function Admin() {
                   <SelectContent>
                     {campaigns.map((campaign: any) => (
                       <SelectItem key={campaign.id} value={campaign.id.toString()}>
-                        {campaign.title}
+                        {campaign.title_en}
                       </SelectItem>
                     ))}
                   </SelectContent>
