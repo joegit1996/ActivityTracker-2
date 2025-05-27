@@ -6,14 +6,19 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  language: text("language").default("en").notNull(),
 });
 
 export const campaigns = pgTable("campaigns", {
   id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  reward_title: text("reward_title").notNull(),
-  reward_description: text("reward_description").notNull(),
+  title_en: text("title_en").notNull(),
+  title_ar: text("title_ar").notNull(),
+  description_en: text("description_en").notNull(),
+  description_ar: text("description_ar").notNull(),
+  reward_title_en: text("reward_title_en").notNull(),
+  reward_title_ar: text("reward_title_ar").notNull(),
+  reward_description_en: text("reward_description_en").notNull(),
+  reward_description_ar: text("reward_description_ar").notNull(),
   total_days: integer("total_days").notNull(),
   is_active: boolean("is_active").default(false),
 });
@@ -22,8 +27,10 @@ export const milestones = pgTable("milestones", {
   id: serial("id").primaryKey(),
   campaign_id: integer("campaign_id").notNull(),
   day_number: integer("day_number").notNull(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
+  title_en: text("title_en").notNull(),
+  title_ar: text("title_ar").notNull(),
+  description_en: text("description_en").notNull(),
+  description_ar: text("description_ar").notNull(),
   order_index: integer("order_index").notNull().default(0),
 });
 
