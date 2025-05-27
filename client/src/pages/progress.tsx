@@ -63,8 +63,8 @@ export default function Progress() {
   const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto">
+      <div className="max-w-md mx-auto space-y-6 pb-8">
         
         {/* Header */}
         <div className="text-center space-y-2">
@@ -103,15 +103,15 @@ export default function Progress() {
         </div>
 
         {/* Streak Reminders */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                <Bell className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                <Bell className="text-white text-sm" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Streak Reminders</h3>
-                <p className="text-sm text-gray-600">Get notified to maintain your streak</p>
+                <h4 className="font-medium text-gray-900 text-sm">Streak Reminders</h4>
+                <p className="text-gray-600 text-xs">Get notified to maintain your streak</p>
               </div>
             </div>
             <Switch
@@ -140,19 +140,6 @@ export default function Progress() {
           >
             {progress.percentage === 100 ? "Claim Reward" : "Complete Milestones to Unlock"}
           </Button>
-        </div>
-
-        {/* Reminder Card */}
-        <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-              <Bell className="text-white text-sm" />
-            </div>
-            <div>
-              <h4 className="font-medium text-gray-900 text-sm">Streak Reminders</h4>
-              <p className="text-gray-600 text-xs">Get notified to maintain your streak</p>
-            </div>
-          </div>
         </div>
 
         {/* Previous Days (if any) */}
