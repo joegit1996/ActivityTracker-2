@@ -434,12 +434,10 @@ export default function Admin() {
                           {editingMilestone?.id ? "Edit Milestone" : "Create New Milestone"}
                         </DialogTitle>
                       </DialogHeader>
-                      {editingMilestone && (
-                        <MilestoneForm
-                          milestone={editingMilestone.id ? editingMilestone : null}
-                          onClose={() => setEditingMilestone(null)}
-                        />
-                      )}
+                      <MilestoneForm
+                        milestone={editingMilestone?.id ? editingMilestone : null}
+                        onClose={() => setEditingMilestone(null)}
+                      />
                     </DialogContent>
                   </Dialog>
                 )}
