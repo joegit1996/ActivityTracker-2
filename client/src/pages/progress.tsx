@@ -1,16 +1,27 @@
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Trophy, Bell, Lock, CheckCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ProgressResponse } from "@/lib/types";
 
 export default function Progress() {
   const { userId, lang } = useParams();
+  const { t, i18n } = useTranslation();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  // Set language and HTML attributes based on URL
+  useEffect(() => {
+    if (lang && (lang === 'en' || lang === 'ar')) {
+      i18n.changeLanguage(lang);
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    }
+  }, [lang, i18n]);
   
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
     queryKey: ["/api/progress", userId],
@@ -49,9 +60,9 @@ export default function Progress() {
         <div className="max-w-md mx-auto">
           <Card>
             <CardContent className="pt-6 text-center">
-              <h1 className="text-xl font-bold text-red-600 mb-2">Error Loading Progress</h1>
+              <h1 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h1>
               <p className="text-gray-600">
-                {error instanceof Error ? error.message : "Failed to load progress data"}
+                {error instanceof Error ? error.message : t('common.error')}
               </p>
             </CardContent>
           </Card>
@@ -68,8 +79,8 @@ export default function Progress() {
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900">Activity Streak</h1>
-          <p className="text-gray-600 text-base">Complete daily tasks to maintain your streak</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('app.title')}</h1>
+          <p className="text-gray-600 text-base">{t('app.subtitle')}</p>
         </div>
 
         {/* Streak Progress */}
