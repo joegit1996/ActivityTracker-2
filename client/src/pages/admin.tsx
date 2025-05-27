@@ -27,6 +27,10 @@ const campaignFormSchema = insertCampaignSchema.extend({
 const milestoneFormSchema = insertMilestoneSchema.extend({
   day_number: z.number().min(1),
   order_index: z.number().min(0),
+  title_en: z.string().min(1, "English title is required"),
+  title_ar: z.string().min(1, "Arabic title is required"),
+  description_en: z.string().min(1, "English description is required"),
+  description_ar: z.string().min(1, "Arabic description is required"),
 });
 
 export default function Admin() {
@@ -228,8 +232,10 @@ export default function Admin() {
       defaultValues: milestone || {
         campaign_id: selectedCampaign,
         day_number: 1,
-        title: "",
-        description: "",
+        title_en: "",
+        title_ar: "",
+        description_en: "",
+        description_ar: "",
         order_index: 0,
       },
     });
@@ -260,10 +266,10 @@ export default function Admin() {
           />
           <FormField
             control={form.control}
-            name="title"
+            name="title_en"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Milestone Title</FormLabel>
+                <FormLabel>English Title</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -273,10 +279,36 @@ export default function Admin() {
           />
           <FormField
             control={form.control}
-            name="description"
+            name="title_ar"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Arabic Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description_en"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>English Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description_ar"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Arabic Description</FormLabel>
                 <FormControl>
                   <Textarea {...field} />
                 </FormControl>
