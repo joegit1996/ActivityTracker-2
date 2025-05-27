@@ -85,7 +85,7 @@ export default function Progress() {
 
         {/* Streak Progress */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className={`flex justify-between items-center mb-4 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
+          <div className="flex justify-between items-center mb-4">
             <span className="text-gray-900 font-medium">
               {t('progress.currentStreak')}: <span className="text-primary font-semibold">{streak.currentDays} {t('progress.days')}</span>
             </span>
