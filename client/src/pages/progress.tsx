@@ -99,10 +99,20 @@ export default function Progress() {
           
           <ProgressBar value={progress.percentage} className="w-full h-2" />
           
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-            <div className="flex items-center space-x-2">
-              <Bell className="w-4 h-4 text-gray-600" />
-              <span className="text-sm text-gray-700">Streak reminders</span>
+
+        </div>
+
+        {/* Streak Reminders */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                <Bell className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Streak Reminders</h3>
+                <p className="text-sm text-gray-600">Get notified to maintain your streak</p>
+              </div>
             </div>
             <Switch
               checked={notificationsEnabled}
