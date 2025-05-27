@@ -6,6 +6,7 @@
   "progress": {
     "currentStreak": "Current Streak",
     "days": "days",
+    "dayLabel": "Day",
     "complete": "Complete",
     "daysCompleted": "days completed",
     "streakReminders": "Streak Reminders",

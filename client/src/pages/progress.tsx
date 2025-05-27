@@ -85,19 +85,19 @@ export default function Progress() {
 
         {/* Streak Progress */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
+          <div className={`flex justify-between items-center mb-4 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
             <span className="text-gray-900 font-medium">
               {t('progress.currentStreak')}: <span className="text-primary font-semibold">{streak.currentDays} {t('progress.days')}</span>
             </span>
             <span className="text-gray-600 text-sm">{progress.percentage}% {t('progress.complete')}</span>
           </div>
           
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-gray-500">Day 1</span>
-            <span className="text-xs text-gray-500">Day {campaign.totalDays}</span>
+          <div className={`flex justify-between items-center mb-2 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
+            <span className="text-xs text-gray-500">{t('progress.dayLabel')} 1</span>
+            <span className="text-xs text-gray-500">{t('progress.dayLabel')} {campaign.totalDays}</span>
           </div>
           
-          <ProgressBar value={progress.percentage} className="w-full h-2" />
+          <ProgressBar value={progress.percentage} className={`w-full h-2 ${lang === 'ar' ? 'transform scale-x-[-1]' : ''}`} />
           
 
         </div>

@@ -6,6 +6,7 @@
   "progress": {
     "currentStreak": "السلسلة الحالية",
     "days": "أيام",
+    "dayLabel": "اليوم",
     "complete": "مكتمل",
     "daysCompleted": "أيام مكتملة",
     "streakReminders": "تذكيرات السلسلة",
