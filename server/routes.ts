@@ -285,9 +285,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/milestones", async (req, res) => {
+  app.post("/api/admin/milestones", 
+    validateInput(insertMilestoneSchema),
+    async (req: any, res) => {
     try {
-      const milestone = await storage.createMilestone(req.body);
+      const milestone = await storage.createMilestone(req.validatedData);
       res.json(milestone);
     } catch (error) {
       console.error("Error creating milestone:", error);

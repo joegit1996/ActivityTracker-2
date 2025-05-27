@@ -51,7 +51,7 @@ export default function Admin() {
 
   // Campaign mutations
   const createCampaignMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/admin/campaigns", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: (data: any) => apiRequest("POST", "/api/admin/campaigns", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
       toast({ title: "Campaign created successfully!" });
@@ -61,7 +61,7 @@ export default function Admin() {
 
   const updateCampaignMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/admin/campaigns/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+      apiRequest("PUT", `/api/admin/campaigns/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
       toast({ title: "Campaign updated successfully!" });
@@ -70,7 +70,7 @@ export default function Admin() {
   });
 
   const deleteCampaignMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/admin/campaigns/${id}`, { method: "DELETE" }),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/campaigns/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
       toast({ title: "Campaign deleted successfully!" });
@@ -79,9 +79,9 @@ export default function Admin() {
 
   // Milestone mutations
   const createMilestoneMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/admin/milestones", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: (data: any) => apiRequest("POST", "/api/admin/milestones", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns", selectedCampaign, "milestones"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`] });
       toast({ title: "Milestone created successfully!" });
       setEditingMilestone(null);
     },
@@ -89,18 +89,18 @@ export default function Admin() {
 
   const updateMilestoneMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/admin/milestones/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+      apiRequest("PUT", `/api/admin/milestones/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns", selectedCampaign, "milestones"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`] });
       toast({ title: "Milestone updated successfully!" });
       setEditingMilestone(null);
     },
   });
 
   const deleteMilestoneMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/admin/milestones/${id}`, { method: "DELETE" }),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/milestones/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns", selectedCampaign, "milestones"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`] });
       toast({ title: "Milestone deleted successfully!" });
     },
   });
