@@ -1,0 +1,82 @@
+# Activity Streak Web App (Golang + React.js)
+
+## Overview
+
+Build an **Activity Streak web app** using **Golang for the backend** and **React.js for the frontend**.  
+There is **no landing page or authentication**: users go directly to `/progress/:user_id` to view their milestone streak, daily tasks, and reward.
+
+Refer to the attached screenshot for UI/UX expectations.
+
+---
+
+## Functional Requirements
+
+- **Campaigns, milestones, and rewards** must be fully configurable via the database.
+- **Active campaign** is set via config (environment variable, JSON, or YAML file).
+  - Only data for the active campaign is visible and actionable in the UI and API.
+  - If the active campaign changes, all users see the new campaign and progress is specific to that campaign.
+- Main entrypoint: `/progress/:user_id` (shows only the streak view for that user).
+- **UI/UX matches the provided screenshot:**  
+  - Display the campaign reward at the top.
+  - Show today’s milestones as actionable; future milestones locked with "Available tomorrow."
+  - **Show previous days as completed (in progress bars or calendar view), but DO NOT display the actual milestones from previous days.**
+  - Progression bars for daily and overall progress.
+  - Remaining days to complete the campaign.
+  - No registration or login; users are only identified by `user_id` in the URL.
+
+---
+
+## Backend API Requirements
+
+### Milestone Completion API
+
+- Expose a **secure REST API endpoint** (e.g., `POST /api/milestone/complete`) to mark a milestone as completed.
+- **This endpoint will be called through Braze Canvas webhooks.**
+- **Request body parameters (all required):**
+  - `user_id`
+  - `campaign_id` (used to pinpoint the milestone in the correct campaign)
+  - `day_number`
+  - `milestone_id`
+- **API must:**
+  - Only allow marking milestones for the currently active campaign (as set in config) and for the correct user (`user_id`).
+  - Only allow marking milestones for the current day.
+  - Store the completion in the `MilestoneCompletions` table, with timestamp.
+  - Respond with updated progression data for the user and campaign.
+- **Endpoint must follow strict security best practices (see below).**
+
+### Database Structure (Suggested)
+
+- **Campaigns:** id, title, reward, total_days, is_active (optional), etc.
+- **Milestones:** id, campaign_id, day_number, title, description, etc.
+- **Users:** id, name, etc.
+- **MilestoneCompletions:** id, user_id, campaign_id, day_number, milestone_id, completed_at
+
+---
+
+## Security Requirements  
+(**Follow [Replit Vibe code security checklist](https://docs.replit.com/tutorials/vibe-code-security-checklist)**)
+
+- **API authentication:** Require a secure API token or key (via header) for all API calls; do NOT expose unauthenticated endpoints.
+- **Input validation:** Strictly validate and sanitize all API request data.
+- **Authorization:** Only allow users to complete their own milestones for the current calendar day in the active campaign.
+- **Secrets and configs:** All sensitive data, credentials, and the active campaign config are stored in environment variables or a secure config file—never hardcoded.
+- **Database security:** Use parameterized queries or ORM for all DB operations.
+- **Error handling:** Never leak sensitive details in API responses or logs.
+- **Rate limiting:** Implement rate limiting for the milestone completion endpoint.
+- **Dependency management:** Use only up-to-date, trusted packages.
+- **Logging:** Log securely; never log sensitive or PII data.
+- **Secure headers:** Use Content-Security-Policy, X-Frame-Options, X-XSS-Protection, etc.
+- **HTTPS:** All traffic must be encrypted.
+- **No secret data in frontend code.
+
+---
+
+## Other Notes
+
+- Easily extensible for new campaigns.
+- Changing the active campaign via config should immediately update UI for all users.
+- Frontend (React.js) must call backend APIs and display all data dynamically based on backend responses.
+- **Users should always see previous completed days visually as completed, but should NOT see the actual milestones from those days.**
+- Milestone completion is ONLY allowed through the secure API.
+- No landing page, no registration—only `/progress/:user_id` and API endpoints.
+- The **design and UX must strictly match** the attached screenshot.
