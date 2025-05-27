@@ -72,17 +72,6 @@ export default function Progress() {
           <p className="text-gray-600 text-base">Complete daily tasks to maintain your streak</p>
         </div>
 
-        {/* Day Progress */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center space-y-2">
-          <div className="bg-primary rounded-xl w-16 h-16 mx-auto flex flex-col items-center justify-center text-white">
-            <div className="text-xl font-bold">{progress.currentDay}</div>
-            <div className="text-xs opacity-90">of {campaign.totalDays} days</div>
-          </div>
-          <div className="text-xs text-gray-600">
-            {progress.completedDays} days completed
-          </div>
-        </div>
-
         {/* Streak Progress */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex justify-between items-center mb-4">
