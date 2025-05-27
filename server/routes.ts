@@ -102,8 +102,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const completed = await storage.isTaskCompleted(userId, milestone.id);
           return {
             id: milestone.id,
-            title: milestone.title,
-            description: milestone.description,
+            title: milestone.title_en,
+            description: milestone.description_en,
             completed,
             number: milestone.order_index + 1
           };
@@ -129,12 +129,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         campaign: {
           id: activeCampaign.id,
-          title: activeCampaign.title,
-          description: activeCampaign.description,
+          title: activeCampaign.title_en,
+          description: activeCampaign.description_en,
           totalDays: activeCampaign.total_days,
           reward: {
-            title: activeCampaign.reward_title,
-            description: activeCampaign.reward_description
+            title: activeCampaign.reward_title_en,
+            description: activeCampaign.reward_description_en
           }
         },
         progress: {

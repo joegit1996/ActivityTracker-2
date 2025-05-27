@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "سلسلة النشاط",
+    "subtitle": "أكمل المهام اليومية للحفاظ على سلسلتك"
+  },
+  "progress": {
+    "currentStreak": "السلسلة الحالية",
+    "days": "أيام",
+    "complete": "مكتمل",
+    "daysCompleted": "أيام مكتملة",
+    "streakReminders": "تذكيرات السلسلة",
+    "streakRemindersDesc": "احصل على إشعارات للحفاظ على سلسلتك",
+    "dayCompleted": "اليوم {{number}} مكتمل",
+    "completedOn": "مكتمل في {{date}}",
+    "currentDayTasks": "مهام اليوم الحالي",
+    "day": "اليوم {{number}}",
+    "completeTask": "إكمال المهمة",
+    "taskCompleted": "تم إكمال المهمة!",
+    "allTasksCompleted": "تم إكمال جميع مهام اليوم!",
+    "remainingDays": "الأيام المتبقية",
+    "lockedDay": "اليوم {{number}} - مقفل",
+    "completeCurrentDay": "أكمل اليوم الحالي للفتح",
+    "claimReward": "استلام المكافأة",
+    "completeToUnlock": "أكمل المعالم للفتح"
+  },
+  "admin": {
+    "title": "لوحة الإدارة",
+    "campaigns": "الحملات",
+    "completions": "الإنجازات",
+    "createCampaign": "إنشاء حملة جديدة",
+    "editCampaign": "تعديل الحملة",
+    "campaignTitle": "عنوان الحملة",
+    "campaignDescription": "الوصف",
+    "rewardTitle": "عنوان المكافأة",
+    "rewardDescription": "وصف المكافأة",
+    "totalDays": "إجمالي الأيام",
+    "isActive": "نشط",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "addMilestone": "إضافة معلم",
+    "milestones": "المعالم",
+    "dayNumber": "اليوم",
+    "milestoneTitle": "العنوان",
+    "milestoneDescription": "الوصف",
+    "orderIndex": "الترتيب",
+    "actions": "الإجراءات"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجح",
+    "retry": "إعادة المحاولة",
+    "close": "إغلاق"
+  }
+}

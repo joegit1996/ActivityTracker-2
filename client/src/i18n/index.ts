@@ -2,8 +2,36 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-import en from './locales/en.json';
-import ar from './locales/ar.json';
+// Import translations directly as objects
+const en = {
+  "app": {
+    "title": "Activity Streak",
+    "subtitle": "Complete daily tasks to maintain your streak"
+  },
+  "progress": {
+    "currentStreak": "Current Streak",
+    "days": "days",
+    "complete": "Complete",
+    "daysCompleted": "days completed",
+    "streakReminders": "Streak Reminders",
+    "streakRemindersDesc": "Get notified to maintain your streak"
+  }
+};
+
+const ar = {
+  "app": {
+    "title": "سلسلة النشاط",
+    "subtitle": "أكمل المهام اليومية للحفاظ على سلسلتك"
+  },
+  "progress": {
+    "currentStreak": "السلسلة الحالية",
+    "days": "أيام",
+    "complete": "مكتمل",
+    "daysCompleted": "أيام مكتملة",
+    "streakReminders": "تذكيرات السلسلة",
+    "streakRemindersDesc": "احصل على إشعارات للحفاظ على سلسلتك"
+  }
+};
 
 const resources = {
   en: {
@@ -24,16 +52,11 @@ i18n
     
     detection: {
       order: ['path', 'localStorage', 'navigator'],
-      lookupFromPathIndex: 0,
-      checkWhitelist: true
+      lookupFromPathIndex: 0
     },
 
     interpolation: {
       escapeValue: false,
-    },
-
-    react: {
-      useSuspense: false
     }
   });
 
