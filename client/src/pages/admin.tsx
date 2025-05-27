@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ const milestoneFormSchema = insertMilestoneSchema.extend({
 });
 
 export default function Admin() {
+  const { lang } = useParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedCampaign, setSelectedCampaign] = useState<number | null>(null);

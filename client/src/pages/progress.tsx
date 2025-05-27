@@ -9,7 +9,7 @@ import { useState } from "react";
 import type { ProgressResponse } from "@/lib/types";
 
 export default function Progress() {
-  const { userId } = useParams();
+  const { userId, lang } = useParams();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
