@@ -4,11 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Trophy, Bell, Lock, CheckCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import type { ProgressResponse } from "@/lib/types";
 
 export default function Progress() {
   const { userId } = useParams();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
     queryKey: ["/api/progress", userId],
@@ -66,8 +68,8 @@ export default function Progress() {
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900">{campaign.title}</h1>
-          <p className="text-gray-600 text-base">{campaign.description}</p>
+          <h1 className="text-2xl font-bold text-gray-900">Activity Streak</h1>
+          <p className="text-gray-600 text-base">Complete daily tasks to maintain your streak</p>
         </div>
 
         {/* Day Progress */}
@@ -199,26 +201,104 @@ export default function Progress() {
           </div>
         )}
 
-        {/* Future Days Preview */}
-        {nextDay && nextDay <= campaign.totalDays && (
-          <div className="bg-gray-100 rounded-2xl p-6 border border-gray-200 space-y-4 opacity-75">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-700">Day {nextDay} Tasks</h3>
-              <div className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                <Lock className="w-3 h-3" />
-                Locked
-              </div>
-            </div>
-            
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="text-gray-500 text-xl" />
-              </div>
-              <p className="text-gray-600 font-medium">Available Tomorrow</p>
-              <p className="text-gray-500 text-sm mt-1">Complete today's tasks to unlock</p>
-            </div>
+        {/* All Days Overview */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900">Campaign Progress</h3>
+          
+          <div className="space-y-3">
+            {Array.from({ length: campaign.totalDays }, (_, index) => {
+              const dayNumber = index + 1;
+              const isCompleted = previousDays.some(day => day.number === dayNumber);
+              const isCurrent = dayNumber === progress.currentDay;
+              const isLocked = dayNumber > progress.currentDay;
+              
+              return (
+                <div
+                  key={dayNumber}
+                  className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
+                    isCompleted 
+                      ? 'border-green-200 bg-green-50' 
+                      : isCurrent 
+                      ? 'border-primary/30 bg-primary/5' 
+                      : 'border-gray-200 bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                      isCompleted 
+                        ? 'bg-green-500' 
+                        : isCurrent 
+                        ? 'bg-primary' 
+                        : 'bg-gray-400'
+                    }`}>
+                      {isCompleted ? <CheckCircle className="w-5 h-5" /> : dayNumber}
+                    </div>
+                    <div>
+                      <p className={`font-medium ${
+                        isCompleted 
+                          ? 'text-green-800' 
+                          : isCurrent 
+                          ? 'text-primary' 
+                          : 'text-gray-600'
+                      }`}>
+                        Day {dayNumber}
+                      </p>
+                      <p className={`text-sm ${
+                        isCompleted 
+                          ? 'text-green-600' 
+                          : isCurrent 
+                          ? 'text-primary/70' 
+                          : 'text-gray-500'
+                      }`}>
+                        {isCompleted 
+                          ? 'Completed' 
+                          : isCurrent 
+                          ? 'Current' 
+                          : isLocked 
+                          ? 'Locked' 
+                          : 'Available'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    {isCompleted && (
+                      <div className="text-green-600 text-xs">
+                        {new Date(previousDays.find(day => day.number === dayNumber)?.completedAt || '').toLocaleDateString()}
+                      </div>
+                    )}
+                    {isCurrent && (
+                      <div className="text-primary text-xs font-medium">
+                        {tasks.filter(t => t.completed).length}/{tasks.length} tasks
+                      </div>
+                    )}
+                    {isLocked && (
+                      <Lock className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
+        </div>
+
+        {/* Notifications Toggle */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Bell className="w-5 h-5 text-gray-600" />
+              <div>
+                <p className="font-medium text-gray-900">Enable Notifications</p>
+                <p className="text-sm text-gray-600">Get reminders about daily tasks</p>
+              </div>
+            </div>
+            <Switch
+              checked={notificationsEnabled}
+              onCheckedChange={setNotificationsEnabled}
+            />
+          </div>
+        </div>
 
       </div>
     </div>
