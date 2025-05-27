@@ -212,85 +212,41 @@ export default function Progress() {
           </div>
         )}
 
-        {/* All Days Overview */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
-          <div className="space-y-3">
-            {Array.from({ length: campaign.totalDays }, (_, index) => {
-              const dayNumber = index + 1;
-              const isCompleted = previousDays.some(day => day.number === dayNumber);
-              const isCurrent = dayNumber === progress.currentDay;
-              const isLocked = dayNumber > progress.currentDay;
+        {/* Remaining Days Overview */}
+        {progress.currentDay < campaign.totalDays && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <div className="space-y-3">
+              {Array.from({ length: campaign.totalDays - progress.currentDay }, (_, index) => {
+                const dayNumber = progress.currentDay + 1 + index;
               
-              return (
-                <div
-                  key={dayNumber}
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
-                    isCompleted 
-                      ? 'border-green-200 bg-green-50' 
-                      : isCurrent 
-                      ? 'border-primary/30 bg-primary/5' 
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
-                      isCompleted 
-                        ? 'bg-green-500' 
-                        : isCurrent 
-                        ? 'bg-primary' 
-                        : 'bg-gray-400'
-                    }`}>
-                      {isCompleted ? <CheckCircle className="w-5 h-5" /> : dayNumber}
-                    </div>
-                    <div>
-                      <p className={`font-medium ${
-                        isCompleted 
-                          ? 'text-green-800' 
-                          : isCurrent 
-                          ? 'text-primary' 
-                          : 'text-gray-600'
-                      }`}>
-                        Day {dayNumber}
-                      </p>
-                      <p className={`text-sm ${
-                        isCompleted 
-                          ? 'text-green-600' 
-                          : isCurrent 
-                          ? 'text-primary/70' 
-                          : 'text-gray-500'
-                      }`}>
-                        {isCompleted 
-                          ? 'Completed' 
-                          : isCurrent 
-                          ? 'Current' 
-                          : isLocked 
-                          ? 'Locked' 
-                          : 'Available'
-                        }
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    {isCompleted && (
-                      <div className="text-green-600 text-xs">
-                        {new Date(previousDays.find(day => day.number === dayNumber)?.completedAt || '').toLocaleDateString()}
+                return (
+                  <div
+                    key={dayNumber}
+                    className="flex items-center justify-between p-4 rounded-xl border transition-colors border-gray-200 bg-gray-50"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold bg-gray-400">
+                        {dayNumber}
                       </div>
-                    )}
-                    {isCurrent && (
-                      <div className="text-primary text-xs font-medium">
-                        {tasks.filter(t => t.completed).length}/{tasks.length} tasks
+                      <div>
+                        <p className="font-medium text-gray-600">
+                          Day {dayNumber}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Locked
+                        </p>
                       </div>
-                    )}
-                    {isLocked && (
+                    </div>
+                    
+                    <div className="flex items-center">
                       <Lock className="w-4 h-4 text-gray-400" />
-                    )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
 
 
