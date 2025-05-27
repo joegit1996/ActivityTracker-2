@@ -16,16 +16,23 @@ export interface IStorage {
   // Campaigns
   getActiveCampaign(): Promise<Campaign | undefined>;
   getCampaign(id: number): Promise<Campaign | undefined>;
+  getAllCampaigns(): Promise<Campaign[]>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
+  updateCampaign(id: number, campaign: Partial<InsertCampaign>): Promise<Campaign>;
+  deleteCampaign(id: number): Promise<void>;
 
   // Milestones
   getMilestonesByDay(campaignId: number, dayNumber: number): Promise<Milestone[]>;
+  getMilestonesByCampaign(campaignId: number): Promise<Milestone[]>;
   getMilestone(id: number): Promise<Milestone | undefined>;
   createMilestone(milestone: InsertMilestone): Promise<Milestone>;
+  updateMilestone(id: number, milestone: Partial<InsertMilestone>): Promise<Milestone>;
+  deleteMilestone(id: number): Promise<void>;
 
   // Completions
   getUserCompletions(userId: number, campaignId: number): Promise<MilestoneCompletion[]>;
   getUserDayCompletions(userId: number, campaignId: number, dayNumber: number): Promise<MilestoneCompletion[]>;
+  getAllCompletions(): Promise<MilestoneCompletion[]>;
   completeMilestone(completion: InsertMilestoneCompletion): Promise<MilestoneCompletion>;
   isTaskCompleted(userId: number, milestoneId: number): Promise<boolean>;
 }
@@ -54,12 +61,29 @@ export class DatabaseStorage implements IStorage {
     return campaign || undefined;
   }
 
+  async getAllCampaigns(): Promise<Campaign[]> {
+    return await db.select().from(campaigns).orderBy(desc(campaigns.id));
+  }
+
   async createCampaign(insertCampaign: InsertCampaign): Promise<Campaign> {
     const [campaign] = await db
       .insert(campaigns)
       .values(insertCampaign)
       .returning();
     return campaign;
+  }
+
+  async updateCampaign(id: number, updateData: Partial<InsertCampaign>): Promise<Campaign> {
+    const [campaign] = await db
+      .update(campaigns)
+      .set(updateData)
+      .where(eq(campaigns.id, id))
+      .returning();
+    return campaign;
+  }
+
+  async deleteCampaign(id: number): Promise<void> {
+    await db.delete(campaigns).where(eq(campaigns.id, id));
   }
 
   async getMilestonesByDay(campaignId: number, dayNumber: number): Promise<Milestone[]> {
@@ -75,6 +99,14 @@ export class DatabaseStorage implements IStorage {
       .orderBy(milestones.order_index);
   }
 
+  async getMilestonesByCampaign(campaignId: number): Promise<Milestone[]> {
+    return await db
+      .select()
+      .from(milestones)
+      .where(eq(milestones.campaign_id, campaignId))
+      .orderBy(milestones.day_number, milestones.order_index);
+  }
+
   async getMilestone(id: number): Promise<Milestone | undefined> {
     const [milestone] = await db.select().from(milestones).where(eq(milestones.id, id));
     return milestone || undefined;
@@ -86,6 +118,19 @@ export class DatabaseStorage implements IStorage {
       .values(insertMilestone)
       .returning();
     return milestone;
+  }
+
+  async updateMilestone(id: number, updateData: Partial<InsertMilestone>): Promise<Milestone> {
+    const [milestone] = await db
+      .update(milestones)
+      .set(updateData)
+      .where(eq(milestones.id, id))
+      .returning();
+    return milestone;
+  }
+
+  async deleteMilestone(id: number): Promise<void> {
+    await db.delete(milestones).where(eq(milestones.id, id));
   }
 
   async getUserCompletions(userId: number, campaignId: number): Promise<MilestoneCompletion[]> {
@@ -112,6 +157,13 @@ export class DatabaseStorage implements IStorage {
           eq(milestone_completions.day_number, dayNumber)
         )
       );
+  }
+
+  async getAllCompletions(): Promise<MilestoneCompletion[]> {
+    return await db
+      .select()
+      .from(milestone_completions)
+      .orderBy(desc(milestone_completions.completed_at));
   }
 
   async completeMilestone(insertCompletion: InsertMilestoneCompletion): Promise<MilestoneCompletion> {

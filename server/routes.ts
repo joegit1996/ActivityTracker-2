@@ -149,6 +149,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { user_id, campaign_id, day_number, milestone_id } = req.validatedData;
 
+        // Auto-create user if they don't exist
+        let user = await storage.getUser(user_id);
+        if (!user) {
+          user = await storage.createUser({ name: `User ${user_id}` });
+        }
+
         // Verify active campaign
         const activeCampaign = await storage.getActiveCampaign();
         if (!activeCampaign || activeCampaign.id !== campaign_id) {
@@ -205,6 +211,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  // Admin API endpoints
+  
+  // Campaigns CRUD
+  app.get("/api/admin/campaigns", async (req, res) => {
+    try {
+      const campaigns = await storage.getAllCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/campaigns", async (req, res) => {
+    try {
+      const campaign = await storage.createCampaign(req.body);
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.put("/api/admin/campaigns/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const campaign = await storage.updateCampaign(id, req.body);
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error updating campaign:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/campaigns/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCampaign(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting campaign:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Milestones CRUD
+  app.get("/api/admin/campaigns/:campaignId/milestones", async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId);
+      const milestones = await storage.getMilestonesByCampaign(campaignId);
+      res.json(milestones);
+    } catch (error) {
+      console.error("Error fetching milestones:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/milestones", async (req, res) => {
+    try {
+      const milestone = await storage.createMilestone(req.body);
+      res.json(milestone);
+    } catch (error) {
+      console.error("Error creating milestone:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.put("/api/admin/milestones/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const milestone = await storage.updateMilestone(id, req.body);
+      res.json(milestone);
+    } catch (error) {
+      console.error("Error updating milestone:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/milestones/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMilestone(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting milestone:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Completions data
+  app.get("/api/admin/completions", async (req, res) => {
+    try {
+      const completions = await storage.getAllCompletions();
+      res.json(completions);
+    } catch (error) {
+      console.error("Error fetching completions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
   // Create a user (for testing purposes)
   app.post("/api/users", async (req, res) => {
