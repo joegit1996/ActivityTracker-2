@@ -87,9 +87,9 @@ export default function Progress() {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex justify-between items-center mb-4">
             <span className="text-gray-900 font-medium">
-              Current Streak: <span className="text-primary font-semibold">{streak.currentDays} days</span>
+              {t('progress.currentStreak')}: <span className="text-primary font-semibold">{streak.currentDays} {t('progress.days')}</span>
             </span>
-            <span className="text-gray-600 text-sm">{progress.percentage}% Complete</span>
+            <span className="text-gray-600 text-sm">{progress.percentage}% {t('progress.complete')}</span>
           </div>
           
           <div className="flex justify-between items-center mb-2">
@@ -110,8 +110,8 @@ export default function Progress() {
                 <Bell className="text-white text-sm" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">Streak Reminders</h4>
-                <p className="text-gray-600 text-xs">Get notified to maintain your streak</p>
+                <h4 className="font-medium text-gray-900 text-sm">{t('progress.streakReminders')}</h4>
+                <p className="text-gray-600 text-xs">{t('progress.streakRemindersDesc')}</p>
               </div>
             </div>
             <Switch
@@ -138,7 +138,7 @@ export default function Progress() {
             className="w-full bg-primary text-white font-medium py-3 px-4 rounded-xl hover:bg-primary/90 transition-colors"
             disabled={progress.percentage < 100}
           >
-            {progress.percentage === 100 ? "Claim Reward" : "Complete Milestones to Unlock"}
+            {progress.percentage === 100 ? t('progress.claimReward') : t('progress.completeToUnlock')}
           </Button>
         </div>
 
@@ -148,13 +148,13 @@ export default function Progress() {
             {previousDays.map((day) => (
               <div key={day.number} className="bg-green-50 rounded-xl p-4 border border-green-200">
                 <div className="flex items-center justify-between">
-                  <span className="text-green-800 font-medium text-sm">Day {day.number} Completed</span>
+                  <span className="text-green-800 font-medium text-sm">{t('progress.dayCompleted', { number: day.number })}</span>
                   <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                     <CheckCircle className="text-white text-xs" />
                   </div>
                 </div>
                 <p className="text-green-700 text-xs mt-1">
-                  Completed on {new Date(day.completedAt).toLocaleDateString()}
+                  {t('progress.completedOn', { date: new Date(day.completedAt).toLocaleDateString() })}
                 </p>
               </div>
             ))}
@@ -165,14 +165,14 @@ export default function Progress() {
         {progress.currentDay <= campaign.totalDays && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Day {progress.currentDay} Tasks</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('progress.day', { number: progress.currentDay })}</h3>
               <div className="text-sm text-gray-600">
                 {tasks.filter(t => t.completed).length}/{tasks.length}
               </div>
             </div>
             
             <p className="text-sm text-gray-600">
-              Complete all {tasks.length} tasks to unlock the next day
+              {t('progress.completeCurrentDay')}
             </p>
 
             {tasks.map((task) => (
