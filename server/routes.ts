@@ -17,7 +17,7 @@ const milestoneRateLimit = rateLimit({
 // Security middleware for API token validation
 function validateApiToken(req: any, res: any, next: any) {
   const token = req.headers.authorization?.replace('Bearer ', '');
-  const validToken = process.env.API_TOKEN || process.env.WEBHOOK_TOKEN || 'default_secure_token';
+  const validToken = process.env.API_TOKEN || process.env.WEBHOOK_TOKEN || 'ea86ee11694aa30b0723961ef65b76a31418e23c1c5430fc66d7f1cf2a00585a';
   
   if (!token || token !== validToken) {
     return res.status(401).json({ error: "Unauthorized: Invalid API token" });
