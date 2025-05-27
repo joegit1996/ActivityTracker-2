@@ -52,6 +52,15 @@
     "error": "Error",
     "success": "Success",
     "retry": "Retry",
-    "close": "Close"
+    "close": "Close",
+    "notFound": "Page Not Found",
+    "backHome": "Back to Home",
+    "pageNotFound": "Sorry, we couldn't find this page",
+    "createNew": "Create New",
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted",
+    "confirm": "Confirm",
+    "confirmDelete": "Are you sure you want to delete this?"
   }
 }
