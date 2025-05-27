@@ -84,6 +84,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid user ID" });
       }
 
+      // Detect language from referer URL or accept-language header
+      const referer = req.headers.referer || '';
+      const language = referer.includes('/ar/') ? 'ar' : 'en';
+
       // Get active campaign
       const activeCampaign = await storage.getActiveCampaign();
       if (!activeCampaign) {
@@ -122,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasksWithCompletion = await Promise.all(
         currentDayMilestones.map(async (milestone) => {
           const completed = await storage.isTaskCompleted(userId, milestone.id);
-          const localizedMilestone = getLocalizedMilestone(milestone, 'en'); // Will add language detection later
+          const localizedMilestone = getLocalizedMilestone(milestone, language);
           return {
             id: milestone.id,
             title: localizedMilestone.title,
@@ -149,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         });
 
-      const localizedCampaign = getLocalizedCampaign(activeCampaign, 'en'); // Will add language detection later
+      const localizedCampaign = getLocalizedCampaign(activeCampaign, language);
       
       res.json({
         campaign: localizedCampaign,

@@ -105,7 +105,7 @@ export default function Progress() {
         {/* Streak Reminders */}
         <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
                 <Bell className="text-white text-sm" />
               </div>
@@ -123,7 +123,7 @@ export default function Progress() {
 
         {/* Reward Card */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
-          <div className="flex items-start space-x-4">
+          <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
             <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
               <Trophy className="text-primary text-xl" />
             </div>
@@ -178,7 +178,7 @@ export default function Progress() {
             {tasks.map((task) => (
               <div 
                 key={task.id}
-                className={`flex items-start space-x-4 p-4 border rounded-xl transition-colors ${
+                className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border rounded-xl transition-colors ${
                   task.completed 
                     ? 'border-green-200 bg-green-50' 
                     : 'border-gray-200 hover:border-primary/30 cursor-pointer'
