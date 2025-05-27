@@ -41,7 +41,7 @@ export default function Admin() {
   });
 
   const { data: milestones = [] } = useQuery({
-    queryKey: ["/api/admin/campaigns", selectedCampaign, "milestones"],
+    queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`],
     enabled: !!selectedCampaign,
   });
 
@@ -446,15 +446,15 @@ export default function Admin() {
 
             {selectedCampaign && (
               <div className="space-y-4">
-                {milestones.reduce((acc: any, milestone: any) => {
+                {Object.entries((milestones as any[]).reduce((acc: Record<number, any[]>, milestone: any) => {
                   const day = milestone.day_number;
                   if (!acc[day]) acc[day] = [];
                   acc[day].push(milestone);
                   return acc;
-                }, []).map((dayMilestones: any, dayIndex: number) => (
-                  <Card key={dayIndex}>
+                }, {})).map(([dayNumber, dayMilestones]: [string, any[]]) => (
+                  <Card key={dayNumber}>
                     <CardHeader>
-                      <CardTitle>Day {dayIndex + 1}</CardTitle>
+                      <CardTitle>Day {dayNumber}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
