@@ -2,30 +2,11 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { completeTaskSchema, insertMilestoneSchema } from "@shared/schema";
+import { getLocalizedCampaign, getLocalizedMilestone, type SupportedLanguage } from "@shared/utils";
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
 
-// Helper function to get localized content
-function getLocalizedCampaign(campaign: any, language: string = 'en') {
-  return {
-    id: campaign.id,
-    title: language === 'ar' ? campaign.title_ar : campaign.title_en,
-    description: language === 'ar' ? campaign.description_ar : campaign.description_en,
-    totalDays: campaign.total_days,
-    reward: {
-      title: language === 'ar' ? campaign.reward_title_ar : campaign.reward_title_en,
-      description: language === 'ar' ? campaign.reward_description_ar : campaign.reward_description_en
-    }
-  };
-}
 
-function getLocalizedMilestone(milestone: any, language: string = 'en') {
-  return {
-    id: milestone.id,
-    title: language === 'ar' ? milestone.title_ar : milestone.title_en,
-    description: language === 'ar' ? milestone.description_ar : milestone.description_en,
-  };
-}
 
 // Rate limiting for milestone completion
 const milestoneRateLimit = rateLimit({
@@ -85,7 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Detect language from query parameter, referer, or default to English
-      const language = (req.query.lang as string) === 'ar' ? 'ar' : 'en';
+      const language: SupportedLanguage = (req.query.lang as string) === 'ar' ? 'ar' : 'en';
 
       // Get active campaign
       const activeCampaign = await storage.getActiveCampaign();
