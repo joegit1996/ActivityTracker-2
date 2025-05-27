@@ -71,8 +71,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user completions for active campaign
       const completions = await storage.getUserCompletions(userId, activeCampaign.id);
       
-      // Calculate progress
-      const completedDays = new Set(completions.map(c => c.day_number)).size;
+      // Calculate which days are fully completed (all milestones for that day done)
+      const fullyCompletedDays = new Set<number>();
+      
+      for (let day = 1; day <= activeCampaign.total_days; day++) {
+        const dayMilestones = await storage.getMilestonesByDay(activeCampaign.id, day);
+        const dayCompletions = completions.filter(c => c.day_number === day);
+        
+        // Day is complete only if all milestones for that day are completed
+        if (dayMilestones.length > 0 && dayCompletions.length === dayMilestones.length) {
+          fullyCompletedDays.add(day);
+        }
+      }
+      
+      const completedDays = fullyCompletedDays.size;
       const currentDay = Math.min(completedDays + 1, activeCampaign.total_days);
       const percentage = Math.round((completedDays / activeCampaign.total_days) * 100);
 
@@ -93,22 +105,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
 
-      // Get completed days for previous days display
-      const completedDayNumbers = Array.from(new Set(completions.map(c => c.day_number)))
+      // Get completed days for previous days display (only fully completed days)
+      const previousDays = Array.from(fullyCompletedDays)
         .filter(day => day < currentDay)
-        .sort((a, b) => b - a);
-
-      const previousDays = completedDayNumbers.map(dayNumber => {
-        const dayCompletions = completions.filter(c => c.day_number === dayNumber);
-        const latestCompletion = dayCompletions.sort((a, b) => 
-          new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
-        )[0];
-        
-        return {
-          number: dayNumber,
-          completedAt: latestCompletion?.completed_at
-        };
-      });
+        .sort((a, b) => b - a)
+        .map(dayNumber => {
+          const dayCompletions = completions.filter(c => c.day_number === dayNumber);
+          const latestCompletion = dayCompletions.sort((a, b) => 
+            new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
+          )[0];
+          
+          return {
+            number: dayNumber,
+            completedAt: latestCompletion?.completed_at
+          };
+        });
 
       res.json({
         campaign: {
