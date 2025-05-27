@@ -63,55 +63,55 @@ export default function Progress() {
   const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
 
   return (
-    <div className="bg-background py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto">
-      <div className="max-w-2xl mx-auto space-y-6 pb-8">
+    <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto">
+      <div className="max-w-md mx-auto space-y-6 pb-8">
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">Activity Streak</h1>
-          <p className="text-muted text-base">Complete daily tasks to maintain your streak</p>
+          <h1 className="text-2xl font-bold text-gray-900">Activity Streak</h1>
+          <p className="text-gray-600 text-base">Complete daily tasks to maintain your streak</p>
         </div>
 
         {/* Day Progress */}
-        <div className="bg-card rounded-xl p-8 card-shadow border border-border text-center space-y-6">
-          <div className="bg-primary rounded-xl w-28 h-28 mx-auto flex flex-col items-center justify-center text-primary-foreground">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center space-y-4">
+          <div className="bg-primary rounded-2xl w-24 h-24 mx-auto flex flex-col items-center justify-center text-white">
             <div className="text-3xl font-bold">{progress.currentDay}</div>
             <div className="text-sm opacity-90">of {campaign.totalDays} days</div>
           </div>
-          <div className="text-sm text-muted">
+          <div className="text-sm text-gray-600">
             {progress.completedDays} days completed
           </div>
         </div>
 
         {/* Streak Progress */}
-        <div className="bg-card rounded-xl p-6 card-shadow border border-border">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-card-foreground font-medium">
+            <span className="text-gray-900 font-medium">
               Current Streak: <span className="text-primary font-semibold">{streak.currentDays} days</span>
             </span>
-            <span className="text-muted text-sm">{progress.percentage}% Complete</span>
+            <span className="text-gray-600 text-sm">{progress.percentage}% Complete</span>
           </div>
           
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-muted-foreground">Day 1</span>
-            <span className="text-xs text-muted-foreground">Day {campaign.totalDays}</span>
+            <span className="text-xs text-gray-500">Day 1</span>
+            <span className="text-xs text-gray-500">Day {campaign.totalDays}</span>
           </div>
           
-          <ProgressBar value={progress.percentage} className="w-full h-2 progress-bar" />
+          <ProgressBar value={progress.percentage} className="w-full h-2" />
           
 
         </div>
 
         {/* Streak Reminders */}
-        <div className="bg-accent rounded-xl p-4 border border-primary/20">
+        <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                <Bell className="text-primary-foreground text-sm" />
+                <Bell className="text-white text-sm" />
               </div>
               <div>
-                <h4 className="font-medium text-card-foreground text-sm">Streak Reminders</h4>
-                <p className="text-muted text-xs">Get notified to maintain your streak</p>
+                <h4 className="font-medium text-gray-900 text-sm">Streak Reminders</h4>
+                <p className="text-gray-600 text-xs">Get notified to maintain your streak</p>
               </div>
             </div>
             <Switch
