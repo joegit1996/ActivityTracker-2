@@ -78,8 +78,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const dayMilestones = await storage.getMilestonesByDay(activeCampaign.id, day);
         const dayCompletions = completions.filter(c => c.day_number === day);
         
-        // Day is complete only if all milestones for that day are completed
-        if (dayMilestones.length > 0 && dayCompletions.length === dayMilestones.length) {
+        // Check if ALL specific milestones for this day are completed
+        const completedMilestoneIds = dayCompletions.map(c => c.milestone_id);
+        const allMilestonesCompleted = dayMilestones.every(milestone => 
+          completedMilestoneIds.includes(milestone.id)
+        );
+        
+        if (dayMilestones.length > 0 && allMilestonesCompleted) {
           fullyCompletedDays.add(day);
         }
       }
