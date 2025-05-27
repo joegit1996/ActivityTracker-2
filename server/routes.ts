@@ -85,8 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Detect language from query parameter, referer, or default to English
-      const language = req.query.lang as string || 'en';
-      console.log('API Language detected:', language);
+      const language = (req.query.lang as string) === 'ar' ? 'ar' : 'en';
 
       // Get active campaign
       const activeCampaign = await storage.getActiveCampaign();
@@ -153,9 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         });
 
-      console.log('Raw campaign data:', activeCampaign);
       const localizedCampaign = getLocalizedCampaign(activeCampaign, language);
-      console.log('Localized campaign:', localizedCampaign);
       
       res.json({
         campaign: localizedCampaign,
