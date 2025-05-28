@@ -44,11 +44,33 @@ const milestoneFormSchema = insertMilestoneSchema.extend({
 
 export default function Admin() {
   const { lang } = useParams();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedCampaign, setSelectedCampaign] = useState<number | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<any>(null);
   const [editingMilestone, setEditingMilestone] = useState<any>(null);
+  
+  // Authentication check
+  const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
+  
+  // Redirect to login if not authenticated
+  if (!authLoading && !isAuthenticated) {
+    setLocation("/admin/login");
+    return null;
+  }
+  
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-8 w-8 mx-auto mb-4 text-primary animate-pulse" />
+          <p>Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Queries
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
@@ -410,9 +432,18 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Activity Streak Admin</h1>
-          <p className="text-gray-600">Manage campaigns, milestones, and view completion data</p>
+        <div className="flex justify-between items-center">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold text-gray-900">Activity Streak Admin</h1>
+            <p className="text-gray-600">Manage campaigns, milestones, and view completion data</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-600">Welcome, {user?.username}</span>
+            <Button variant="outline" onClick={logout} className="flex items-center space-x-2">
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
