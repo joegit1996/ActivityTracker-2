@@ -128,10 +128,10 @@ export type InsertAdmin = z.infer<typeof insertAdminSchema>;
 
 // API schemas
 export const completeTaskSchema = z.object({
-  user_id: z.number(),
-  campaign_id: z.number(),
-  day_number: z.number(),
-  milestone_id: z.number(),
+  user_id: z.coerce.number(),
+  campaign_id: z.coerce.number(),
+  day_number: z.coerce.number(),
+  milestone_id: z.coerce.number(),
 });
 
 export type CompleteTaskRequest = z.infer<typeof completeTaskSchema>;
