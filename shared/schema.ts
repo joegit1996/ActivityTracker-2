@@ -1,9 +1,9 @@
-import { mysqlTable, text, serial, int, boolean, timestamp } from "drizzle-orm/mysql-core";
+import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = mysqlTable("users", {
+export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   language: text("language").default("en").notNull(),
