@@ -487,7 +487,9 @@ export default function Admin() {
                 <Card key={campaign.id} className="relative">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{campaign.title_en}</CardTitle>
+                      <CardTitle className="text-lg">
+                        ID: {campaign.id} - {campaign.title_en}
+                      </CardTitle>
                       <div className="flex items-center space-x-2">
                         {campaign.is_active && (
                           <Badge variant="default" className="bg-green-500">
