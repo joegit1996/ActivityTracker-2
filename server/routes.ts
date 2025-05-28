@@ -78,6 +78,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // Admin authentication endpoints
+  
+  // POST /api/login - Admin login endpoint
+  app.post("/api/login", validateInput(z.object({
+    username: z.string().min(1, "Username is required"),
+    password: z.string().min(1, "Password is required")
+  })), async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Find admin by username
+      const admin = await storage.getAdminByUsername(username);
+      if (!admin) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+      
+      // Verify password using bcrypt
+      const isValidPassword = await bcrypt.compare(password, admin.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+      
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          id: admin.id, 
+          username: admin.username, 
+          role: admin.role 
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      // Return token and admin info (without password)
+      res.json({
+        token,
+        admin: {
+          id: admin.id,
+          username: admin.username,
+          role: admin.role
+        }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // GET /api/me - Get current admin info from token
+  app.get("/api/me", authenticateToken, async (req, res) => {
+    try {
+      const admin = await storage.getAdmin(req.admin.id);
+      if (!admin) {
+        return res.status(404).json({ error: "Admin not found" });
+      }
+      
+      // Return admin info without password
+      res.json({
+        id: admin.id,
+        username: admin.username,
+        role: admin.role
+      });
+    } catch (error) {
+      console.error("Get admin error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin Authentication Routes
+
+  // POST /api/login - Admin login endpoint
+  app.post('/api/login', validateInput(z.object({
+    username: z.string().min(1, "Username is required"),
+    password: z.string().min(1, "Password is required")
+  })), async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Find admin by username
+      const admin = await storage.getAdminByUsername(username);
+      if (!admin) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      // Verify password using bcrypt
+      const isValidPassword = await bcrypt.compare(password, admin.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          id: admin.id, 
+          username: admin.username, 
+          role: admin.role 
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Return token and admin info (without password)
+      res.json({
+        token,
+        admin: {
+          id: admin.id,
+          username: admin.username,
+          role: admin.role
+        }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // GET /api/me - Get current admin info from token
+  app.get('/api/me', authenticateToken, async (req, res) => {
+    try {
+      const admin = await storage.getAdmin(req.admin.id);
+      if (!admin) {
+        return res.status(404).json({ error: 'Admin not found' });
+      }
+
+      // Return admin info without password
+      res.json({
+        id: admin.id,
+        username: admin.username,
+        role: admin.role
+      });
+    } catch (error) {
+      console.error('Get admin error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Get user progress
   app.get("/api/progress/:userId", async (req, res) => {
     try {
@@ -268,10 +404,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Admin API endpoints
+  // Admin API endpoints - All protected with JWT authentication
   
   // Campaigns CRUD
-  app.get("/api/admin/campaigns", async (req, res) => {
+  app.get("/api/admin/campaigns", authenticateToken, async (req, res) => {
     try {
       const campaigns = await storage.getAllCampaigns();
       res.json(campaigns);
