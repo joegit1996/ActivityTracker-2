@@ -38,7 +38,7 @@ function LanguageRouter() {
 
   return (
     <Switch>
-      {/* Authentication routes */}
+      {/* Authentication routes - must come first */}
       <Route path="/login" component={Login} />
       
       {/* Language-aware routes */}
