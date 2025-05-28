@@ -39,49 +39,11 @@ export default function Progress() {
     enabled: !!userId,
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-6 px-4">
-        <div className="max-w-md mx-auto space-y-6">
-          <div className="animate-pulse">
-            <div className="bg-gray-200 h-8 w-48 mx-auto rounded mb-2"></div>
-            <div className="bg-gray-200 h-6 w-64 mx-auto rounded"></div>
-          </div>
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="animate-pulse space-y-4">
-              <div className="bg-gray-200 h-24 w-24 mx-auto rounded-2xl"></div>
-              <div className="bg-gray-200 h-4 w-32 mx-auto rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !progressData) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-6 px-4">
-        <div className="max-w-md mx-auto">
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <h1 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h1>
-              <p className="text-gray-600">
-                {error instanceof Error ? error.message : t('common.error')}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
-
-  // Check if all milestones are completed and show reward modal
-  const isCompleted = progress.percentage === 100 && progress.currentDay > campaign.totalDays;
+  // Check if all milestones are completed and show reward modal (must be before early returns)
+  const isCompleted = progressData ? progressData.progress.percentage === 100 && progressData.progress.currentDay > progressData.campaign.totalDays : false;
   
   useEffect(() => {
-    if (isCompleted && !showRewardModal) {
+    if (isCompleted && !showRewardModal && progressData) {
       // Trigger confetti animation
       const duration = 3000;
       const animationEnd = Date.now() + duration;
@@ -125,7 +87,45 @@ export default function Progress() {
         setShowRewardModal(true);
       }, 1500);
     }
-  }, [isCompleted, showRewardModal]);
+  }, [isCompleted, showRewardModal, progressData]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-6 px-4">
+        <div className="max-w-md mx-auto space-y-6">
+          <div className="animate-pulse">
+            <div className="bg-gray-200 h-8 w-48 mx-auto rounded mb-2"></div>
+            <div className="bg-gray-200 h-6 w-64 mx-auto rounded"></div>
+          </div>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="animate-pulse space-y-4">
+              <div className="bg-gray-200 h-24 w-24 mx-auto rounded-2xl"></div>
+              <div className="bg-gray-200 h-4 w-32 mx-auto rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !progressData) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-6 px-4">
+        <div className="max-w-md mx-auto">
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <h1 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h1>
+              <p className="text-gray-600">
+                {error instanceof Error ? error.message : t('common.error')}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
 
   return (
     <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto">
