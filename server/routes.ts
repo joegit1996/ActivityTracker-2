@@ -348,20 +348,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Detect language from query parameter, referer, or default to English
       const language: SupportedLanguage = (req.query.lang as string) === 'ar' ? 'ar' : 'en';
 
-      // Get specific campaign
-      const campaign = await storage.getCampaign(parseInt(req.params.campaignId));
-      if (!campaign || !campaign.is_active) {
-        return res.status(404).json({ error: "Campaign not found or inactive" });
+      // Get active campaign (fallback for legacy route)
+      const activeCampaign = await storage.getActiveCampaign();
+      if (!activeCampaign) {
+        return res.status(404).json({ error: "No active campaign found" });
       }
 
-      // Get user completions for the specific campaign
-      const completions = await storage.getUserCompletions(userId, campaign.id);
+      // Get user completions for the active campaign
+      const completions = await storage.getUserCompletions(userId, activeCampaign.id);
       
       // Calculate which days are fully completed (all milestones for that day done)
       const fullyCompletedDays = new Set<number>();
       
-      for (let day = 1; day <= campaign.total_days; day++) {
-        const dayMilestones = await storage.getMilestonesByDay(campaign.id, day);
+      for (let day = 1; day <= activeCampaign.total_days; day++) {
+        const dayMilestones = await storage.getMilestonesByDay(activeCampaign.id, day);
         const dayCompletions = completions.filter(c => c.day_number === day);
         
         // Check if ALL specific milestones for this day are completed
@@ -376,11 +376,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const completedDays = fullyCompletedDays.size;
-      const currentDay = Math.min(completedDays + 1, campaign.total_days);
-      const percentage = Math.round((completedDays / campaign.total_days) * 100);
+      const currentDay = Math.min(completedDays + 1, activeCampaign.total_days);
+      const percentage = Math.round((completedDays / activeCampaign.total_days) * 100);
 
       // Get current day milestones
-      const currentDayMilestones = await storage.getMilestonesByDay(campaign.id, currentDay);
+      const currentDayMilestones = await storage.getMilestonesByDay(activeCampaign.id, currentDay);
       
       // Check which current day milestones are completed
       const tasksWithCompletion = await Promise.all(
@@ -413,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         });
 
-      const localizedCampaign = getLocalizedCampaign(campaign, language);
+      const localizedCampaign = getLocalizedCampaign(activeCampaign, language);
       
       res.json({
         campaign: localizedCampaign,
