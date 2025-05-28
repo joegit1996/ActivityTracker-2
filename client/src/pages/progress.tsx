@@ -92,10 +92,10 @@ export default function Progress() {
           
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-gray-500">
-              {i18n.language === 'ar' ? `${t('progress.dayLabel')} ${campaign.totalDays}` : `${t('progress.dayLabel')} 1`}
+              {i18n.language === 'ar' ? `${t('progress.dayLabel')} 1` : `${t('progress.dayLabel')} 1`}
             </span>
             <span className="text-xs text-gray-500">
-              {i18n.language === 'ar' ? `${t('progress.dayLabel')} 1` : `${t('progress.dayLabel')} ${campaign.totalDays}`}
+              {i18n.language === 'ar' ? `${t('progress.dayLabel')} ${campaign.totalDays}` : `${t('progress.dayLabel')} ${campaign.totalDays}`}
             </span>
           </div>
           
