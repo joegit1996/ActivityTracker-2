@@ -24,7 +24,8 @@
     "claimReward": "استلام المكافأة",
     "completeToUnlock": "أكمل المعالم للفتح",
     "congratulations": "تهانينا!",
-    "rewardCode": "المكافأة"
+    "rewardCode": "المكافأة",
+    "complete": "مكتمل"
   },
   "admin": {
     "title": "لوحة الإدارة",

@@ -24,7 +24,8 @@
     "claimReward": "Claim Reward",
     "completeToUnlock": "Complete Milestones to Unlock",
     "congratulations": "Congratulations!",
-    "rewardCode": "Reward"
+    "rewardCode": "Reward",
+    "complete": "Complete"
   },
   "admin": {
     "title": "Admin Panel",

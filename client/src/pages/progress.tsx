@@ -180,7 +180,7 @@ export default function Progress() {
               <h3 className="text-xl font-bold text-yellow-800 mb-1">{campaign.reward.title}</h3>
               <p className="text-yellow-700 text-sm">{campaign.reward.description}</p>
               <div className="inline-block bg-yellow-200 rounded-full px-3 py-1 mt-2">
-                <span className="text-yellow-800 font-semibold text-sm">100% Complete</span>
+                <span className="text-yellow-800 font-semibold text-sm">100% {t('progress.complete')}</span>
               </div>
             </div>
             
