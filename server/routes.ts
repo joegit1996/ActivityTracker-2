@@ -1,11 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { completeTaskSchema, insertMilestoneSchema, adminLoginSchema, createAdminSchema } from "@shared/schema";
+import { completeTaskSchema, insertMilestoneSchema } from "@shared/schema";
 import { getLocalizedCampaign, getLocalizedMilestone, type SupportedLanguage } from "@shared/utils";
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
-import { configureSession, requireAuth, checkAuth, hashPassword, comparePassword, AuthenticatedRequest } from "./auth";
 
 
 
@@ -14,15 +13,6 @@ const milestoneRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: { error: "Too many completion attempts, please try again later" },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Rate limiting for login attempts
-const loginRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login attempts per windowMs
-  message: { error: "Too many login attempts, please try again later" },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -58,9 +48,6 @@ function validateInput(schema: z.ZodSchema) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configure session middleware
-  app.use(configureSession());
-
   // Security headers
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -68,121 +55,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
     next();
-  });
-
-  // Authentication routes
-  app.post('/api/auth/login', loginRateLimit, validateInput(adminLoginSchema), async (req: AuthenticatedRequest, res) => {
-    try {
-      const { username, password } = req.validatedData;
-      
-      const admin = await storage.getAdminByUsername(username);
-      if (!admin || !admin.isActive) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      const isValidPassword = await comparePassword(password, admin.passwordHash);
-      if (!isValidPassword) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      req.session.adminId = admin.id;
-      req.session.adminUsername = admin.username;
-      
-      res.json({ 
-        success: true, 
-        admin: { 
-          id: admin.id, 
-          username: admin.username 
-        } 
-      });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "Login failed" });
-    }
-  });
-
-  app.post('/api/auth/logout', async (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Logout error:", err);
-        return res.status(500).json({ error: "Logout failed" });
-      }
-      res.json({ success: true });
-    });
-  });
-
-  app.get('/api/auth/me', checkAuth, (req: AuthenticatedRequest, res) => {
-    if (req.adminUser) {
-      res.json({ 
-        admin: { 
-          id: req.adminUser.id, 
-          username: req.adminUser.username 
-        } 
-      });
-    } else {
-      res.status(401).json({ error: "Not authenticated" });
-    }
-  });
-
-  // Admin user management routes
-  app.get('/api/admin/users', requireAuth, async (req, res) => {
-    try {
-      const admins = await storage.getAllAdminUsers();
-      const safeAdmins = admins.map(admin => ({
-        id: admin.id,
-        username: admin.username,
-        isActive: admin.isActive,
-        createdAt: admin.createdAt
-      }));
-      res.json(safeAdmins);
-    } catch (error) {
-      console.error("Get admin users error:", error);
-      res.status(500).json({ error: "Failed to fetch admin users" });
-    }
-  });
-
-  app.post('/api/admin/users', requireAuth, validateInput(createAdminSchema), async (req: AuthenticatedRequest, res) => {
-    try {
-      const { username, password } = req.validatedData;
-      
-      const existingAdmin = await storage.getAdminByUsername(username);
-      if (existingAdmin) {
-        return res.status(400).json({ error: "Username already exists" });
-      }
-      
-      const hashedPassword = await hashPassword(password);
-      const admin = await storage.createAdminUser({
-        username,
-        passwordHash: hashedPassword,
-        isActive: true,
-      });
-      
-      res.status(201).json({ 
-        success: true, 
-        admin: { 
-          id: admin.id, 
-          username: admin.username 
-        } 
-      });
-    } catch (error) {
-      console.error("Create admin error:", error);
-      res.status(500).json({ error: "Failed to create admin user" });
-    }
-  });
-
-  app.delete('/api/admin/users/:id', requireAuth, async (req, res) => {
-    try {
-      const adminId = parseInt(req.params.id);
-      if (isNaN(adminId)) {
-        return res.status(400).json({ error: "Invalid admin ID" });
-      }
-      
-      await storage.deleteAdminUser(adminId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Delete admin error:", error);
-      res.status(500).json({ error: "Failed to delete admin user" });
-    }
   });
 
   // Get user progress
@@ -375,10 +247,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Admin API endpoints (protected)
+  // Admin API endpoints
   
   // Campaigns CRUD
-  app.get("/api/admin/campaigns", requireAuth, async (req, res) => {
+  app.get("/api/admin/campaigns", async (req, res) => {
     try {
       const campaigns = await storage.getAllCampaigns();
       res.json(campaigns);
@@ -388,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/campaigns", requireAuth, async (req, res) => {
+  app.post("/api/admin/campaigns", async (req, res) => {
     try {
       const campaign = await storage.createCampaign(req.body);
       res.json(campaign);
@@ -398,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/campaigns/:id", requireAuth, async (req, res) => {
+  app.put("/api/admin/campaigns/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const campaign = await storage.updateCampaign(id, req.body);
@@ -409,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/campaigns/:id", requireAuth, async (req, res) => {
+  app.delete("/api/admin/campaigns/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteCampaign(id);
