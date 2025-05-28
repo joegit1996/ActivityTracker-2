@@ -186,7 +186,7 @@ export default function Progress() {
               
               {/* Show congratulations message when completed */}
               {isCompleted && (
-                <div className="mt-4 p-4 bg-yellow-100 rounded-xl border border-yellow-200 w-full">
+                <div className="mt-4 p-5 bg-yellow-100 rounded-xl border border-yellow-200 w-full mx-auto">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">🎉</span>
                     <p className="text-yellow-800 font-medium text-base">
@@ -196,13 +196,8 @@ export default function Progress() {
                   
                   {/* Display reward text if available */}
                   {(campaign as any).rewardCode && (
-                    <div className="w-full">
-                      <p className="text-sm text-yellow-600 mb-2 uppercase tracking-wide font-medium">
-                        {t('progress.rewardCode')}
-                      </p>
-                      <div className="text-base text-yellow-900 bg-yellow-50 p-3 rounded-lg border border-yellow-200 w-full">
-                        {(campaign as any).rewardCode}
-                      </div>
+                    <div className="text-base text-yellow-900 font-medium">
+                      {(campaign as any).rewardCode}
                     </div>
                   )}
                 </div>
