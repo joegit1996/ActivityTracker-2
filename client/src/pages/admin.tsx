@@ -556,8 +556,13 @@ export default function Admin() {
                       <div className="space-y-3">
                         {dayMilestones.map((milestone: any) => (
                           <div key={milestone.id} className="flex items-center justify-between p-3 border rounded">
-                            <div>
-                              <p className="font-medium">{milestone.title}</p>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                  ID: {milestone.id}
+                                </span>
+                                <p className="font-medium">{milestone.title}</p>
+                              </div>
                               <p className="text-sm text-gray-600">{milestone.description}</p>
                               <p className="text-xs text-gray-500">Order: {milestone.order_index}</p>
                             </div>
