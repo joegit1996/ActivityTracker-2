@@ -4,34 +4,13 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Trophy, Bell, Lock, CheckCircle } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { Trophy, Lock, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { ProgressResponse } from "@/lib/types";
-
-// Type declarations for native app bridges
-declare global {
-  interface Window {
-    webkit?: {
-      messageHandlers?: {
-        notificationSettings?: {
-          postMessage: (message: any) => void;
-        };
-      };
-    };
-    AndroidInterface?: {
-      openNotificationSettings: () => void;
-    };
-    ReactNativeWebView?: {
-      postMessage: (message: string) => void;
-    };
-  }
-}
 
 export default function Progress() {
   const { userId, lang } = useParams();
   const { t, i18n } = useTranslation();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   // Set language and HTML attributes based on URL
   useEffect(() => {
@@ -41,41 +20,6 @@ export default function Progress() {
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     }
   }, [lang, i18n]);
-
-  // Handle notification toggle with native app bridge
-  const handleNotificationToggle = (enabled: boolean) => {
-    if (enabled) {
-      // Try to communicate with native app to open notification settings
-      try {
-        // iOS WebKit bridge
-        if ((window as any).webkit?.messageHandlers?.notificationSettings) {
-          (window as any).webkit.messageHandlers.notificationSettings.postMessage({
-            action: 'openSettings',
-            type: 'notifications'
-          });
-        }
-        // Android bridge
-        else if ((window as any).AndroidInterface?.openNotificationSettings) {
-          (window as any).AndroidInterface.openNotificationSettings();
-        }
-        // React Native bridge
-        else if ((window as any).ReactNativeWebView) {
-          (window as any).ReactNativeWebView.postMessage(JSON.stringify({
-            action: 'openNotificationSettings'
-          }));
-        }
-        // Fallback - show message if no bridge available
-        else {
-          console.log('No native bridge available - running in regular browser');
-          // In a real app, you might want to show a toast message here
-        }
-      } catch (error) {
-        console.error('Failed to communicate with native app:', error);
-      }
-    }
-    
-    setNotificationsEnabled(enabled);
-  };
   
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
     queryKey: ["/api/progress", userId, lang],
@@ -156,24 +100,7 @@ export default function Progress() {
 
         </div>
 
-        {/* Streak Reminders */}
-        <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10">
-          <div className="flex items-center justify-between">
-            <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                <Bell className="text-white text-sm" />
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900 text-sm">{t('progress.streakReminders')}</h4>
-                <p className="text-gray-600 text-xs">{t('progress.streakRemindersDesc')}</p>
-              </div>
-            </div>
-            <Switch
-              checked={notificationsEnabled}
-              onCheckedChange={handleNotificationToggle}
-            />
-          </div>
-        </div>
+
 
         {/* Reward Card */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
