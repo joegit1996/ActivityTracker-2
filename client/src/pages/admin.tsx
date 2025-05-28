@@ -440,7 +440,7 @@ export default function Admin() {
                     Create Campaign
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>
                       {editingCampaign?.id ? "Edit Campaign" : "Create New Campaign"}
@@ -524,7 +524,7 @@ export default function Admin() {
                         Add Milestone
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>
                           {editingMilestone?.id ? "Edit Milestone" : "Create New Milestone"}
