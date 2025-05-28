@@ -4,13 +4,16 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Trophy, Lock, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Trophy, Lock, CheckCircle, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import type { ProgressResponse } from "@/lib/types";
 
 export default function Progress() {
   const { userId, lang, campaignId } = useParams();
   const { t, i18n } = useTranslation();
+  const [showRewardModal, setShowRewardModal] = useState(false);
 
   // Set language and HTML attributes based on URL
   useEffect(() => {
@@ -73,6 +76,56 @@ export default function Progress() {
   }
 
   const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
+
+  // Check if all milestones are completed and show reward modal
+  const isCompleted = progress.percentage === 100 && progress.currentDay > campaign.totalDays;
+  
+  useEffect(() => {
+    if (isCompleted && !showRewardModal) {
+      // Trigger confetti animation
+      const duration = 3000;
+      const animationEnd = Date.now() + duration;
+      
+      const randomInRange = (min: number, max: number) => {
+        return Math.random() * (max - min) + min;
+      };
+      
+      const confettiInterval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+        
+        if (timeLeft <= 0) {
+          clearInterval(confettiInterval);
+          return;
+        }
+        
+        const particleCount = 50 * (timeLeft / duration);
+        
+        confetti({
+          particleCount,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#0079F2', '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1']
+        });
+        
+        confetti({
+          particleCount,
+          spread: 70,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        
+        confetti({
+          particleCount,
+          spread: 70,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+      }, 250);
+      
+      // Show the reward modal after a short delay
+      setTimeout(() => {
+        setShowRewardModal(true);
+      }, 1500);
+    }
+  }, [isCompleted, showRewardModal]);
 
   return (
     <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto">

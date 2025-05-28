@@ -19,6 +19,8 @@ export const campaigns = pgTable("campaigns", {
   reward_title_ar: text("reward_title_ar").notNull(),
   reward_description_en: text("reward_description_en").notNull(),
   reward_description_ar: text("reward_description_ar").notNull(),
+  reward_code_en: text("reward_code_en"),
+  reward_code_ar: text("reward_code_ar"),
   total_days: integer("total_days").notNull(),
   is_active: boolean("is_active").default(false),
 });

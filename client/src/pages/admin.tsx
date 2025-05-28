@@ -253,6 +253,32 @@ export default function Admin() {
           />
           <FormField
             control={form.control}
+            name="reward_code_en"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>English Reward Code</FormLabel>
+                <FormControl>
+                  <Textarea {...field} placeholder="Enter the reward code text to display when campaign is completed..." />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="reward_code_ar"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Arabic Reward Code</FormLabel>
+                <FormControl>
+                  <Textarea {...field} placeholder="أدخل نص رمز المكافأة ليتم عرضه عند إكمال الحملة..." />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="total_days"
             render={({ field }) => (
               <FormItem>
