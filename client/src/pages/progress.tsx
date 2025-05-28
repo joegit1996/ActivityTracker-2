@@ -128,8 +128,8 @@ export default function Progress() {
   const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
 
   return (
-    <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto">
-      <div className="max-w-md mx-auto space-y-6 pb-8">
+    <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto overflow-x-hidden w-full">
+      <div className="max-w-md mx-auto space-y-6 pb-8 w-full">
         
         {/* Header */}
         <div className="text-center space-y-2">
