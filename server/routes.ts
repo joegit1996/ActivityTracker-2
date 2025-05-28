@@ -449,13 +449,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let user = await storage.getUser(user_id);
         if (!user) {
           user = await storage.createUser({ name: `User ${user_id}` });
+          // Note: user.id will be auto-assigned, but we use the provided user_id for completions
         }
 
         // Verify campaign exists and is active
         const campaign = await storage.getCampaign(campaign_id);
-        const isActive = campaign?.is_active === true || campaign?.is_active === "true";
-        if (!campaign || !isActive) {
-          return res.status(400).json({ error: "Invalid or inactive campaign" });
+        if (!campaign) {
+          return res.status(400).json({ error: "Campaign not found" });
+        }
+        if (!campaign.is_active) {
+          return res.status(400).json({ error: "Campaign is not active" });
         }
 
         // Verify milestone exists and belongs to the campaign
