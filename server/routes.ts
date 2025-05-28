@@ -417,7 +417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/campaigns", async (req, res) => {
+  app.post("/api/admin/campaigns", authenticateToken, async (req, res) => {
     try {
       const campaign = await storage.createCampaign(req.body);
       res.json(campaign);
@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/campaigns/:id", async (req, res) => {
+  app.put("/api/admin/campaigns/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const campaign = await storage.updateCampaign(id, req.body);
@@ -438,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/campaigns/:id", async (req, res) => {
+  app.delete("/api/admin/campaigns/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteCampaign(id);
@@ -450,7 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Milestones CRUD
-  app.get("/api/admin/campaigns/:campaignId/milestones", async (req, res) => {
+  app.get("/api/admin/campaigns/:campaignId/milestones", authenticateToken, async (req, res) => {
     try {
       const campaignId = parseInt(req.params.campaignId);
       const milestones = await storage.getMilestonesByCampaign(campaignId);
@@ -462,6 +462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/admin/milestones", 
+    authenticateToken,
     validateInput(insertMilestoneSchema),
     async (req: any, res) => {
     try {
@@ -473,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/milestones/:id", async (req, res) => {
+  app.put("/api/admin/milestones/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const milestone = await storage.updateMilestone(id, req.body);
@@ -484,7 +485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/milestones/:id", async (req, res) => {
+  app.delete("/api/admin/milestones/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteMilestone(id);
@@ -496,7 +497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Completions data
-  app.get("/api/admin/completions", async (req, res) => {
+  app.get("/api/admin/completions", authenticateToken, async (req, res) => {
     try {
       const completions = await storage.getAllCompletions();
       res.json(completions);

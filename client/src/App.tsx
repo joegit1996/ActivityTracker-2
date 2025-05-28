@@ -8,6 +8,8 @@ import { useEffect } from "react";
 import NotFound from "@/pages/not-found";
 import Progress from "@/pages/progress";
 import Admin from "@/pages/admin";
+import Login from "@/pages/login";
+import { AdminAuthProvider, ProtectedAdminRoute } from "@/hooks/use-admin-auth";
 
 // Component to handle language detection and routing
 function LanguageRouter() {
@@ -36,9 +38,16 @@ function LanguageRouter() {
 
   return (
     <Switch>
+      {/* Authentication routes */}
+      <Route path="/login" component={Login} />
+      
       {/* Language-aware routes */}
       <Route path="/:lang/progress/:userId" component={Progress} />
-      <Route path="/:lang/admin" component={Admin} />
+      <Route path="/:lang/admin">
+        <ProtectedAdminRoute>
+          <Admin />
+        </ProtectedAdminRoute>
+      </Route>
       
       {/* Legacy routes - redirect to language-prefixed versions */}
       <Route path="/progress/:userId">
@@ -82,10 +91,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AdminAuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AdminAuthProvider>
     </QueryClientProvider>
   );
 }
