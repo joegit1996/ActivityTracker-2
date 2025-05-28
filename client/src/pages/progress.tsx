@@ -186,20 +186,23 @@ export default function Progress() {
               
               {/* Show congratulations message when completed */}
               {isCompleted && (
-                <div className="mt-3 p-3 bg-yellow-100 rounded-lg border border-yellow-200">
-                  <p className="text-yellow-800 font-medium text-sm mb-2">
-                    🎉 {t('progress.congratulations')}!
-                  </p>
+                <div className="mt-4 p-4 bg-yellow-100 rounded-xl border border-yellow-200 w-full">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">🎉</span>
+                    <p className="text-yellow-800 font-medium text-base">
+                      {t('progress.congratulations')}
+                    </p>
+                  </div>
                   
-                  {/* Display reward code if available */}
+                  {/* Display reward text if available */}
                   {(campaign as any).rewardCode && (
-                    <div className="mt-2">
-                      <p className="text-xs text-yellow-600 mb-1 uppercase tracking-wide">
+                    <div className="w-full">
+                      <p className="text-sm text-yellow-600 mb-2 uppercase tracking-wide font-medium">
                         {t('progress.rewardCode')}
                       </p>
-                      <p className="text-sm font-mono font-semibold text-yellow-900 bg-yellow-50 p-2 rounded border break-words">
+                      <div className="text-base text-yellow-900 bg-yellow-50 p-3 rounded-lg border border-yellow-200 w-full">
                         {(campaign as any).rewardCode}
-                      </p>
+                      </div>
                     </div>
                   )}
                 </div>

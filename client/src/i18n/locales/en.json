@@ -22,7 +22,9 @@
     "lockedDay": "Day {{number}} - Locked",
     "completeCurrentDay": "Complete current day to unlock",
     "claimReward": "Claim Reward",
-    "completeToUnlock": "Complete Milestones to Unlock"
+    "completeToUnlock": "Complete Milestones to Unlock",
+    "congratulations": "Congratulations!",
+    "rewardCode": "Reward"
   },
   "admin": {
     "title": "Admin Panel",

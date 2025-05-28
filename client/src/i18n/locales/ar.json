@@ -22,7 +22,9 @@
     "lockedDay": "اليوم {{number}} - مقفل",
     "completeCurrentDay": "أكمل اليوم الحالي للفتح",
     "claimReward": "استلام المكافأة",
-    "completeToUnlock": "أكمل المعالم للفتح"
+    "completeToUnlock": "أكمل المعالم للفتح",
+    "congratulations": "تهانينا!",
+    "rewardCode": "المكافأة"
   },
   "admin": {
     "title": "لوحة الإدارة",
