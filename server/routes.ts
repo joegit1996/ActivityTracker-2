@@ -453,7 +453,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Verify campaign exists and is active
         const campaign = await storage.getCampaign(campaign_id);
-        if (!campaign || !campaign.is_active) {
+        const isActive = campaign?.is_active === true || campaign?.is_active === "true";
+        if (!campaign || !isActive) {
           return res.status(400).json({ error: "Invalid or inactive campaign" });
         }
 
