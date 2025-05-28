@@ -54,9 +54,12 @@ function validateApiToken(req: any, res: any, next: any) {
 function validateInput(schema: z.ZodSchema) {
   return (req: any, res: any, next: any) => {
     try {
+      console.log("DEBUG: Validating request body:", req.body);
       req.validatedData = schema.parse(req.body);
+      console.log("DEBUG: Validation successful:", req.validatedData);
       next();
     } catch (error) {
+      console.log("DEBUG: Validation failed:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
           error: "Invalid request data", 
@@ -442,6 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     validateApiToken,
     validateInput(completeTaskSchema),
     async (req: any, res) => {
+      console.log("DEBUG: Milestone completion endpoint hit!");
       try {
         const { user_id, campaign_id, day_number, milestone_id } = req.validatedData;
         
