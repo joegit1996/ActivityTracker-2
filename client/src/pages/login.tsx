@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Lock, User } from "lucide-react";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 
 // Login form validation schema
 const loginSchema = z.object({
@@ -22,6 +23,16 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const { login, isAuthenticated } = useAdminAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const browserLang = navigator.language.toLowerCase();
+      const defaultLang = browserLang.startsWith('ar') ? 'ar' : 'en';
+      setLocation(`/${defaultLang}/admin`);
+    }
+  }, [isAuthenticated, setLocation]);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -36,7 +47,7 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,22 +57,20 @@ export default function Login() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Login failed");
+        throw new Error(error.message || "Login failed");
       }
 
       const result = await response.json();
       
-      // Store JWT token in localStorage
-      localStorage.setItem("adminToken", result.token);
-      localStorage.setItem("adminUser", JSON.stringify(result.admin));
+      // Use auth context login function to update state
+      login(result.token, result.admin);
 
       toast({
         title: "Login successful!",
         description: `Welcome back, ${result.admin.username}`,
       });
 
-      // Redirect to admin panel
-      setLocation("/admin");
+      // Redirect will happen automatically via useEffect when isAuthenticated becomes true
     } catch (error) {
       toast({
         title: "Login failed",
