@@ -214,33 +214,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user progress - supports both active campaign and specific campaign
-  app.get("/api/progress/:userId/:campaignId?", async (req, res) => {
+  // Get user progress for specific campaign
+  app.get("/api/progress/:userId/:campaignId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const campaignId = req.params.campaignId ? parseInt(req.params.campaignId) : null;
+      const campaignId = parseInt(req.params.campaignId);
       
       if (isNaN(userId)) {
         return res.status(400).json({ error: "Invalid user ID" });
       }
       
-      if (campaignId && isNaN(campaignId)) {
+      if (isNaN(campaignId)) {
         return res.status(400).json({ error: "Invalid campaign ID" });
       }
 
       // Detect language from query parameter, referer, or default to English
       const language: SupportedLanguage = (req.query.lang as string) === 'ar' ? 'ar' : 'en';
 
-      // Get specified campaign or active campaign
-      const activeCampaign = campaignId 
-        ? await storage.getCampaign(campaignId)
-        : await storage.getActiveCampaign();
-        
+      // Get specified campaign
+      const activeCampaign = await storage.getCampaign(campaignId);
       if (!activeCampaign) {
-        const errorMsg = campaignId 
-          ? `Campaign with ID ${campaignId} not found`
-          : "No active campaign found";
-        return res.status(404).json({ error: errorMsg });
+        return res.status(404).json({ error: `Campaign with ID ${campaignId} not found` });
+      }
+
+      // Get user completions for specified campaign
+      const completions = await storage.getUserCompletions(userId, activeCampaign.id);
+      
+      // Calculate progress
+      const totalMilestones = await storage.getMilestonesByCampaign(activeCampaign.id);
+      const completedMilestones = completions.length;
+      
+      // Find current day (first day with incomplete milestones)
+      let currentDay = 1;
+      for (let day = 1; day <= activeCampaign.total_days; day++) {
+        const dayMilestones = await storage.getMilestonesByDay(activeCampaign.id, day);
+        const dayCompletions = await storage.getUserDayCompletions(userId, activeCampaign.id, day);
+        
+        if (dayCompletions.length < dayMilestones.length) {
+          currentDay = day;
+          break;
+        }
+        if (day === activeCampaign.total_days) {
+          currentDay = day + 1; // All days completed
+        }
+      }
+      
+      // Calculate completed days
+      let completedDays = 0;
+      for (let day = 1; day < currentDay && day <= activeCampaign.total_days; day++) {
+        const dayMilestones = await storage.getMilestonesByDay(activeCampaign.id, day);
+        const dayCompletions = await storage.getUserDayCompletions(userId, activeCampaign.id, day);
+        
+        if (dayCompletions.length === dayMilestones.length && dayMilestones.length > 0) {
+          completedDays++;
+        }
+      }
+      
+      const percentage = Math.round((completedDays / activeCampaign.total_days) * 100);
+      
+      // Get current day tasks if not completed
+      const currentDayMilestones = currentDay <= activeCampaign.total_days 
+        ? await storage.getMilestonesByDay(activeCampaign.id, currentDay)
+        : [];
+      
+      const currentDayCompletions = currentDay <= activeCampaign.total_days
+        ? await storage.getUserDayCompletions(userId, activeCampaign.id, currentDay)
+        : [];
+      
+      const tasksWithCompletion = currentDayMilestones.map((milestone, index) => {
+        const isCompleted = currentDayCompletions.some(completion => completion.milestone_id === milestone.id);
+        const localizedMilestone = getLocalizedMilestone(milestone, language);
+        
+        return {
+          id: milestone.id,
+          title: localizedMilestone.title,
+          description: localizedMilestone.description,
+          completed: isCompleted,
+          number: index + 1
+        };
+      });
+      
+      // Get previous completed days
+      const previousDays = [];
+      for (let day = 1; day < currentDay && day <= activeCampaign.total_days; day++) {
+        const dayMilestones = await storage.getMilestonesByDay(activeCampaign.id, day);
+        const dayCompletions = await storage.getUserDayCompletions(userId, activeCampaign.id, day);
+        
+        if (dayCompletions.length === dayMilestones.length && dayMilestones.length > 0) {
+          // Find the latest completion time for this day
+          const latestCompletion = dayCompletions.reduce((latest, completion) => {
+            return new Date(completion.completed_at) > new Date(latest.completed_at) ? completion : latest;
+          });
+          
+          previousDays.push({
+            number: day,
+            completedAt: latestCompletion.completed_at
+          });
+        }
+      }
+      
+      const localizedCampaign = getLocalizedCampaign(activeCampaign, language);
+      
+      res.json({
+        campaign: localizedCampaign,
+        progress: {
+          currentDay,
+          completedDays,
+          percentage
+        },
+        streak: {
+          currentDays: completedDays
+        },
+        tasks: tasksWithCompletion,
+        previousDays,
+        nextDay: currentDay < activeCampaign.total_days ? currentDay + 1 : null
+      });
+
+    } catch (error) {
+      console.error("Error fetching progress:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Get user progress for active campaign
+  app.get("/api/progress/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      // Detect language from query parameter, referer, or default to English
+      const language: SupportedLanguage = (req.query.lang as string) === 'ar' ? 'ar' : 'en';
+
+      // Get active campaign
+      const activeCampaign = await storage.getActiveCampaign();
+      if (!activeCampaign) {
+        return res.status(404).json({ error: "No active campaign found" });
       }
 
       // Get user completions for active campaign
