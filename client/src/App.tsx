@@ -17,6 +17,11 @@ function LanguageRouter() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
+    // Skip language detection for authentication routes
+    if (location.startsWith('/login')) {
+      return;
+    }
+
     // Extract language from URL path
     const pathSegments = location.split('/').filter(Boolean);
     const possibleLang = pathSegments[0];
