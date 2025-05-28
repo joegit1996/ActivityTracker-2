@@ -186,8 +186,12 @@ export default function Progress() {
               
               {/* Show congratulations message when completed */}
               {isCompleted && (
-                <div className="mt-4 mx-auto w-4/5 max-w-sm p-4 bg-yellow-100 rounded-xl border border-yellow-200 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-3">
+                <div className={`mt-4 mx-auto w-4/5 max-w-[350px] p-4 bg-yellow-100 rounded-xl border border-yellow-200 ${
+                  lang === 'ar' ? 'text-right' : 'text-left'
+                }`}>
+                  <div className={`flex items-center gap-2 mb-3 ${
+                    lang === 'ar' ? 'flex-row-reverse' : 'flex-row'
+                  }`}>
                     <span className="text-lg">🎉</span>
                     <p className="text-yellow-800 font-medium text-base">
                       {t('progress.congratulations')}
