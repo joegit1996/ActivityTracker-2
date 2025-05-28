@@ -3,17 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trophy, Lock, CheckCircle, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import type { ProgressResponse } from "@/lib/types";
 
 export default function Progress() {
   const { userId, lang, campaignId } = useParams();
   const { t, i18n } = useTranslation();
-  const [showRewardModal, setShowRewardModal] = useState(false);
 
   // Set language and HTML attributes based on URL
   useEffect(() => {
@@ -43,8 +40,8 @@ export default function Progress() {
   const isCompleted = progressData ? progressData.progress.percentage === 100 && progressData.progress.currentDay > progressData.campaign.totalDays : false;
   
   useEffect(() => {
-    if (isCompleted && !showRewardModal && progressData) {
-      // Trigger confetti animation
+    if (isCompleted && progressData) {
+      // Trigger confetti animation when all milestones are completed
       const duration = 3000;
       const animationEnd = Date.now() + duration;
       
@@ -81,13 +78,8 @@ export default function Progress() {
           origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
         });
       }, 250);
-      
-      // Show the reward modal after a short delay
-      setTimeout(() => {
-        setShowRewardModal(true);
-      }, 1500);
     }
-  }, [isCompleted, showRewardModal, progressData]);
+  }, [isCompleted, progressData]);
 
   if (isLoading) {
     return (
@@ -163,19 +155,62 @@ export default function Progress() {
 
 
         {/* Reward Card */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+        <div className={`bg-white rounded-2xl p-6 shadow-sm border space-y-4 transition-all duration-500 ${
+          isCompleted 
+            ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-lg shadow-yellow-200/50' 
+            : 'border-gray-100'
+        }`}>
           <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Trophy className="text-primary text-xl" />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-500 ${
+              isCompleted 
+                ? 'bg-yellow-100 animate-pulse' 
+                : 'bg-primary/10'
+            }`}>
+              <Trophy className={`text-xl transition-all duration-500 ${
+                isCompleted 
+                  ? 'text-yellow-600' 
+                  : 'text-primary'
+              }`} />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 mb-1">{campaign.reward.title}</h3>
-              <p className="text-gray-600 text-sm">{campaign.reward.description}</p>
+              <h3 className={`font-semibold mb-1 transition-all duration-500 ${
+                isCompleted 
+                  ? 'text-yellow-800' 
+                  : 'text-gray-900'
+              }`}>{campaign.reward.title}</h3>
+              <p className={`text-sm transition-all duration-500 ${
+                isCompleted 
+                  ? 'text-yellow-700' 
+                  : 'text-gray-600'
+              }`}>{campaign.reward.description}</p>
+              
+              {/* Show congratulations message when completed */}
+              {isCompleted && (
+                <div className="mt-3 p-3 bg-yellow-100 rounded-lg border border-yellow-200">
+                  <p className="text-yellow-800 font-medium text-sm mb-2">
+                    🎉 {t('progress.congratulations')}!
+                  </p>
+                  
+                  {/* Display reward code if available */}
+                  {(campaign as any).rewardCode && (
+                    <div className="mt-2">
+                      <p className="text-xs text-yellow-600 mb-1 uppercase tracking-wide">
+                        {t('progress.rewardCode')}
+                      </p>
+                      <p className="text-sm font-mono font-semibold text-yellow-900 bg-yellow-50 p-2 rounded border break-words">
+                        {(campaign as any).rewardCode}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <div className="text-primary font-semibold text-sm">{progress.percentage}%</div>
+            <div className={`font-semibold text-sm transition-all duration-500 ${
+              isCompleted 
+                ? 'text-yellow-600' 
+                : 'text-primary'
+            }`}>{progress.percentage}%</div>
           </div>
-          
-
         </div>
 
         {/* Previous Days (if any) */}
@@ -284,48 +319,6 @@ export default function Progress() {
 
 
       </div>
-
-      {/* Reward Modal */}
-      <Dialog open={showRewardModal} onOpenChange={setShowRewardModal}>
-        <DialogContent className="max-w-sm mx-auto bg-white rounded-2xl border-0 shadow-2xl">
-          <DialogHeader className="text-center space-y-4 pb-4">
-            <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
-              <Trophy className="w-10 h-10 text-yellow-600" />
-            </div>
-            <DialogTitle className="text-2xl font-bold text-gray-900">
-              {t('progress.congratulations')}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="text-center space-y-4">
-            <p className="text-gray-600">
-              {campaign.reward.title}
-            </p>
-            <p className="text-sm text-gray-500">
-              {campaign.reward.description}
-            </p>
-            
-            {/* Display reward code if available */}
-            {(campaign as any).rewardCode && (
-              <div className="bg-gray-50 rounded-xl p-4 mt-4">
-                <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">
-                  {t('progress.rewardCode')}
-                </p>
-                <p className="text-lg font-mono font-semibold text-gray-900 break-words">
-                  {(campaign as any).rewardCode}
-                </p>
-              </div>
-            )}
-            
-            <Button
-              onClick={() => setShowRewardModal(false)}
-              className="w-full bg-primary text-white font-medium py-3 px-4 rounded-xl hover:bg-primary/90 transition-colors mt-6"
-            >
-              {t('common.close')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
