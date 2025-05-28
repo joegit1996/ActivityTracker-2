@@ -92,6 +92,7 @@ export default function Progress() {
           
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-gray-500">
+              {console.log('Debug - lang:', lang, 'isArabic:', lang === 'ar')}
               {lang === 'ar' ? `${t('progress.dayLabel')} ${campaign.totalDays}` : `${t('progress.dayLabel')} 1`}
             </span>
             <span className="text-xs text-gray-500">
