@@ -155,68 +155,87 @@ export default function Progress() {
 
 
         {/* Reward Card */}
-        <div className={`bg-white rounded-2xl p-6 shadow-sm border space-y-4 transition-all duration-500 ${
-          isCompleted 
-            ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-lg shadow-yellow-200/50' 
-            : 'border-gray-100'
-        }`}>
-          <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-500 ${
-              isCompleted 
-                ? 'bg-yellow-100 animate-pulse' 
-                : 'bg-primary/10'
-            }`}>
-              <Trophy className={`text-xl transition-all duration-500 ${
-                isCompleted 
-                  ? 'text-yellow-600' 
-                  : 'text-primary'
-              }`} />
+        {!isCompleted ? (
+          // Normal state - clean and simple
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Trophy className="text-primary text-xl" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 mb-1">{campaign.reward.title}</h3>
+                <p className="text-gray-600 text-sm">{campaign.reward.description}</p>
+              </div>
+              <div className="text-primary font-semibold text-sm">{progress.percentage}%</div>
             </div>
-            <div className="flex-1">
-              <h3 className={`font-semibold mb-1 transition-all duration-500 ${
-                isCompleted 
-                  ? 'text-yellow-800' 
-                  : 'text-gray-900'
-              }`}>{campaign.reward.title}</h3>
-              <p className={`text-sm transition-all duration-500 ${
-                isCompleted 
-                  ? 'text-yellow-700' 
-                  : 'text-gray-600'
-              }`}>{campaign.reward.description}</p>
-              
-              {/* Show congratulations message when completed */}
-              {isCompleted && (
-                <div className={`
-                  mt-6 mb-4 mx-auto
-                  w-[80vw] max-w-[480px]
-                  p-6 bg-yellow-100 rounded-xl border border-yellow-200
-                  ${lang === 'ar' ? 'text-right' : 'text-left'}
-                `}>
-                  <div className={`flex items-center gap-2 mb-3 ${
-                    lang === 'ar' ? 'flex-row-reverse' : 'flex-row'
-                  }`}>
-                    <span className="text-lg">🎉</span>
-                    <p className="text-yellow-800 font-medium text-base">
-                      {t('progress.congratulations')}
-                    </p>
-                  </div>
-                  
-                  {/* Display reward text if available */}
-                  {(campaign as any).rewardCode && (
-                    <div className="text-base text-yellow-900 font-medium">
-                      {(campaign as any).rewardCode}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className={`font-semibold text-sm transition-all duration-500 ${
-              isCompleted 
-                ? 'text-yellow-600' 
-                : 'text-primary'
-            }`}>{progress.percentage}%</div>
           </div>
-        </div>
+        ) : (
+          // Completed state - exciting and celebratory
+          <div className="relative overflow-hidden bg-gradient-to-br from-yellow-400 via-orange-300 to-pink-400 rounded-3xl p-8 shadow-2xl shadow-yellow-500/30 border-4 border-yellow-300 animate-pulse">
+            {/* Sparkle decorations */}
+            <div className="absolute top-4 left-4 text-yellow-200 text-xl animate-bounce">✨</div>
+            <div className="absolute top-6 right-6 text-yellow-200 text-lg animate-bounce delay-75">⭐</div>
+            <div className="absolute bottom-4 left-6 text-yellow-200 text-lg animate-bounce delay-150">💫</div>
+            <div className="absolute bottom-6 right-4 text-yellow-200 text-xl animate-bounce delay-100">✨</div>
+            
+            {/* Main content */}
+            <div className="relative z-10 text-center space-y-6">
+              {/* Large trophy icon */}
+              <div className="mx-auto w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                <Trophy className="text-yellow-600 text-4xl" />
+              </div>
+              
+              {/* Title and description */}
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-white drop-shadow-lg">
+                  {campaign.reward.title}
+                </h2>
+                <p className="text-white/90 text-lg font-medium drop-shadow">
+                  {campaign.reward.description}
+                </p>
+                <div className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mt-2">
+                  <span className="text-white font-bold text-xl">100% {t('progress.complete')}</span>
+                </div>
+              </div>
+              
+              {/* Congratulations section */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 mx-4 shadow-xl border border-white/50">
+                <div className={`flex items-center justify-center gap-3 mb-4 ${
+                  lang === 'ar' ? 'flex-row-reverse' : 'flex-row'
+                }`}>
+                  <span className="text-3xl animate-bounce">🎉</span>
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    {t('progress.congratulations')}
+                  </h3>
+                  <span className="text-3xl animate-bounce delay-75">🎊</span>
+                </div>
+                
+                {/* Reward content */}
+                {(campaign as any).rewardCode && (
+                  <div className="space-y-3">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-xl p-4 text-center">
+                      <p className="text-white font-bold text-lg mb-2 drop-shadow">
+                        🏆 {t('progress.rewardCode')} 🏆
+                      </p>
+                      <div className="bg-white rounded-lg p-4 shadow-inner">
+                        <p className="text-gray-800 font-bold text-xl break-words">
+                          {(campaign as any).rewardCode}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Success message */}
+              <div className="text-center">
+                <p className="text-white text-lg font-semibold drop-shadow animate-pulse">
+                  🌟 {t('progress.allTasksCompleted')} 🌟
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Previous Days (if any) */}
         {previousDays.length > 0 && (
