@@ -1,12 +1,33 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { completeTaskSchema, insertMilestoneSchema } from "@shared/schema";
+import { completeTaskSchema, insertMilestoneSchema, insertAdminSchema } from "@shared/schema";
 import { getLocalizedCampaign, getLocalizedMilestone, type SupportedLanguage } from "@shared/utils";
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
+// JWT Secret - should be in environment variable in production
+const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
 
+// JWT Authentication middleware for admin routes
+const authenticateToken = (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err: any, admin: any) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    req.admin = admin;
+    next();
+  });
+};
 
 // Rate limiting for milestone completion
 const milestoneRateLimit = rateLimit({

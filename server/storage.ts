@@ -1,9 +1,10 @@
 import { 
-  users, campaigns, milestones, milestone_completions,
+  users, campaigns, milestones, milestone_completions, admins,
   type User, type InsertUser,
   type Campaign, type InsertCampaign,
   type Milestone, type InsertMilestone,
-  type MilestoneCompletion, type InsertMilestoneCompletion
+  type MilestoneCompletion, type InsertMilestoneCompletion,
+  type Admin, type InsertAdmin
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -35,6 +36,11 @@ export interface IStorage {
   getAllCompletions(): Promise<MilestoneCompletion[]>;
   completeMilestone(completion: InsertMilestoneCompletion): Promise<MilestoneCompletion>;
   isTaskCompleted(userId: number, milestoneId: number): Promise<boolean>;
+
+  // Admins
+  getAdminByUsername(username: string): Promise<Admin | undefined>;
+  createAdmin(admin: InsertAdmin): Promise<Admin>;
+  getAdmin(id: number): Promise<Admin | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -185,6 +191,31 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return !!completion;
+  }
+
+  // Admin authentication methods
+  async getAdminByUsername(username: string): Promise<Admin | undefined> {
+    const [admin] = await db
+      .select()
+      .from(admins)
+      .where(eq(admins.username, username));
+    return admin || undefined;
+  }
+
+  async createAdmin(insertAdmin: InsertAdmin): Promise<Admin> {
+    const [admin] = await db
+      .insert(admins)
+      .values(insertAdmin)
+      .returning();
+    return admin;
+  }
+
+  async getAdmin(id: number): Promise<Admin | undefined> {
+    const [admin] = await db
+      .select()
+      .from(admins)
+      .where(eq(admins.id, id));
+    return admin || undefined;
   }
 }
 
