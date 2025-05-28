@@ -83,7 +83,7 @@ async function main() {
 
     // Get password
     let password: string;
-    let confirmPassword: string;
+    let confirmPassword: string = "";
     do {
       password = await questionHidden("Password (min 8 characters): ");
       if (password.length < 8) {
@@ -117,11 +117,9 @@ async function main() {
     process.exit(1);
   } finally {
     rl.close();
-    await db.pool.end();
     process.exit(0);
   }
 }
 
-if (require.main === module) {
-  main();
-}
+// Run the script
+main();
