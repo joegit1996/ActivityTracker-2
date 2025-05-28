@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import type { ProgressResponse } from "@/lib/types";
 
 export default function Progress() {
-  const { userId, lang } = useParams();
+  const { userId, lang, campaignId } = useParams();
   const { t, i18n } = useTranslation();
 
   // Set language and HTML attributes based on URL
@@ -22,9 +22,12 @@ export default function Progress() {
   }, [lang, i18n]);
   
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
-    queryKey: ["/api/progress", userId, lang],
+    queryKey: ["/api/progress", userId, campaignId, lang],
     queryFn: async () => {
-      const response = await fetch(`/api/progress/${userId}?lang=${lang || 'en'}`);
+      const url = campaignId 
+        ? `/api/progress/${userId}/${campaignId}?lang=${lang || 'en'}`
+        : `/api/progress/${userId}?lang=${lang || 'en'}`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch progress");
       }

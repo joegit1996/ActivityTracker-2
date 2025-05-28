@@ -47,7 +47,7 @@ function LanguageRouter() {
       <Route path="/login" component={Login} />
       
       {/* Language-aware routes */}
-      <Route path="/:lang/progress/:userId" component={Progress} />
+      <Route path="/:lang/progress/:userId/:campaignId?" component={Progress} />
       <Route path="/:lang/admin">
         <ProtectedAdminRoute>
           <Admin />
@@ -55,11 +55,12 @@ function LanguageRouter() {
       </Route>
       
       {/* Legacy routes - redirect to language-prefixed versions */}
-      <Route path="/progress/:userId">
+      <Route path="/progress/:userId/:campaignId?">
         {(params) => {
           const browserLang = navigator.language.toLowerCase();
           const defaultLang = browserLang.startsWith('ar') ? 'ar' : 'en';
-          setLocation(`/${defaultLang}/progress/${params.userId}`);
+          const campaignPath = params.campaignId ? `/${params.campaignId}` : '';
+          setLocation(`/${defaultLang}/progress/${params.userId}${campaignPath}`);
           return null;
         }}
       </Route>

@@ -214,21 +214,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user progress
-  app.get("/api/progress/:userId", async (req, res) => {
+  // Get user progress - supports both active campaign and specific campaign
+  app.get("/api/progress/:userId/:campaignId?", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
+      const campaignId = req.params.campaignId ? parseInt(req.params.campaignId) : null;
+      
       if (isNaN(userId)) {
         return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      if (campaignId && isNaN(campaignId)) {
+        return res.status(400).json({ error: "Invalid campaign ID" });
       }
 
       // Detect language from query parameter, referer, or default to English
       const language: SupportedLanguage = (req.query.lang as string) === 'ar' ? 'ar' : 'en';
 
-      // Get active campaign
-      const activeCampaign = await storage.getActiveCampaign();
+      // Get specified campaign or active campaign
+      const activeCampaign = campaignId 
+        ? await storage.getCampaign(campaignId)
+        : await storage.getActiveCampaign();
+        
       if (!activeCampaign) {
-        return res.status(404).json({ error: "No active campaign found" });
+        const errorMsg = campaignId 
+          ? `Campaign with ID ${campaignId} not found`
+          : "No active campaign found";
+        return res.status(404).json({ error: errorMsg });
       }
 
       // Get user completions for active campaign
