@@ -186,9 +186,12 @@ export default function Progress() {
               
               {/* Show congratulations message when completed */}
               {isCompleted && (
-                <div className={`mt-4 mx-auto w-4/5 max-w-[350px] p-4 bg-yellow-100 rounded-xl border border-yellow-200 ${
-                  lang === 'ar' ? 'text-right' : 'text-left'
-                }`}>
+                <div className={`
+                  mt-6 mb-4 mx-auto
+                  w-[80vw] max-w-[480px]
+                  p-6 bg-yellow-100 rounded-xl border border-yellow-200
+                  ${lang === 'ar' ? 'text-right' : 'text-left'}
+                `}>
                   <div className={`flex items-center gap-2 mb-3 ${
                     lang === 'ar' ? 'flex-row-reverse' : 'flex-row'
                   }`}>
