@@ -54,12 +54,9 @@ function validateApiToken(req: any, res: any, next: any) {
 function validateInput(schema: z.ZodSchema) {
   return (req: any, res: any, next: any) => {
     try {
-      console.log("DEBUG: Validating request body:", req.body);
       req.validatedData = schema.parse(req.body);
-      console.log("DEBUG: Validation successful:", req.validatedData);
       next();
     } catch (error) {
-      console.log("DEBUG: Validation failed:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
           error: "Invalid request data", 
@@ -445,11 +442,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     validateApiToken,
     validateInput(completeTaskSchema),
     async (req: any, res) => {
-      console.log("DEBUG: Milestone completion endpoint hit!");
       try {
         const { user_id, campaign_id, day_number, milestone_id } = req.validatedData;
-        
-        console.log("Milestone completion request:", { user_id, campaign_id, day_number, milestone_id });
 
         // Auto-create user if they don't exist
         let user = await storage.getUser(user_id);
@@ -459,9 +453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Verify campaign exists and is active
         const campaign = await storage.getCampaign(campaign_id);
-        console.log("Found campaign:", campaign);
         if (!campaign || !campaign.is_active) {
-          console.log("Campaign validation failed - campaign:", campaign, "is_active:", campaign?.is_active);
           return res.status(400).json({ error: "Invalid or inactive campaign" });
         }
 
