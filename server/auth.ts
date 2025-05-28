@@ -39,6 +39,7 @@ declare module "express-session" {
 
 export interface AuthenticatedRequest extends Request {
   adminUser?: AdminUser;
+  validatedData?: any;
 }
 
 export async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
