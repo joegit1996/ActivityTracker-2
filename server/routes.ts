@@ -451,9 +451,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           user = await storage.createUser({ name: `User ${user_id}` });
         }
 
-        // Verify active campaign
-        const activeCampaign = await storage.getActiveCampaign();
-        if (!activeCampaign || activeCampaign.id !== campaign_id) {
+        // Verify campaign exists and is active
+        const campaign = await storage.getCampaign(campaign_id);
+        if (!campaign || !campaign.is_active) {
           return res.status(400).json({ error: "Invalid or inactive campaign" });
         }
 
@@ -469,8 +469,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Calculate which days are fully completed (all milestones for that day done)
         const fullyCompletedDays = new Set<number>();
         
-        for (let day = 1; day <= activeCampaign.total_days; day++) {
-          const dayMilestones = await storage.getMilestonesByDay(activeCampaign.id, day);
+        for (let day = 1; day <= campaign.total_days; day++) {
+          const dayMilestones = await storage.getMilestonesByDay(campaign.id, day);
           const dayCompletions = userCompletions.filter(c => c.day_number === day);
           
           // Check if ALL specific milestones for this day are completed
@@ -485,7 +485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         const completedDays = fullyCompletedDays.size;
-        const currentDay = Math.min(completedDays + 1, activeCampaign.total_days);
+        const currentDay = Math.min(completedDays + 1, campaign.total_days);
 
         if (day_number !== currentDay) {
           return res.status(400).json({ error: "Can only complete milestones for current day" });
@@ -508,13 +508,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get updated progress
         const updatedCompletions = await storage.getUserCompletions(user_id, campaign_id);
         const updatedCompletedDays = new Set(updatedCompletions.map(c => c.day_number)).size;
-        const updatedPercentage = Math.round((updatedCompletedDays / activeCampaign.total_days) * 100);
+        const updatedPercentage = Math.round((updatedCompletedDays / campaign.total_days) * 100);
 
         res.json({
           success: true,
           completion,
           progress: {
-            currentDay: Math.min(updatedCompletedDays + 1, activeCampaign.total_days),
+            currentDay: Math.min(updatedCompletedDays + 1, campaign.total_days),
             completedDays: updatedCompletedDays,
             percentage: updatedPercentage
           }
