@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import Progress from "@/pages/progress";
 import Admin from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
+import WebViewDemo from "@/pages/webview-demo";
 
 // Component to handle language detection and routing
 function LanguageRouter() {
@@ -40,6 +41,9 @@ function LanguageRouter() {
       {/* Language-aware routes */}
       <Route path="/:lang/progress/:userId" component={Progress} />
       <Route path="/:lang/admin" component={Admin} />
+      
+      {/* Demo route */}
+      <Route path="/webview-demo" component={WebViewDemo} />
       
       {/* Admin authentication routes (no language prefix needed) */}
       <Route path="/admin/login" component={AdminLogin} />
