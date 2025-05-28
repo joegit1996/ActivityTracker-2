@@ -11,8 +11,6 @@
     "daysCompleted": "days completed",
     "streakReminders": "Streak Reminders",
     "streakRemindersDesc": "Get notified to maintain your streak",
-    "streakRemindersWebview": "Notifications managed by your app",
-    "webviewMode": "WebView Mode",
     "dayCompleted": "Day {{number}} Completed",
     "completedOn": "Completed on {{date}}",
     "currentDayTasks": "Current Day Tasks",

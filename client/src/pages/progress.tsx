@@ -6,14 +6,13 @@ import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Trophy, Bell, Lock, CheckCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { useEffect } from "react";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useState, useEffect } from "react";
 import type { ProgressResponse } from "@/lib/types";
 
 export default function Progress() {
   const { userId, lang } = useParams();
   const { t, i18n } = useTranslation();
-  const { notificationsEnabled, toggleNotifications, isWebView } = useNotifications();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   // Set language and HTML attributes based on URL
   useEffect(() => {
@@ -112,25 +111,12 @@ export default function Progress() {
               </div>
               <div>
                 <h4 className="font-medium text-gray-900 text-sm">{t('progress.streakReminders')}</h4>
-                <p className="text-gray-600 text-xs">
-                  {isWebView 
-                    ? t('progress.streakRemindersWebview') 
-                    : t('progress.streakRemindersDesc')
-                  }
-                </p>
-                {isWebView && (
-                  <div className="flex items-center mt-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    <span className="text-xs text-green-600 font-medium">
-                      {t('progress.webviewMode')}
-                    </span>
-                  </div>
-                )}
+                <p className="text-gray-600 text-xs">{t('progress.streakRemindersDesc')}</p>
               </div>
             </div>
             <Switch
               checked={notificationsEnabled}
-              onCheckedChange={toggleNotifications}
+              onCheckedChange={setNotificationsEnabled}
             />
           </div>
         </div>

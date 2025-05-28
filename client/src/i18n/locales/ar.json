@@ -11,8 +11,6 @@
     "daysCompleted": "أيام مكتملة",
     "streakReminders": "تذكيرات السلسلة",
     "streakRemindersDesc": "احصل على إشعارات للحفاظ على سلسلتك",
-    "streakRemindersWebview": "التنبيهات تديرها التطبيق الخاص بك",
-    "webviewMode": "وضع العرض المدمج",
     "dayCompleted": "اليوم {{number}} مكتمل",
     "completedOn": "مكتمل في {{date}}",
     "currentDayTasks": "مهام اليوم الحالي",
