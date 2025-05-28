@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: integer("id").primaryKey(),
   name: text("name").notNull(),
   language: text("language").default("en").notNull(),
 });
@@ -88,9 +88,7 @@ export const milestoneCompletionsRelations = relations(milestone_completions, ({
 }));
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-});
+export const insertUserSchema = createInsertSchema(users);
 
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   id: true,

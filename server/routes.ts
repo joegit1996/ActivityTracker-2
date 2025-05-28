@@ -445,11 +445,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { user_id, campaign_id, day_number, milestone_id } = req.validatedData;
 
-        // Auto-create user if they don't exist
+        // Auto-create user if they don't exist (using exact user_id)
         let user = await storage.getUser(user_id);
         if (!user) {
-          user = await storage.createUser({ name: `User ${user_id}` });
-          // Note: user.id will be auto-assigned, but we use the provided user_id for completions
+          user = await storage.createUserWithId(user_id, `User ${user_id}`);
         }
 
         // Verify campaign exists and is active

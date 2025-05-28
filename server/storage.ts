@@ -13,6 +13,7 @@ export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  createUserWithId(id: number, name: string): Promise<User>;
 
   // Campaigns
   getActiveCampaign(): Promise<Campaign | undefined>;
@@ -53,6 +54,14 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async createUserWithId(id: number, name: string): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({ id, name, language: "en" })
       .returning();
     return user;
   }
