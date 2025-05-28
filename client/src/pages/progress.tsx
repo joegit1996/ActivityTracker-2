@@ -90,9 +90,13 @@ export default function Progress() {
             <span className="text-gray-600 text-sm">{progress.percentage}% {t('progress.complete')}</span>
           </div>
           
-          <div className={`flex justify-between items-center mb-2 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
-            <span className="text-xs text-gray-500">{t('progress.dayLabel')} 1</span>
-            <span className="text-xs text-gray-500">{t('progress.dayLabel')} {campaign.totalDays}</span>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs text-gray-500">
+              {lang === 'ar' ? `${t('progress.dayLabel')} ${campaign.totalDays}` : `${t('progress.dayLabel')} 1`}
+            </span>
+            <span className="text-xs text-gray-500">
+              {lang === 'ar' ? `${t('progress.dayLabel')} 1` : `${t('progress.dayLabel')} ${campaign.totalDays}`}
+            </span>
           </div>
           
           <ProgressBar value={progress.percentage} className={`w-full h-2 ${lang === 'ar' ? 'transform scale-x-[-1]' : ''}`} />
