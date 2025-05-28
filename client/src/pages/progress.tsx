@@ -287,31 +287,31 @@ export default function Progress() {
 
       {/* Reward Modal */}
       <Dialog open={showRewardModal} onOpenChange={setShowRewardModal}>
-        <DialogContent className="max-w-xs mx-auto bg-white rounded-2xl border-0 shadow-2xl p-6 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
-          <DialogHeader className="text-center space-y-3 pb-3">
-            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
-              <Trophy className="w-8 h-8 text-yellow-600" />
+        <DialogContent className="max-w-sm mx-auto bg-white rounded-2xl border-0 shadow-2xl">
+          <DialogHeader className="text-center space-y-4 pb-4">
+            <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
+              <Trophy className="w-10 h-10 text-yellow-600" />
             </div>
-            <DialogTitle className="text-xl font-bold text-gray-900">
+            <DialogTitle className="text-2xl font-bold text-gray-900">
               {t('progress.congratulations')}
             </DialogTitle>
           </DialogHeader>
           
-          <div className="text-center space-y-3">
-            <p className="text-gray-600 text-sm">
+          <div className="text-center space-y-4">
+            <p className="text-gray-600">
               {campaign.reward.title}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm text-gray-500">
               {campaign.reward.description}
             </p>
             
             {/* Display reward code if available */}
             {(campaign as any).rewardCode && (
-              <div className="bg-gray-50 rounded-lg p-3 mt-3">
-                <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">
+              <div className="bg-gray-50 rounded-xl p-4 mt-4">
+                <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">
                   {t('progress.rewardCode')}
                 </p>
-                <p className="text-sm font-mono font-semibold text-gray-900 break-words">
+                <p className="text-lg font-mono font-semibold text-gray-900 break-words">
                   {(campaign as any).rewardCode}
                 </p>
               </div>
@@ -319,7 +319,7 @@ export default function Progress() {
             
             <Button
               onClick={() => setShowRewardModal(false)}
-              className="w-full bg-primary text-white font-medium py-2.5 px-4 rounded-lg hover:bg-primary/90 transition-colors mt-4"
+              className="w-full bg-primary text-white font-medium py-3 px-4 rounded-xl hover:bg-primary/90 transition-colors mt-6"
             >
               {t('common.close')}
             </Button>
