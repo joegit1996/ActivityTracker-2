@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -41,6 +41,15 @@ export const milestone_completions = pgTable("milestone_completions", {
   day_number: integer("day_number").notNull(),
   milestone_id: integer("milestone_id").notNull(),
   completed_at: timestamp("completed_at").defaultNow().notNull(),
+});
+
+// Admins table for authentication
+export const admins = pgTable("admins", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 50 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(), // bcrypt hashed password
+  role: varchar("role", { length: 20 }).notNull().default("editor"), // superadmin, editor
+  created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
 // Relations
@@ -94,6 +103,11 @@ export const insertMilestoneCompletionSchema = createInsertSchema(milestone_comp
   completed_at: true,
 });
 
+export const insertAdminSchema = createInsertSchema(admins).omit({
+  id: true,
+  created_at: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -106,6 +120,9 @@ export type InsertMilestone = z.infer<typeof insertMilestoneSchema>;
 
 export type MilestoneCompletion = typeof milestone_completions.$inferSelect;
 export type InsertMilestoneCompletion = z.infer<typeof insertMilestoneCompletionSchema>;
+
+export type Admin = typeof admins.$inferSelect;
+export type InsertAdmin = z.infer<typeof insertAdminSchema>;
 
 // API schemas
 export const completeTaskSchema = z.object({
