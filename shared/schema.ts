@@ -1,9 +1,9 @@
-import { mysqlTable, text, serial, int, boolean, timestamp } from "drizzle-orm/mysql-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = mysqlTable("users", {
+export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   language: text("language").default("en").notNull(),
@@ -43,6 +43,15 @@ export const milestone_completions = pgTable("milestone_completions", {
   completed_at: timestamp("completed_at").defaultNow().notNull(),
 });
 
+export const admin_users = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 255 }).notNull().unique(),
+  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
 export const campaignsRelations = relations(campaigns, ({ many }) => ({
   milestones: many(milestones),
@@ -76,6 +85,8 @@ export const milestoneCompletionsRelations = relations(milestone_completions, ({
   }),
 }));
 
+export const adminUsersRelations = relations(admin_users, ({ many }) => ({}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -94,6 +105,12 @@ export const insertMilestoneCompletionSchema = createInsertSchema(milestone_comp
   completed_at: true,
 });
 
+export const insertAdminUserSchema = createInsertSchema(admin_users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -107,6 +124,9 @@ export type InsertMilestone = z.infer<typeof insertMilestoneSchema>;
 export type MilestoneCompletion = typeof milestone_completions.$inferSelect;
 export type InsertMilestoneCompletion = z.infer<typeof insertMilestoneCompletionSchema>;
 
+export type AdminUser = typeof admin_users.$inferSelect;
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+
 // API schemas
 export const completeTaskSchema = z.object({
   user_id: z.number(),
@@ -116,3 +136,17 @@ export const completeTaskSchema = z.object({
 });
 
 export type CompleteTaskRequest = z.infer<typeof completeTaskSchema>;
+
+// Auth schemas
+export const adminLoginSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export const createAdminSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export type AdminLoginRequest = z.infer<typeof adminLoginSchema>;
+export type CreateAdminRequest = z.infer<typeof createAdminSchema>;

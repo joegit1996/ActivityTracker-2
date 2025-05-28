@@ -1,9 +1,10 @@
 import { 
-  users, campaigns, milestones, milestone_completions,
+  users, campaigns, milestones, milestone_completions, admin_users,
   type User, type InsertUser,
   type Campaign, type InsertCampaign,
   type Milestone, type InsertMilestone,
-  type MilestoneCompletion, type InsertMilestoneCompletion
+  type MilestoneCompletion, type InsertMilestoneCompletion,
+  type AdminUser, type InsertAdminUser
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -35,6 +36,14 @@ export interface IStorage {
   getAllCompletions(): Promise<MilestoneCompletion[]>;
   completeMilestone(completion: InsertMilestoneCompletion): Promise<MilestoneCompletion>;
   isTaskCompleted(userId: number, milestoneId: number): Promise<boolean>;
+
+  // Admin Users
+  getAdminByUsername(username: string): Promise<AdminUser | undefined>;
+  createAdminUser(admin: InsertAdminUser): Promise<AdminUser>;
+  getAllAdminUsers(): Promise<AdminUser[]>;
+  updateAdminUser(id: number, admin: Partial<InsertAdminUser>): Promise<AdminUser>;
+  deleteAdminUser(id: number): Promise<void>;
+  countAdminUsers(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -185,6 +194,44 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return !!completion;
+  }
+
+  // Admin Users
+  async getAdminByUsername(username: string): Promise<AdminUser | undefined> {
+    const [admin] = await db.select().from(admin_users).where(eq(admin_users.username, username));
+    return admin || undefined;
+  }
+
+  async createAdminUser(insertAdmin: InsertAdminUser): Promise<AdminUser> {
+    const [admin] = await db
+      .insert(admin_users)
+      .values(insertAdmin)
+      .returning();
+    return admin;
+  }
+
+  async getAllAdminUsers(): Promise<AdminUser[]> {
+    return await db.select().from(admin_users).where(eq(admin_users.isActive, true));
+  }
+
+  async updateAdminUser(id: number, updateData: Partial<InsertAdminUser>): Promise<AdminUser> {
+    const [admin] = await db
+      .update(admin_users)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(admin_users.id, id))
+      .returning();
+    return admin;
+  }
+
+  async deleteAdminUser(id: number): Promise<void> {
+    await db.update(admin_users)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(admin_users.id, id));
+  }
+
+  async countAdminUsers(): Promise<number> {
+    const result = await db.select().from(admin_users).where(eq(admin_users.isActive, true));
+    return result.length;
   }
 }
 

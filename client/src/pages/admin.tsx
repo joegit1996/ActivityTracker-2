@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +14,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertCampaignSchema, insertMilestoneSchema } from "@shared/schema";
+import { insertCampaignSchema, insertMilestoneSchema, createAdminSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Settings, Users, Trophy, CheckCircle } from "lucide-react";
+import { Plus, Edit, Trash2, Settings, Users, Trophy, CheckCircle, LogOut, Lock } from "lucide-react";
 import { z } from "zod";
+import { useAuth } from "@/hooks/useAuth";
 
 const campaignFormSchema = insertCampaignSchema.extend({
   total_days: z.number().min(1).max(365),
@@ -43,11 +44,33 @@ const milestoneFormSchema = insertMilestoneSchema.extend({
 
 export default function Admin() {
   const { lang } = useParams();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedCampaign, setSelectedCampaign] = useState<number | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<any>(null);
   const [editingMilestone, setEditingMilestone] = useState<any>(null);
+  
+  // Authentication check
+  const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
+  
+  // Redirect to login if not authenticated
+  if (!authLoading && !isAuthenticated) {
+    setLocation("/admin/login");
+    return null;
+  }
+  
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-8 w-8 mx-auto mb-4 text-primary animate-pulse" />
+          <p>Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Queries
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
@@ -409,9 +432,18 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Activity Streak Admin</h1>
-          <p className="text-gray-600">Manage campaigns, milestones, and view completion data</p>
+        <div className="flex justify-between items-center">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold text-gray-900">Activity Streak Admin</h1>
+            <p className="text-gray-600">Manage campaigns, milestones, and view completion data</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-600">Welcome, {user?.username}</span>
+            <Button variant="outline" onClick={logout} className="flex items-center space-x-2">
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
