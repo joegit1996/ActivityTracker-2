@@ -9,6 +9,25 @@ import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
 import type { ProgressResponse } from "@/lib/types";
 
+// Type declarations for native app bridges
+declare global {
+  interface Window {
+    webkit?: {
+      messageHandlers?: {
+        notificationSettings?: {
+          postMessage: (message: any) => void;
+        };
+      };
+    };
+    AndroidInterface?: {
+      openNotificationSettings: () => void;
+    };
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
+
 export default function Progress() {
   const { userId, lang } = useParams();
   const { t, i18n } = useTranslation();
@@ -22,6 +41,41 @@ export default function Progress() {
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     }
   }, [lang, i18n]);
+
+  // Handle notification toggle with native app bridge
+  const handleNotificationToggle = (enabled: boolean) => {
+    if (enabled) {
+      // Try to communicate with native app to open notification settings
+      try {
+        // iOS WebKit bridge
+        if ((window as any).webkit?.messageHandlers?.notificationSettings) {
+          (window as any).webkit.messageHandlers.notificationSettings.postMessage({
+            action: 'openSettings',
+            type: 'notifications'
+          });
+        }
+        // Android bridge
+        else if ((window as any).AndroidInterface?.openNotificationSettings) {
+          (window as any).AndroidInterface.openNotificationSettings();
+        }
+        // React Native bridge
+        else if ((window as any).ReactNativeWebView) {
+          (window as any).ReactNativeWebView.postMessage(JSON.stringify({
+            action: 'openNotificationSettings'
+          }));
+        }
+        // Fallback - show message if no bridge available
+        else {
+          console.log('No native bridge available - running in regular browser');
+          // In a real app, you might want to show a toast message here
+        }
+      } catch (error) {
+        console.error('Failed to communicate with native app:', error);
+      }
+    }
+    
+    setNotificationsEnabled(enabled);
+  };
   
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
     queryKey: ["/api/progress", userId, lang],
@@ -116,7 +170,7 @@ export default function Progress() {
             </div>
             <Switch
               checked={notificationsEnabled}
-              onCheckedChange={setNotificationsEnabled}
+              onCheckedChange={handleNotificationToggle}
             />
           </div>
         </div>
