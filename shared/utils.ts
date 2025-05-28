@@ -11,7 +11,8 @@ export function getLocalizedCampaign(campaign: Campaign, language: SupportedLang
     reward: {
       title: language === 'ar' ? campaign.reward_title_ar : campaign.reward_title_en,
       description: language === 'ar' ? campaign.reward_description_ar : campaign.reward_description_en
-    }
+    },
+    rewardCode: language === 'ar' ? (campaign as any).reward_code_ar : (campaign as any).reward_code_en
   };
 }
 
