@@ -53,27 +53,21 @@ export default function Admin() {
 
   // Queries
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
-    queryKey: ["/api/admin/campaigns"],
+    queryKey: ["/admin/campaigns"],
   });
 
   const { data: milestones = [] } = useQuery({
-    queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`],
+    queryKey: [`/admin/campaigns/${selectedCampaign}/milestones`],
     enabled: !!selectedCampaign,
   });
 
-  const { data: completions = [] } = useQuery({
-    queryKey: ["/api/admin/completions"],
-  });
 
-  const { data: campaignCompletions = [] } = useQuery({
-    queryKey: ["/api/admin/campaign-completions"],
-  });
 
   // Campaign mutations
   const createCampaignMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/admin/campaigns", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/campaigns", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/campaigns"] });
       toast({ title: "Campaign created successfully!" });
       setEditingCampaign(null);
     },
@@ -81,27 +75,27 @@ export default function Admin() {
 
   const updateCampaignMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest("PUT", `/api/admin/campaigns/${id}`, data),
+      apiRequest("PUT", `/api/campaigns/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/campaigns"] });
       toast({ title: "Campaign updated successfully!" });
       setEditingCampaign(null);
     },
   });
 
   const deleteCampaignMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/campaigns/${id}`),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/campaigns/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/campaigns"] });
       toast({ title: "Campaign deleted successfully!" });
     },
   });
 
   // Milestone mutations
   const createMilestoneMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/admin/milestones", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/milestones", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`] });
+      queryClient.invalidateQueries({ queryKey: [`/admin/campaigns/${selectedCampaign}/milestones`] });
       toast({ title: "Milestone created successfully!" });
       setEditingMilestone(null);
     },
@@ -109,18 +103,18 @@ export default function Admin() {
 
   const updateMilestoneMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest("PUT", `/api/admin/milestones/${id}`, data),
+      apiRequest("PUT", `/api/milestones/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`] });
+      queryClient.invalidateQueries({ queryKey: [`/admin/campaigns/${selectedCampaign}/milestones`] });
       toast({ title: "Milestone updated successfully!" });
       setEditingMilestone(null);
     },
   });
 
   const deleteMilestoneMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/milestones/${id}`),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/milestones/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`] });
+      queryClient.invalidateQueries({ queryKey: [`/admin/campaigns/${selectedCampaign}/milestones`] });
       toast({ title: "Milestone deleted successfully!" });
     },
   });
@@ -326,7 +320,7 @@ export default function Admin() {
     const form = useForm({
       resolver: zodResolver(milestoneFormSchema),
       defaultValues: milestone || {
-        campaign_id: selectedCampaign,
+        campaign_id: selectedCampaign || 1,
         day_number: 1,
         title_en: "",
         title_ar: "",
@@ -468,7 +462,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="campaigns" className="flex items-center space-x-2">
               <Trophy className="w-4 h-4" />
               <span>Campaigns</span>
@@ -476,14 +470,6 @@ export default function Admin() {
             <TabsTrigger value="milestones" className="flex items-center space-x-2">
               <Settings className="w-4 h-4" />
               <span>Milestones</span>
-            </TabsTrigger>
-            <TabsTrigger value="completions" className="flex items-center space-x-2">
-              <Users className="w-4 h-4" />
-              <span>Task Completions</span>
-            </TabsTrigger>
-            <TabsTrigger value="campaign-completions" className="flex items-center space-x-2">
-              <CheckCircle className="w-4 h-4" />
-              <span>Campaign Winners</span>
             </TabsTrigger>
           </TabsList>
 
@@ -649,66 +635,6 @@ export default function Admin() {
                 ))}
               </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="completions" className="space-y-4">
-            <h2 className="text-xl font-semibold">Completion Data</h2>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {completions.length === 0 ? (
-                    <p className="text-center text-gray-500">No completion data available</p>
-                  ) : (
-                    completions.map((completion: any) => (
-                      <div key={completion.id} className="flex items-center justify-between p-3 border rounded">
-                        <div>
-                          <p className="font-medium">
-                            User {completion.user_id} - Campaign {completion.campaign_id}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Day {completion.day_number}, Milestone {completion.milestone_id}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Completed: {new Date(completion.completed_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="campaign-completions" className="space-y-4">
-            <h2 className="text-xl font-semibold">Campaign Winners</h2>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {campaignCompletions.length === 0 ? (
-                    <p className="text-center text-gray-500">No users have completed entire campaigns yet</p>
-                  ) : (
-                    (campaignCompletions as any[]).map((completion: any) => (
-                      <div key={completion.id} className="flex items-center justify-between p-4 border rounded-lg bg-green-50 border-green-200">
-                        <div>
-                          <p className="font-bold text-green-800">
-                            🏆 User {completion.user_id} completed Campaign {completion.campaign_id}
-                          </p>
-                          <p className="text-sm text-green-700">
-                            Finished all milestones and earned the reward
-                          </p>
-                          <p className="text-xs text-green-600">
-                            Completed: {new Date(completion.completed_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <Trophy className="w-8 h-8 text-yellow-500" />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </div>

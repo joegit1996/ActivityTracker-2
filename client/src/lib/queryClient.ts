@@ -18,8 +18,8 @@ export async function apiRequest(
     headers["Content-Type"] = "application/json";
   }
   
-  // Add JWT token for admin routes
-  if (url.startsWith("/api/admin/")) {
+  // Add JWT token for admin routes and API routes that require authentication
+  if (url.startsWith("/admin/") || url.startsWith("/api/campaigns") || url.startsWith("/api/milestones")) {
     const token = localStorage.getItem("adminToken");
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -46,8 +46,8 @@ export const getQueryFn: <T>(options: {
     const url = queryKey[0] as string;
     const headers: Record<string, string> = {};
     
-    // Add JWT token for admin routes
-    if (url.startsWith("/api/admin/")) {
+    // Add JWT token for admin routes and API routes that require authentication
+    if (url.startsWith("/admin/") || url.startsWith("/api/campaigns") || url.startsWith("/api/milestones")) {
       const token = localStorage.getItem("adminToken");
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;

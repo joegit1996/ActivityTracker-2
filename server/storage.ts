@@ -58,15 +58,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await db
+    const [result] = await db
       .insert(users)
-      .values(insertUser);
+      .values(insertUser)
+      .$returningId();
     
-    // MySQL doesn't support returning, so we fetch the inserted record
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.id, Number((result as any).insertId)));
+      .where(eq(users.id, result.id));
     return user;
   }
 
@@ -98,14 +98,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCampaign(insertCampaign: InsertCampaign): Promise<Campaign> {
-    const result = await db
+    const [result] = await db
       .insert(campaigns)
-      .values(insertCampaign);
+      .values(insertCampaign)
+      .$returningId();
     
     const [campaign] = await db
       .select()
       .from(campaigns)
-      .where(eq(campaigns.id, Number((result as any).insertId)));
+      .where(eq(campaigns.id, result.id));
     return campaign;
   }
 
@@ -153,14 +154,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMilestone(insertMilestone: InsertMilestone): Promise<Milestone> {
-    const result = await db
+    const [result] = await db
       .insert(milestones)
-      .values(insertMilestone);
+      .values(insertMilestone)
+      .$returningId();
     
     const [milestone] = await db
       .select()
       .from(milestones)
-      .where(eq(milestones.id, Number((result as any).insertId)));
+      .where(eq(milestones.id, result.id));
     return milestone;
   }
 
@@ -219,10 +221,13 @@ export class DatabaseStorage implements IStorage {
       .insert(milestone_completions)
       .values(insertCompletion);
     
+    // For MySQL, use the raw connection to get insertId
+    const insertId = (result as any).insertId;
+    
     const [completion] = await db
       .select()
       .from(milestone_completions)
-      .where(eq(milestone_completions.id, Number((result as any).insertId)));
+      .where(eq(milestone_completions.id, insertId));
     return completion;
   }
 
@@ -249,14 +254,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAdmin(insertAdmin: InsertAdmin): Promise<Admin> {
-    const result = await db
+    const [result] = await db
       .insert(admins)
-      .values(insertAdmin);
+      .values(insertAdmin)
+      .$returningId();
     
     const [admin] = await db
       .select()
       .from(admins)
-      .where(eq(admins.id, Number((result as any).insertId)));
+      .where(eq(admins.id, result.id));
     return admin;
   }
 
@@ -281,14 +287,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markCampaignComplete(userId: number, campaignId: number): Promise<CampaignCompletion> {
-    const result = await db
+    const [result] = await db
       .insert(campaign_completions)
-      .values({ user_id: userId, campaign_id: campaignId });
+      .values({ user_id: userId, campaign_id: campaignId })
+      .$returningId();
     
     const [completion] = await db
       .select()
       .from(campaign_completions)
-      .where(eq(campaign_completions.id, Number((result as any).insertId)));
+      .where(eq(campaign_completions.id, result.id));
     return completion;
   }
 
