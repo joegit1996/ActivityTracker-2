@@ -68,8 +68,17 @@ export default function Progress() {
     enabled: !!userId,
   });
 
+  // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY EARLY RETURNS
+  
   // Animated counter for percentage (always call hooks at top level)
   const animatedPercentage = useAnimatedCounter(progressData?.progress?.percentage || 0, 500);
+
+  // Trigger animations when data loads
+  useEffect(() => {
+    if (progressData && !animationsTriggered) {
+      setAnimationsTriggered(true);
+    }
+  }, [progressData, animationsTriggered]);
 
   // Check if all milestones are completed and show reward modal (must be before early returns)
   const isCompleted = progressData ? progressData.progress.percentage === 100 && progressData.progress.currentDay > progressData.campaign.totalDays : false;
@@ -157,13 +166,6 @@ export default function Progress() {
   }
 
   const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
-
-  // Trigger animations when data loads
-  useEffect(() => {
-    if (progressData && !animationsTriggered) {
-      setAnimationsTriggered(true);
-    }
-  }, [progressData, animationsTriggered]);
 
   return (
     <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto overflow-x-hidden w-full">
