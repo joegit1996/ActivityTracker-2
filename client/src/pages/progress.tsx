@@ -42,42 +42,46 @@ export default function Progress() {
   useEffect(() => {
     if (isCompleted && progressData) {
       // Trigger confetti animation when all milestones are completed
-      const duration = 3000;
-      const animationEnd = Date.now() + duration;
-      
-      const randomInRange = (min: number, max: number) => {
-        return Math.random() * (max - min) + min;
-      };
-      
-      const confettiInterval = setInterval(() => {
-        const timeLeft = animationEnd - Date.now();
+      try {
+        const duration = 3000;
+        const animationEnd = Date.now() + duration;
         
-        if (timeLeft <= 0) {
-          clearInterval(confettiInterval);
-          return;
-        }
+        const randomInRange = (min: number, max: number) => {
+          return Math.random() * (max - min) + min;
+        };
         
-        const particleCount = 50 * (timeLeft / duration);
-        
-        confetti({
-          particleCount,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#0079F2', '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1']
-        });
-        
-        confetti({
-          particleCount,
-          spread: 70,
-          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-        });
-        
-        confetti({
-          particleCount,
-          spread: 70,
-          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-        });
-      }, 250);
+        const confettiInterval = setInterval(() => {
+          const timeLeft = animationEnd - Date.now();
+          
+          if (timeLeft <= 0) {
+            clearInterval(confettiInterval);
+            return;
+          }
+          
+          const particleCount = 50 * (timeLeft / duration);
+          
+          confetti({
+            particleCount,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#0079F2', '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1']
+          });
+          
+          confetti({
+            particleCount,
+            spread: 70,
+            origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+          });
+          
+          confetti({
+            particleCount,
+            spread: 70,
+            origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+          });
+        }, 250);
+      } catch (error) {
+        console.warn('Confetti animation failed:', error);
+      }
     }
   }, [isCompleted, progressData]);
 
