@@ -61,13 +61,7 @@ export default function Admin() {
     enabled: !!selectedCampaign,
   });
 
-  const { data: completions = [] } = useQuery({
-    queryKey: ["/admin/completions"],
-  });
 
-  const { data: campaignCompletions = [] } = useQuery({
-    queryKey: ["/admin/campaign-completions"],
-  });
 
   // Campaign mutations
   const createCampaignMutation = useMutation({
@@ -468,7 +462,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="campaigns" className="flex items-center space-x-2">
               <Trophy className="w-4 h-4" />
               <span>Campaigns</span>
@@ -476,14 +470,6 @@ export default function Admin() {
             <TabsTrigger value="milestones" className="flex items-center space-x-2">
               <Settings className="w-4 h-4" />
               <span>Milestones</span>
-            </TabsTrigger>
-            <TabsTrigger value="completions" className="flex items-center space-x-2">
-              <Users className="w-4 h-4" />
-              <span>Task Completions</span>
-            </TabsTrigger>
-            <TabsTrigger value="campaign-completions" className="flex items-center space-x-2">
-              <CheckCircle className="w-4 h-4" />
-              <span>Campaign Winners</span>
             </TabsTrigger>
           </TabsList>
 
@@ -649,66 +635,6 @@ export default function Admin() {
                 ))}
               </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="completions" className="space-y-4">
-            <h2 className="text-xl font-semibold">Completion Data</h2>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {completions.length === 0 ? (
-                    <p className="text-center text-gray-500">No completion data available</p>
-                  ) : (
-                    completions.map((completion: any) => (
-                      <div key={completion.id} className="flex items-center justify-between p-3 border rounded">
-                        <div>
-                          <p className="font-medium">
-                            User {completion.user_id} - Campaign {completion.campaign_id}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Day {completion.day_number}, Milestone {completion.milestone_id}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Completed: {new Date(completion.completed_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="campaign-completions" className="space-y-4">
-            <h2 className="text-xl font-semibold">Campaign Winners</h2>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {campaignCompletions.length === 0 ? (
-                    <p className="text-center text-gray-500">No users have completed entire campaigns yet</p>
-                  ) : (
-                    (campaignCompletions as any[]).map((completion: any) => (
-                      <div key={completion.id} className="flex items-center justify-between p-4 border rounded-lg bg-green-50 border-green-200">
-                        <div>
-                          <p className="font-bold text-green-800">
-                            🏆 User {completion.user_id} completed Campaign {completion.campaign_id}
-                          </p>
-                          <p className="text-sm text-green-700">
-                            Finished all milestones and earned the reward
-                          </p>
-                          <p className="text-xs text-green-600">
-                            Completed: {new Date(completion.completed_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <Trophy className="w-8 h-8 text-yellow-500" />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </div>
