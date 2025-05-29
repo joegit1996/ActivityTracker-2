@@ -47,7 +47,7 @@ ENV NODE_ENV=production
 ENV PORT=5000
 
 # Expose port (configurable via environment)
-EXPOSE $PORT
+EXPOSE ${PORT}
 
 # Switch to non-root user
 USER activityapp

@@ -95,6 +95,22 @@ docker build -t activity-streak-app .
 ```bash
 docker run -p 80:5000 \
   -e NODE_ENV=production \
+  -e PORT=5000 \
+  -e DB_HOST=your-production-db \
+  -e DB_USER=your-db-user \
+  -e DB_PASSWORD=your-db-password \
+  -e DB_NAME=your-db-name \
+  -e SESSION_SECRET=your-session-secret \
+  -e JWT_SECRET=your-jwt-secret \
+  -e WEBHOOK_TOKEN=your-webhook-token \
+  activity-streak-app
+```
+
+### Running on Different Port
+```bash
+docker run -p 8080:8080 \
+  -e PORT=8080 \
+  -e NODE_ENV=production \
   -e DB_HOST=your-production-db \
   -e DB_USER=your-db-user \
   -e DB_PASSWORD=your-db-password \
@@ -119,9 +135,9 @@ The Docker container includes a health check endpoint at `/api/health` that moni
 - `POST /api/complete-task` - Complete a milestone (webhook with token authentication)
 
 ### Admin Authentication
-- `POST /api/login` - Admin login (returns JWT token)
-- `POST /api/logout` - Admin logout (blacklists token)
-- `GET /api/me` - Get current admin info
+- `POST /api/admin/login` - Admin login (returns JWT token)
+- `POST /api/admin/logout` - Admin logout (blacklists token)
+- `GET /api/admin/me` - Get current admin info
 
 ### Admin Panel APIs (require JWT authentication)
 - `GET /api/admin/campaigns` - List all campaigns
