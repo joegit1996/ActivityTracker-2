@@ -135,21 +135,21 @@ The Docker container includes a health check endpoint at `/api/health` that moni
 - `POST /api/complete-task` - Complete a milestone (webhook with token authentication)
 
 ### Admin Authentication
-- `POST /api/admin/login` - Admin login (returns JWT token)
-- `POST /api/admin/logout` - Admin logout (blacklists token)
-- `GET /api/admin/me` - Get current admin info
+- `POST /admin/login` - Admin login (returns JWT token)
+- `POST /admin/logout` - Admin logout (blacklists token)
+- `GET /admin/me` - Get current admin info
 
 ### Admin Panel APIs (require JWT authentication)
-- `GET /api/admin/campaigns` - List all campaigns
-- `POST /api/admin/campaigns` - Create new campaign
-- `PUT /api/admin/campaigns/:id` - Update campaign
-- `DELETE /api/admin/campaigns/:id` - Delete campaign
-- `GET /api/admin/milestones/:campaignId` - Get campaign milestones
-- `POST /api/admin/milestones` - Create milestone
-- `PUT /api/admin/milestones/:id` - Update milestone
-- `DELETE /api/admin/milestones/:id` - Delete milestone
-- `GET /api/admin/completions` - View all milestone completions
-- `GET /api/admin/campaign-completions` - View campaign winners
+- `GET /admin/campaigns` - List all campaigns
+- `POST /admin/campaigns` - Create new campaign
+- `PUT /admin/campaigns/:id` - Update campaign
+- `DELETE /admin/campaigns/:id` - Delete campaign
+- `GET /admin/milestones/:campaignId` - Get campaign milestones
+- `POST /admin/milestones` - Create milestone
+- `PUT /admin/milestones/:id` - Update milestone
+- `DELETE /admin/milestones/:id` - Delete milestone
+- `GET /admin/completions` - View all milestone completions
+- `GET /admin/campaign-completions` - View campaign winners
 
 ## Database Schema
 
