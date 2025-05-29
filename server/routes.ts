@@ -586,10 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/milestones", 
-    authenticateToken,
-    validateInput(insertMilestoneSchema),
-    async (req: any, res) => {
+  app.post("/api/milestones", authenticateToken, validateInput(insertMilestoneSchema), async (req: any, res) => {
     try {
       const milestone = await storage.createMilestone(req.validatedData);
       res.json(milestone);
