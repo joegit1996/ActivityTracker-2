@@ -222,7 +222,7 @@ export class DatabaseStorage implements IStorage {
     const [completion] = await db
       .select()
       .from(milestone_completions)
-      .where(eq(milestone_completions.id, Number(result[0].insertId)));
+      .where(eq(milestone_completions.id, Number((result as any).insertId)));
     return completion;
   }
 
@@ -256,7 +256,7 @@ export class DatabaseStorage implements IStorage {
     const [admin] = await db
       .select()
       .from(admins)
-      .where(eq(admins.id, Number(result[0].insertId)));
+      .where(eq(admins.id, Number((result as any).insertId)));
     return admin;
   }
 
@@ -288,7 +288,7 @@ export class DatabaseStorage implements IStorage {
     const [completion] = await db
       .select()
       .from(campaign_completions)
-      .where(eq(campaign_completions.id, Number(result[0].insertId)));
+      .where(eq(campaign_completions.id, Number((result as any).insertId)));
     return completion;
   }
 
