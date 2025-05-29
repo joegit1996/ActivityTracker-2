@@ -47,7 +47,7 @@ export const getQueryFn: <T>(options: {
     const headers: Record<string, string> = {};
     
     // Add JWT token for admin routes
-    if (url.startsWith("/api/admin/")) {
+    if (url.startsWith("/admin/")) {
       const token = localStorage.getItem("adminToken");
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
