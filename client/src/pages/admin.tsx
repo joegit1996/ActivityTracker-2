@@ -53,27 +53,27 @@ export default function Admin() {
 
   // Queries
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
-    queryKey: ["/api/admin/campaigns"],
+    queryKey: ["/admin/campaigns"],
   });
 
   const { data: milestones = [] } = useQuery({
-    queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`],
+    queryKey: [`/admin/campaigns/${selectedCampaign}/milestones`],
     enabled: !!selectedCampaign,
   });
 
   const { data: completions = [] } = useQuery({
-    queryKey: ["/api/admin/completions"],
+    queryKey: ["/admin/completions"],
   });
 
   const { data: campaignCompletions = [] } = useQuery({
-    queryKey: ["/api/admin/campaign-completions"],
+    queryKey: ["/admin/campaign-completions"],
   });
 
   // Campaign mutations
   const createCampaignMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/admin/campaigns", data),
+    mutationFn: (data: any) => apiRequest("POST", "/admin/campaigns", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/campaigns"] });
       toast({ title: "Campaign created successfully!" });
       setEditingCampaign(null);
     },
@@ -83,7 +83,7 @@ export default function Admin() {
     mutationFn: ({ id, data }: { id: number; data: any }) => 
       apiRequest("PUT", `/api/admin/campaigns/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/campaigns"] });
       toast({ title: "Campaign updated successfully!" });
       setEditingCampaign(null);
     },
@@ -92,14 +92,14 @@ export default function Admin() {
   const deleteCampaignMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/campaigns/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/campaigns"] });
       toast({ title: "Campaign deleted successfully!" });
     },
   });
 
   // Milestone mutations
   const createMilestoneMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/admin/milestones", data),
+    mutationFn: (data: any) => apiRequest("POST", "/admin/milestones", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/admin/campaigns/${selectedCampaign}/milestones`] });
       toast({ title: "Milestone created successfully!" });
