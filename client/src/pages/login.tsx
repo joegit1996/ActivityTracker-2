@@ -28,9 +28,7 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const browserLang = navigator.language.toLowerCase();
-      const defaultLang = browserLang.startsWith('ar') ? 'ar' : 'en';
-      setLocation(`/${defaultLang}/admin`);
+      setLocation('/admin');
     }
   }, [isAuthenticated, setLocation]);
 
