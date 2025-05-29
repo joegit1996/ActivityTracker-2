@@ -532,7 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin Management endpoints - All protected with JWT authentication
   
   // Campaigns CRUD
-  app.get("/api/campaigns", authenticateToken, async (req, res) => {
+  app.get("/admin/campaigns", authenticateToken, async (req, res) => {
     try {
       const campaigns = await storage.getAllCampaigns();
       res.json(campaigns);
@@ -575,7 +575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Milestones CRUD
-  app.get("/api/campaigns/:campaignId/milestones", authenticateToken, async (req, res) => {
+  app.get("/admin/campaigns/:campaignId/milestones", authenticateToken, async (req, res) => {
     try {
       const campaignId = parseInt(req.params.campaignId);
       const milestones = await storage.getMilestonesByCampaign(campaignId);
