@@ -17,59 +17,72 @@ function LanguageRouter() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
-    // Skip language detection for authentication routes
-    if (location.startsWith('/login')) {
+    // Skip language detection for admin and login routes
+    if (location.startsWith('/admin') || location.startsWith('/login')) {
       return;
     }
 
-    // Extract language from URL path
+    // Extract language from URL path for /web routes
     const pathSegments = location.split('/').filter(Boolean);
-    const possibleLang = pathSegments[0];
     
-    // Check if first segment is a valid language
-    if (possibleLang === 'en' || possibleLang === 'ar') {
-      // Set the language in i18n
-      if (i18n.language !== possibleLang) {
-        i18n.changeLanguage(possibleLang);
+    // Handle /web/lang/... routes
+    if (pathSegments[0] === 'web') {
+      const possibleLang = pathSegments[1];
+      
+      // Check if second segment is a valid language
+      if (possibleLang === 'en' || possibleLang === 'ar') {
+        // Set the language in i18n
+        if (i18n.language !== possibleLang) {
+          i18n.changeLanguage(possibleLang);
+        }
+      } else if (!location.startsWith('/web/en/') && !location.startsWith('/web/ar/')) {
+        // Redirect to language-prefixed URL (default to English)
+        const browserLang = navigator.language.toLowerCase();
+        const defaultLang = browserLang.startsWith('ar') ? 'ar' : 'en';
+        const remainingPath = location.replace('/web', '');
+        setLocation(`/web/${defaultLang}${remainingPath}`);
+        return;
       }
-    } else if (location !== '/' && !location.startsWith('/en/') && !location.startsWith('/ar/')) {
-      // Redirect to language-prefixed URL (default to English)
-      const browserLang = navigator.language.toLowerCase();
-      const defaultLang = browserLang.startsWith('ar') ? 'ar' : 'en';
-      setLocation(`/${defaultLang}${location}`);
-      return;
     }
   }, [location, i18n, setLocation]);
 
   return (
     <Switch>
-      {/* Authentication routes - must come first */}
+      {/* Authentication routes */}
       <Route path="/login" component={Login} />
       
-      {/* Language-aware routes */}
-      <Route path="/:lang/progress/:userId/:campaignId?" component={Progress} />
-      <Route path="/:lang/admin">
+      {/* Admin routes (no language prefix) */}
+      <Route path="/admin">
         <ProtectedAdminRoute>
           <Admin />
         </ProtectedAdminRoute>
       </Route>
       
-      {/* Legacy routes - redirect to language-prefixed versions */}
+      {/* Web application routes with language prefixes */}
+      <Route path="/web/:lang/progress/:userId/:campaignId?" component={Progress} />
+      
+      {/* Legacy routes - redirect to new structure */}
+      <Route path="/:lang/progress/:userId/:campaignId?">
+        {(params) => {
+          const campaignPath = params.campaignId ? `/${params.campaignId}` : '';
+          setLocation(`/web/${params.lang}/progress/${params.userId}${campaignPath}`);
+          return null;
+        }}
+      </Route>
+      
       <Route path="/progress/:userId/:campaignId?">
         {(params) => {
           const browserLang = navigator.language.toLowerCase();
           const defaultLang = browserLang.startsWith('ar') ? 'ar' : 'en';
           const campaignPath = params.campaignId ? `/${params.campaignId}` : '';
-          setLocation(`/${defaultLang}/progress/${params.userId}${campaignPath}`);
+          setLocation(`/web/${defaultLang}/progress/${params.userId}${campaignPath}`);
           return null;
         }}
       </Route>
       
-      <Route path="/admin">
+      <Route path="/:lang/admin">
         {() => {
-          const browserLang = navigator.language.toLowerCase();
-          const defaultLang = browserLang.startsWith('ar') ? 'ar' : 'en';
-          setLocation(`/${defaultLang}/admin`);
+          setLocation('/admin');
           return null;
         }}
       </Route>
@@ -79,7 +92,7 @@ function LanguageRouter() {
         {() => {
           const browserLang = navigator.language.toLowerCase();
           const defaultLang = browserLang.startsWith('ar') ? 'ar' : 'en';
-          setLocation(`/${defaultLang}/progress/1`);
+          setLocation(`/web/${defaultLang}/progress/1`);
           return null;
         }}
       </Route>
