@@ -94,78 +94,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Admin authentication endpoints
-  
-  // POST /api/login - Admin login endpoint
-  app.post("/api/login", validateInput(z.object({
-    username: z.string().min(1, "Username is required"),
-    password: z.string().min(1, "Password is required")
-  })), async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      // Find admin by username
-      const admin = await storage.getAdminByUsername(username);
-      if (!admin) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      // Verify password using bcrypt
-      const isValidPassword = await bcrypt.compare(password, admin.password);
-      if (!isValidPassword) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      // Generate JWT token
-      const token = jwt.sign(
-        { 
-          id: admin.id, 
-          username: admin.username, 
-          role: admin.role 
-        },
-        JWT_SECRET,
-        { expiresIn: '2h' }
-      );
-      
-      // Return token and admin info (without password)
-      res.json({
-        token,
-        admin: {
-          id: admin.id,
-          username: admin.username,
-          role: admin.role
-        }
-      });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-  
-  // GET /api/me - Get current admin info from token
-  app.get("/api/me", authenticateToken, async (req, res) => {
-    try {
-      const admin = await storage.getAdmin(req.admin.id);
-      if (!admin) {
-        return res.status(404).json({ error: "Admin not found" });
-      }
-      
-      // Return admin info without password
-      res.json({
-        id: admin.id,
-        username: admin.username,
-        role: admin.role
-      });
-    } catch (error) {
-      console.error("Get admin error:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-
   // Admin Authentication Routes
 
-  // POST /api/login - Admin login endpoint
-  app.post('/api/login', validateInput(z.object({
+  // POST /admin/login - Admin login endpoint
+  app.post('/admin/login', validateInput(z.object({
     username: z.string().min(1, "Username is required"),
     password: z.string().min(1, "Password is required")
   })), async (req, res) => {
@@ -210,8 +142,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GET /api/me - Get current admin info from token
-  app.get('/api/me', authenticateToken, async (req, res) => {
+  // GET /admin/me - Get current admin info from token
+  app.get('/admin/me', authenticateToken, async (req, res) => {
     try {
       const admin = await storage.getAdmin(req.admin.id);
       if (!admin) {
@@ -230,8 +162,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // POST /api/logout - Logout admin and blacklist token
-  app.post('/api/logout', authenticateToken, (req: any, res) => {
+  // POST /admin/logout - Logout admin and blacklist token
+  app.post('/admin/logout', authenticateToken, (req: any, res) => {
     try {
       // Add token to blacklist
       const token = req.token;
@@ -589,10 +521,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Admin API endpoints - All protected with JWT authentication
+  // Admin Management endpoints - All protected with JWT authentication
   
   // Campaigns CRUD
-  app.get("/api/admin/campaigns", authenticateToken, async (req, res) => {
+  app.get("/admin/campaigns", authenticateToken, async (req, res) => {
     try {
       const campaigns = await storage.getAllCampaigns();
       res.json(campaigns);
@@ -602,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/campaigns", authenticateToken, async (req, res) => {
+  app.post("/admin/campaigns", authenticateToken, async (req, res) => {
     try {
       const campaign = await storage.createCampaign(req.body);
       res.json(campaign);
@@ -612,7 +544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/campaigns/:id", authenticateToken, async (req, res) => {
+  app.put("/admin/campaigns/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const campaign = await storage.updateCampaign(id, req.body);
@@ -623,7 +555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/campaigns/:id", authenticateToken, async (req, res) => {
+  app.delete("/admin/campaigns/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteCampaign(id);
@@ -635,7 +567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Milestones CRUD
-  app.get("/api/admin/campaigns/:campaignId/milestones", authenticateToken, async (req, res) => {
+  app.get("/admin/campaigns/:campaignId/milestones", authenticateToken, async (req, res) => {
     try {
       const campaignId = parseInt(req.params.campaignId);
       const milestones = await storage.getMilestonesByCampaign(campaignId);
@@ -646,7 +578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/milestones", 
+  app.post("/admin/milestones", 
     authenticateToken,
     validateInput(insertMilestoneSchema),
     async (req: any, res) => {
@@ -659,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/milestones/:id", authenticateToken, async (req, res) => {
+  app.put("/admin/milestones/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const milestone = await storage.updateMilestone(id, req.body);
@@ -670,7 +602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/milestones/:id", authenticateToken, async (req, res) => {
+  app.delete("/admin/milestones/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteMilestone(id);
@@ -682,7 +614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Completions data
-  app.get("/api/admin/completions", authenticateToken, async (req, res) => {
+  app.get("/admin/completions", authenticateToken, async (req, res) => {
     try {
       const completions = await storage.getAllCompletions();
       res.json(completions);
@@ -693,7 +625,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaign completions data
-  app.get("/api/admin/campaign-completions", authenticateToken, async (req, res) => {
+  app.get("/admin/campaign-completions", authenticateToken, async (req, res) => {
     try {
       const completions = await storage.getAllCampaignCompletions();
       res.json(completions);
@@ -703,7 +635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/campaign-completions/:campaignId", authenticateToken, async (req, res) => {
+  app.get("/admin/campaign-completions/:campaignId", authenticateToken, async (req, res) => {
     try {
       const campaignId = parseInt(req.params.campaignId);
       if (isNaN(campaignId)) {
