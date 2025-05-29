@@ -49,6 +49,7 @@
   border-radius: 9999px;
   position: relative;
   animation: progress-fill 500ms ease-out forwards;
+  overflow: hidden;
 }
 
 .animated-progress-fill::after {
