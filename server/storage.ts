@@ -217,15 +217,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async completeMilestone(insertCompletion: InsertMilestoneCompletion): Promise<MilestoneCompletion> {
-    const [result] = await db
+    const result = await db
       .insert(milestone_completions)
-      .values(insertCompletion)
-      .$returningId();
+      .values(insertCompletion);
+    
+    // For MySQL, use the raw connection to get insertId
+    const insertId = (result as any).insertId;
     
     const [completion] = await db
       .select()
       .from(milestone_completions)
-      .where(eq(milestone_completions.id, result.id));
+      .where(eq(milestone_completions.id, insertId));
     return completion;
   }
 
