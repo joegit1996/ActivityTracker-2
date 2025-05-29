@@ -1,10 +1,11 @@
 import { 
-  users, campaigns, milestones, milestone_completions, admins,
+  users, campaigns, milestones, milestone_completions, admins, campaign_completions,
   type User, type InsertUser,
   type Campaign, type InsertCampaign,
   type Milestone, type InsertMilestone,
   type MilestoneCompletion, type InsertMilestoneCompletion,
-  type Admin, type InsertAdmin
+  type Admin, type InsertAdmin,
+  type CampaignCompletion, type InsertCampaignCompletion
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -42,6 +43,12 @@ export interface IStorage {
   getAdminByUsername(username: string): Promise<Admin | undefined>;
   createAdmin(admin: InsertAdmin): Promise<Admin>;
   getAdmin(id: number): Promise<Admin | undefined>;
+
+  // Campaign Completions
+  getCampaignCompletions(campaignId: number): Promise<CampaignCompletion[]>;
+  getAllCampaignCompletions(): Promise<CampaignCompletion[]>;
+  markCampaignComplete(userId: number, campaignId: number): Promise<CampaignCompletion>;
+  isCampaignCompleted(userId: number, campaignId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -225,6 +232,35 @@ export class DatabaseStorage implements IStorage {
       .from(admins)
       .where(eq(admins.id, id));
     return admin || undefined;
+  }
+
+  // Campaign completion methods
+  async getCampaignCompletions(campaignId: number): Promise<CampaignCompletion[]> {
+    return await db.select().from(campaign_completions)
+      .where(eq(campaign_completions.campaign_id, campaignId))
+      .orderBy(desc(campaign_completions.completed_at));
+  }
+
+  async getAllCampaignCompletions(): Promise<CampaignCompletion[]> {
+    return await db.select().from(campaign_completions)
+      .orderBy(desc(campaign_completions.completed_at));
+  }
+
+  async markCampaignComplete(userId: number, campaignId: number): Promise<CampaignCompletion> {
+    const [completion] = await db
+      .insert(campaign_completions)
+      .values({ user_id: userId, campaign_id: campaignId })
+      .returning();
+    return completion;
+  }
+
+  async isCampaignCompleted(userId: number, campaignId: number): Promise<boolean> {
+    const [completion] = await db.select().from(campaign_completions)
+      .where(and(
+        eq(campaign_completions.user_id, userId),
+        eq(campaign_completions.campaign_id, campaignId)
+      ));
+    return !!completion;
   }
 }
 

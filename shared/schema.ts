@@ -131,6 +131,11 @@ export const insertAdminSchema = createInsertSchema(admins).omit({
   created_at: true,
 });
 
+export const insertCampaignCompletionSchema = createInsertSchema(campaign_completions).omit({
+  id: true,
+  completed_at: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -146,6 +151,9 @@ export type InsertMilestoneCompletion = z.infer<typeof insertMilestoneCompletion
 
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
+
+export type CampaignCompletion = typeof campaign_completions.$inferSelect;
+export type InsertCampaignCompletion = z.infer<typeof insertCampaignCompletionSchema>;
 
 // API schemas
 export const completeTaskSchema = z.object({
