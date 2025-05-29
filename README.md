@@ -122,34 +122,46 @@ docker run -p 8080:8080 \
 ```
 
 ### Health Check
-The Docker container includes a health check endpoint at `/api/health` that monitors:
+The Docker container includes a health check endpoint at `/health` that monitors:
 - Server status
 - Application uptime
 - Environment information
 
-## API Endpoints
+## API Reference
 
-### Public Endpoints
-- `GET /api/health` - Health check for monitoring
-- `GET /api/progress/:userId/:campaignId?lang=en|ar` - Get user progress for a campaign
-- `POST /api/complete-task` - Complete a milestone (webhook with token authentication)
+### Frontend Web Pages
+- `/` - Main application homepage
+- `/web/en/progress/:userId` - English progress tracking page
+- `/web/ar/progress/:userId` - Arabic progress tracking page (RTL layout)
+- `/web/en/admin` - English admin dashboard
+- `/web/ar/admin` - Arabic admin dashboard
+- `/admin` - Admin login page
 
-### Admin Authentication
-- `POST /admin/login` - Admin login (returns JWT token)
-- `POST /admin/logout` - Admin logout (blacklists token)
-- `GET /admin/me` - Get current admin info
+### Public API Endpoints
+- `GET /health` - Health check for monitoring and Docker
+- `GET /api/progress/:userId/:campaignId?lang=en|ar` - Get user progress for specific campaign
 
-### Admin Panel APIs (require JWT authentication)
+### Webhook API (Token Required)
+- `POST /api/milestone/complete` - Complete a milestone task
+
+### Admin Management API (JWT Required)
+
+**Authentication:**
+- `POST /admin/login` - Admin login
+- `GET /admin/me` - Get current admin details
+- `POST /admin/logout` - Admin logout
+
+**Campaign Management:**
 - `GET /admin/campaigns` - List all campaigns
-- `POST /admin/campaigns` - Create new campaign
-- `PUT /admin/campaigns/:id` - Update campaign
-- `DELETE /admin/campaigns/:id` - Delete campaign
-- `GET /admin/milestones/:campaignId` - Get campaign milestones
-- `POST /admin/milestones` - Create milestone
-- `PUT /admin/milestones/:id` - Update milestone
-- `DELETE /admin/milestones/:id` - Delete milestone
-- `GET /admin/completions` - View all milestone completions
-- `GET /admin/campaign-completions` - View campaign winners
+- `POST /api/campaigns` - Create new campaign
+- `PUT /api/campaigns/:id` - Update campaign
+- `DELETE /api/campaigns/:id` - Delete campaign
+
+**Milestone Management:**
+- `GET /admin/campaigns/:campaignId/milestones` - Get milestones for campaign
+- `POST /api/milestones` - Create new milestone
+- `PUT /api/milestones/:id` - Update milestone
+- `DELETE /api/milestones/:id` - Delete milestone
 
 ## Database Schema
 
@@ -170,20 +182,23 @@ The Docker container includes a health check endpoint at `/api/health` that moni
 
 ### User Progress
 Users can view their progress at:
-- English: `/web/en/progress/:campaignId` (user ID auto-detected or specified via query param)
-- Arabic: `/web/ar/progress/:campaignId`
+- English: `/web/en/progress/:userId` 
+- Arabic: `/web/ar/progress/:userId`
 
 ### Webhook Integration
 The app supports milestone completion via webhook:
 ```bash
-POST /api/complete-task
+POST /api/milestone/complete
 Content-Type: application/json
+Authorization: Bearer <WEBHOOK_TOKEN>
+# Or alternatively:
 X-API-Token: <WEBHOOK_TOKEN>
 
 {
-  "user_id": 12344,
+  "user_id": 100,
   "campaign_id": 1,
-  "milestone_id": 5
+  "day_number": 1,
+  "milestone_id": 2
 }
 ```
 
