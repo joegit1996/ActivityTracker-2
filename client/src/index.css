@@ -29,9 +29,14 @@
 @keyframes progress-shimmer {
   0% {
     transform: translateX(-30px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
   }
   100% {
-    transform: translateX(calc(100% + 30px));
+    transform: translateX(calc(var(--progress-width) + 30px));
+    opacity: 0;
   }
 }
 
