@@ -657,6 +657,36 @@ export default function Admin() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="campaign-completions" className="space-y-4">
+            <h2 className="text-xl font-semibold">Campaign Winners</h2>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  {campaignCompletions.length === 0 ? (
+                    <p className="text-center text-gray-500">No users have completed entire campaigns yet</p>
+                  ) : (
+                    (campaignCompletions as any[]).map((completion: any) => (
+                      <div key={completion.id} className="flex items-center justify-between p-4 border rounded-lg bg-green-50 border-green-200">
+                        <div>
+                          <p className="font-bold text-green-800">
+                            🏆 User {completion.user_id} completed Campaign {completion.campaign_id}
+                          </p>
+                          <p className="text-sm text-green-700">
+                            Finished all milestones and earned the reward
+                          </p>
+                          <p className="text-xs text-green-600">
+                            Completed: {new Date(completion.completed_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <Trophy className="w-8 h-8 text-yellow-500" />
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

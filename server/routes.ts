@@ -508,9 +508,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           milestone_id
         });
 
-        // Get updated progress
+        // Get updated progress - recalculate fully completed days
         const updatedCompletions = await storage.getUserCompletions(user_id, campaign_id);
-        const updatedCompletedDays = new Set(updatedCompletions.map(c => c.day_number)).size;
+        const updatedFullyCompletedDays = new Set<number>();
+        
+        for (let day = 1; day <= campaign.total_days; day++) {
+          const dayMilestones = await storage.getMilestonesByDay(campaign.id, day);
+          const dayCompletions = updatedCompletions.filter(c => c.day_number === day);
+          
+          // Check if ALL specific milestones for this day are completed
+          const completedMilestoneIds = dayCompletions.map(c => c.milestone_id);
+          const allMilestonesCompleted = dayMilestones.every(milestone => 
+            completedMilestoneIds.includes(milestone.id)
+          );
+          
+          if (dayMilestones.length > 0 && allMilestonesCompleted) {
+            updatedFullyCompletedDays.add(day);
+          }
+        }
+        
+        const updatedCompletedDays = updatedFullyCompletedDays.size;
         const updatedPercentage = Math.round((updatedCompletedDays / campaign.total_days) * 100);
 
         // Check if user completed entire campaign
