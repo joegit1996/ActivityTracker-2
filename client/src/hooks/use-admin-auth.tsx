@@ -93,7 +93,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
     setAdmin(null);
-    setLocation("/login");
+    setLocation("/admin/login");
   };
 
   return (
@@ -127,7 +127,7 @@ export function ProtectedAdminRoute({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      setLocation("/login");
+      setLocation("/admin/login");
     }
   }, [isAuthenticated, isLoading, setLocation]);
 

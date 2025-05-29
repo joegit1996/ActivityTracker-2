@@ -48,10 +48,8 @@ function LanguageRouter() {
 
   return (
     <Switch>
-      {/* Authentication routes */}
-      <Route path="/login" component={Login} />
-      
-      {/* Admin routes (no language prefix) */}
+      {/* Admin routes */}
+      <Route path="/admin/login" component={Login} />
       <Route path="/admin">
         <ProtectedAdminRoute>
           <Admin />
@@ -83,6 +81,13 @@ function LanguageRouter() {
       <Route path="/:lang/admin">
         {() => {
           setLocation('/admin');
+          return null;
+        }}
+      </Route>
+      
+      <Route path="/login">
+        {() => {
+          setLocation('/admin/login');
           return null;
         }}
       </Route>
