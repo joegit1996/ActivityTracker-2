@@ -57,7 +57,7 @@ export default function Admin() {
   });
 
   const { data: milestones = [] } = useQuery({
-    queryKey: [`/admin/milestones/${selectedCampaign}`],
+    queryKey: [`/admin/campaigns/${selectedCampaign}/milestones`],
     enabled: !!selectedCampaign,
   });
 
