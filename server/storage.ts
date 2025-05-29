@@ -153,14 +153,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMilestone(insertMilestone: InsertMilestone): Promise<Milestone> {
-    const result = await db
+    const [result] = await db
       .insert(milestones)
-      .values(insertMilestone);
+      .values(insertMilestone)
+      .$returningId();
     
     const [milestone] = await db
       .select()
       .from(milestones)
-      .where(eq(milestones.id, Number((result as any).insertId)));
+      .where(eq(milestones.id, result.id));
     return milestone;
   }
 

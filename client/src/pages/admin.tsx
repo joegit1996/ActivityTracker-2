@@ -326,7 +326,7 @@ export default function Admin() {
     const form = useForm({
       resolver: zodResolver(milestoneFormSchema),
       defaultValues: milestone || {
-        campaign_id: selectedCampaign,
+        campaign_id: selectedCampaign || 1,
         day_number: 1,
         title_en: "",
         title_ar: "",
