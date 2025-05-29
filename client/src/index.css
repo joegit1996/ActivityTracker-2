@@ -57,44 +57,35 @@
   top: 0;
   left: 0;
   height: 100%;
-  width: 100%;
+  width: 30px;
   background: linear-gradient(
     90deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.6) 50%,
-    transparent 70%
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
   );
   animation: progress-shimmer 1.5s ease-in-out infinite;
+  border-radius: 9999px;
 }
 
 /* Animated Trophy Icon */
-@keyframes trophy-pop {
-  0% {
-    transform: scale(0.8);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes trophy-wiggle {
+@keyframes trophy-bounce {
   0%, 100% {
-    transform: rotate(0deg);
+    transform: scale(1) rotate(0deg);
   }
   25% {
-    transform: rotate(-5deg);
+    transform: scale(1.1) rotate(-3deg);
+  }
+  50% {
+    transform: scale(1.15) rotate(0deg);
   }
   75% {
-    transform: rotate(5deg);
+    transform: scale(1.1) rotate(3deg);
   }
 }
 
 .animated-trophy {
-  animation: trophy-pop 400ms ease-out forwards,
-             trophy-wiggle 600ms ease-in-out 400ms 2;
+  animation: trophy-bounce 2s ease-in-out infinite;
   transform-origin: center;
 }
 
