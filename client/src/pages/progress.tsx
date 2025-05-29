@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
-import { Trophy, Lock, CheckCircle, X } from "lucide-react";
+import { Trophy, Lock, CheckCircle, X, Flame } from "lucide-react";
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import type { ProgressResponse } from "@/lib/types";
@@ -173,7 +173,10 @@ export default function Progress() {
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900">{t('app.title')}</h1>
+          <div className="flex items-center justify-center gap-3">
+            <Flame className="text-orange-500 text-3xl" size={28} />
+            <h1 className="text-2xl font-bold text-gray-900">{t('app.title')}</h1>
+          </div>
           <p className="text-gray-600 text-base">{t('app.subtitle')}</p>
         </div>
 
