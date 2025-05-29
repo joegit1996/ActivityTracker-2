@@ -69,8 +69,10 @@ An advanced internationalized Activity Streak Web App that provides a dynamic, e
    # Optional: Webhook Token for milestone completion API
    WEBHOOK_TOKEN=your-webhook-token
    
-   # Optional: Port Configuration
+   # Environment Configuration
+   NODE_ENV=development
    PORT=5000
+   DOMAIN=appstreak.q84sale.com
    ```
 
 4. **Database Setup**
