@@ -14,7 +14,7 @@ interface AdminAuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (token: string, admin: AdminUser) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | null>(null);
@@ -72,7 +72,24 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     setAdmin(adminUser);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const token = localStorage.getItem("adminToken");
+    
+    // Call backend logout to blacklist token
+    if (token) {
+      try {
+        await fetch("/api/logout", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+    
+    // Clear local storage and state
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
     setAdmin(null);

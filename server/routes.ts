@@ -11,6 +11,9 @@ import bcrypt from "bcryptjs";
 // JWT Secret - should be in environment variable in production
 const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
 
+// In-memory token blacklist (in production, use Redis or database)
+const tokenBlacklist = new Set<string>();
+
 // JWT Authentication middleware for admin routes
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
@@ -20,11 +23,24 @@ const authenticateToken = (req: any, res: any, next: any) => {
     return res.status(401).json({ error: 'Access token required' });
   }
 
+  // Check if token is blacklisted
+  if (tokenBlacklist.has(token)) {
+    return res.status(403).json({ error: 'Token has been invalidated' });
+  }
+
   jwt.verify(token, JWT_SECRET, (err: any, admin: any) => {
     if (err) {
       return res.status(403).json({ error: 'Invalid or expired token' });
     }
+    
+    // Check token expiration for session timeout
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (admin.exp && admin.exp < currentTime) {
+      return res.status(403).json({ error: 'Session expired' });
+    }
+    
     req.admin = admin;
+    req.token = token; // Store token for potential blacklisting
     next();
   });
 };
@@ -108,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: admin.role 
         },
         JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '2h' }
       );
       
       // Return token and admin info (without password)
@@ -176,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: admin.role 
         },
         JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '2h' }
       );
 
       // Return token and admin info (without password)
@@ -214,7 +230,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user progress for specific campaign
+  // POST /api/logout - Logout admin and blacklist token
+  app.post('/api/logout', authenticateToken, (req: any, res) => {
+    try {
+      // Add token to blacklist
+      const token = req.token;
+      if (token) {
+        tokenBlacklist.add(token);
+      }
+      
+      res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // GET user progress for specific campaign
   app.get("/api/progress/:userId/:campaignId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
