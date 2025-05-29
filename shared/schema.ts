@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, unique } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -54,10 +54,21 @@ export const admins = pgTable("admins", {
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Campaign completions table - tracks users who completed entire campaigns
+export const campaign_completions = pgTable("campaign_completions", {
+  id: serial("id").primaryKey(),
+  user_id: integer("user_id").notNull().references(() => users.id),
+  campaign_id: integer("campaign_id").notNull().references(() => campaigns.id),
+  completed_at: timestamp("completed_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueUserCampaign: unique("unique_user_campaign").on(table.user_id, table.campaign_id),
+}));
+
 // Relations
 export const campaignsRelations = relations(campaigns, ({ many }) => ({
   milestones: many(milestones),
   completions: many(milestone_completions),
+  campaignCompletions: many(campaign_completions),
 }));
 
 export const milestonesRelations = relations(milestones, ({ one, many }) => ({
@@ -70,6 +81,7 @@ export const milestonesRelations = relations(milestones, ({ one, many }) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
   completions: many(milestone_completions),
+  campaignCompletions: many(campaign_completions),
 }));
 
 export const milestoneCompletionsRelations = relations(milestone_completions, ({ one }) => ({
@@ -84,6 +96,17 @@ export const milestoneCompletionsRelations = relations(milestone_completions, ({
   milestone: one(milestones, {
     fields: [milestone_completions.milestone_id],
     references: [milestones.id],
+  }),
+}));
+
+export const campaignCompletionsRelations = relations(campaign_completions, ({ one }) => ({
+  user: one(users, {
+    fields: [campaign_completions.user_id],
+    references: [users.id],
+  }),
+  campaign: one(campaigns, {
+    fields: [campaign_completions.campaign_id],
+    references: [campaigns.id],
   }),
 }));
 
