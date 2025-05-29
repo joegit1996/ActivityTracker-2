@@ -1,52 +1,52 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, unique } from "drizzle-orm/pg-core";
+import { mysqlTable, text, serial, int, boolean, timestamp, varchar, unique } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: integer("id").primaryKey(),
-  name: text("name").notNull(),
-  language: text("language").default("en").notNull(),
+export const users = mysqlTable("users", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  language: varchar("language", { length: 10 }).default("en").notNull(),
 });
 
-export const campaigns = pgTable("campaigns", {
+export const campaigns = mysqlTable("campaigns", {
   id: serial("id").primaryKey(),
-  title_en: text("title_en").notNull(),
-  title_ar: text("title_ar").notNull(),
+  title_en: varchar("title_en", { length: 255 }).notNull(),
+  title_ar: varchar("title_ar", { length: 255 }).notNull(),
   description_en: text("description_en").notNull(),
   description_ar: text("description_ar").notNull(),
-  reward_title_en: text("reward_title_en").notNull(),
-  reward_title_ar: text("reward_title_ar").notNull(),
+  reward_title_en: varchar("reward_title_en", { length: 255 }).notNull(),
+  reward_title_ar: varchar("reward_title_ar", { length: 255 }).notNull(),
   reward_description_en: text("reward_description_en").notNull(),
   reward_description_ar: text("reward_description_ar").notNull(),
   reward_code_en: text("reward_code_en"),
   reward_code_ar: text("reward_code_ar"),
-  total_days: integer("total_days").notNull(),
+  total_days: int("total_days").notNull(),
   is_active: boolean("is_active").default(false),
 });
 
-export const milestones = pgTable("milestones", {
+export const milestones = mysqlTable("milestones", {
   id: serial("id").primaryKey(),
-  campaign_id: integer("campaign_id").notNull(),
-  day_number: integer("day_number").notNull(),
-  title_en: text("title_en").notNull(),
-  title_ar: text("title_ar").notNull(),
+  campaign_id: int("campaign_id").notNull(),
+  day_number: int("day_number").notNull(),
+  title_en: varchar("title_en", { length: 255 }).notNull(),
+  title_ar: varchar("title_ar", { length: 255 }).notNull(),
   description_en: text("description_en").notNull(),
   description_ar: text("description_ar").notNull(),
-  order_index: integer("order_index").notNull().default(0),
+  order_index: int("order_index").notNull().default(0),
 });
 
-export const milestone_completions = pgTable("milestone_completions", {
+export const milestone_completions = mysqlTable("milestone_completions", {
   id: serial("id").primaryKey(),
-  user_id: integer("user_id").notNull(),
-  campaign_id: integer("campaign_id").notNull(),
-  day_number: integer("day_number").notNull(),
-  milestone_id: integer("milestone_id").notNull(),
+  user_id: int("user_id").notNull(),
+  campaign_id: int("campaign_id").notNull(),
+  day_number: int("day_number").notNull(),
+  milestone_id: int("milestone_id").notNull(),
   completed_at: timestamp("completed_at").defaultNow().notNull(),
 });
 
 // Admins table for authentication
-export const admins = pgTable("admins", {
+export const admins = mysqlTable("admins", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 50 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(), // bcrypt hashed password
@@ -55,10 +55,10 @@ export const admins = pgTable("admins", {
 });
 
 // Campaign completions table - tracks users who completed entire campaigns
-export const campaign_completions = pgTable("campaign_completions", {
+export const campaign_completions = mysqlTable("campaign_completions", {
   id: serial("id").primaryKey(),
-  user_id: integer("user_id").notNull().references(() => users.id),
-  campaign_id: integer("campaign_id").notNull().references(() => campaigns.id),
+  user_id: int("user_id").notNull(),
+  campaign_id: int("campaign_id").notNull(),
   completed_at: timestamp("completed_at").defaultNow().notNull(),
 }, (table) => ({
   uniqueUserCampaign: unique("unique_user_campaign").on(table.user_id, table.campaign_id),
