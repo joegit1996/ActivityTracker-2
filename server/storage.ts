@@ -58,18 +58,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
+    const result = await db
       .insert(users)
-      .values(insertUser)
-      .returning();
+      .values(insertUser);
+    
+    // MySQL doesn't support returning, so we fetch the inserted record
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, Number(result[0].insertId)));
     return user;
   }
 
   async createUserWithId(id: number, name: string): Promise<User> {
-    const [user] = await db
+    await db
       .insert(users)
-      .values({ id, name, language: "en" })
-      .returning();
+      .values({ id, name, language: "en" });
+    
+    // MySQL doesn't support returning, so we fetch the inserted record
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, id));
     return user;
   }
 
@@ -88,19 +98,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCampaign(insertCampaign: InsertCampaign): Promise<Campaign> {
-    const [campaign] = await db
+    const result = await db
       .insert(campaigns)
-      .values(insertCampaign)
-      .returning();
+      .values(insertCampaign);
+    
+    const [campaign] = await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.id, Number(result[0].insertId)));
     return campaign;
   }
 
   async updateCampaign(id: number, updateData: Partial<InsertCampaign>): Promise<Campaign> {
-    const [campaign] = await db
+    await db
       .update(campaigns)
       .set(updateData)
-      .where(eq(campaigns.id, id))
-      .returning();
+      .where(eq(campaigns.id, id));
+    
+    const [campaign] = await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.id, id));
     return campaign;
   }
 

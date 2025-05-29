@@ -19,4 +19,4 @@ if (!process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_NAME) {
 }
 
 export const connection = mysql.createPool(connectionConfig);
-export const db = drizzle(connection, { schema });
+export const db = drizzle(connection, { schema, mode: 'default' });
