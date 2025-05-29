@@ -305,7 +305,7 @@ export default function Progress() {
             {tasks.map((task) => (
               <div 
                 key={task.id}
-                className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border rounded-xl transition-colors ${
+                className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border rounded-xl transition-colors ${
                   task.completed 
                     ? 'border-green-200 bg-green-50' 
                     : 'border-gray-200 hover:border-primary/30 cursor-pointer'
