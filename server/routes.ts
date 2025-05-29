@@ -513,6 +513,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updatedCompletedDays = new Set(updatedCompletions.map(c => c.day_number)).size;
         const updatedPercentage = Math.round((updatedCompletedDays / campaign.total_days) * 100);
 
+        // Check if user completed entire campaign
+        if (updatedPercentage === 100 && updatedCompletedDays === campaign.total_days) {
+          // Check if already marked as campaign completer
+          const alreadyCompleted = await storage.isCampaignCompleted(user_id, campaign_id);
+          if (!alreadyCompleted) {
+            // Mark user as campaign completer
+            await storage.markCampaignComplete(user_id, campaign_id);
+          }
+        }
+
         res.json({
           success: true,
           completion,
@@ -629,6 +639,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(completions);
     } catch (error) {
       console.error("Error fetching completions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Campaign completions data
+  app.get("/api/admin/campaign-completions", authenticateToken, async (req, res) => {
+    try {
+      const completions = await storage.getAllCampaignCompletions();
+      res.json(completions);
+    } catch (error) {
+      console.error("Error fetching campaign completions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/campaign-completions/:campaignId", authenticateToken, async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId);
+      if (isNaN(campaignId)) {
+        return res.status(400).json({ error: "Invalid campaign ID" });
+      }
+      
+      const completions = await storage.getCampaignCompletions(campaignId);
+      res.json(completions);
+    } catch (error) {
+      console.error("Error fetching campaign completions:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

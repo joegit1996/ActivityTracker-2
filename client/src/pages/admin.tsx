@@ -63,6 +63,10 @@ export default function Admin() {
     queryKey: ["/api/admin/completions"],
   });
 
+  const { data: campaignCompletions = [] } = useQuery({
+    queryKey: ["/api/admin/campaign-completions"],
+  });
+
   // Campaign mutations
   const createCampaignMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/admin/campaigns", data),
@@ -441,7 +445,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="campaigns" className="flex items-center space-x-2">
               <Trophy className="w-4 h-4" />
               <span>Campaigns</span>
@@ -452,7 +456,11 @@ export default function Admin() {
             </TabsTrigger>
             <TabsTrigger value="completions" className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
-              <span>Completions</span>
+              <span>Task Completions</span>
+            </TabsTrigger>
+            <TabsTrigger value="campaign-completions" className="flex items-center space-x-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>Campaign Winners</span>
             </TabsTrigger>
           </TabsList>
 
