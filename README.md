@@ -72,6 +72,7 @@ An advanced internationalized Activity Streak Web App that provides a dynamic, e
    # Environment Configuration
    NODE_ENV=development
    PORT=5000
+   DOMAIN=appstreak.q84sale.com
    ```
 
 4. **Database Setup**
