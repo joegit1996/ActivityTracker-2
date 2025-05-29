@@ -35,7 +35,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       if (token && savedAdmin) {
         try {
           // Verify token with backend
-          const response = await fetch("/admin/me", {
+          const response = await fetch("/api/admin/me", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -78,7 +78,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     // Call backend logout to blacklist token
     if (token) {
       try {
-        await fetch("/admin/logout", {
+        await fetch("/api/admin/logout", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

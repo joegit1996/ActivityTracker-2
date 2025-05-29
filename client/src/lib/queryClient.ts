@@ -19,7 +19,7 @@ export async function apiRequest(
   }
   
   // Add JWT token for admin routes
-  if (url.startsWith("/admin/")) {
+  if (url.startsWith("/api/admin/")) {
     const token = localStorage.getItem("adminToken");
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
