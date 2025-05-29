@@ -4,13 +4,45 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Trophy, Lock, CheckCircle, X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import type { ProgressResponse } from "@/lib/types";
+
+// Custom hook for animated counter
+function useAnimatedCounter(end: number, duration: number = 500) {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    let animationFrame: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      
+      setCurrent(Math.floor(progress * end));
+      
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [end, duration]);
+
+  return current;
+}
 
 export default function Progress() {
   const { userId, lang, campaignId } = useParams();
   const { t, i18n } = useTranslation();
+  const [animationsTriggered, setAnimationsTriggered] = useState(false);
 
   // Set language and HTML attributes based on URL
   useEffect(() => {
@@ -122,6 +154,16 @@ export default function Progress() {
   }
 
   const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
+  
+  // Animated counter for percentage
+  const animatedPercentage = useAnimatedCounter(progress.percentage, 500);
+
+  // Trigger animations when data loads
+  useEffect(() => {
+    if (progressData && !animationsTriggered) {
+      setAnimationsTriggered(true);
+    }
+  }, [progressData, animationsTriggered]);
 
   return (
     <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto overflow-x-hidden w-full">
@@ -139,10 +181,13 @@ export default function Progress() {
             <span className="text-gray-900 font-medium">
               {t('progress.currentStreak')}: <span className="text-primary font-semibold">{streak.currentDays} {t('progress.days')}</span>
             </span>
-            <span className="text-gray-600 text-sm">{progress.percentage}% {t('progress.complete')}</span>
+            <span className="text-2xl font-bold text-primary">
+              {animatedPercentage}% 
+              <span className="text-sm font-normal text-gray-600 ml-1">{t('progress.complete')}</span>
+            </span>
           </div>
           
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-3">
             <span className="text-xs text-gray-500">
               {i18n.language === 'ar' ? `${t('progress.dayLabel')} 1` : `${t('progress.dayLabel')} 1`}
             </span>
@@ -151,7 +196,15 @@ export default function Progress() {
             </span>
           </div>
           
-          <ProgressBar value={progress.percentage} className={`w-full h-2 ${i18n.language === 'ar' ? 'transform scale-x-[-1]' : ''}`} />
+          {/* Animated Progress Bar */}
+          <div className={`animated-progress ${i18n.language === 'ar' ? 'transform scale-x-[-1]' : ''}`}>
+            <div 
+              className="animated-progress-fill"
+              style={{ 
+                '--progress-width': `${progress.percentage}%` 
+              } as React.CSSProperties}
+            ></div>
+          </div>
           
 
         </div>
@@ -164,13 +217,13 @@ export default function Progress() {
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
             <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Trophy className="text-primary text-xl" />
+                <Trophy className={`text-primary text-xl ${animationsTriggered ? 'animated-trophy' : ''}`} />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900 mb-1">{campaign.reward.title}</h3>
                 <p className="text-gray-600 text-sm">{campaign.reward.description}</p>
               </div>
-              <div className="text-primary font-semibold text-sm">{progress.percentage}%</div>
+              <div className="text-primary font-semibold text-sm">{animatedPercentage}%</div>
             </div>
           </div>
         ) : (
