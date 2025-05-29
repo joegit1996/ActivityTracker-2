@@ -68,6 +68,9 @@ export default function Progress() {
     enabled: !!userId,
   });
 
+  // Animated counter for percentage (always call hooks at top level)
+  const animatedPercentage = useAnimatedCounter(progressData?.progress?.percentage || 0, 500);
+
   // Check if all milestones are completed and show reward modal (must be before early returns)
   const isCompleted = progressData ? progressData.progress.percentage === 100 && progressData.progress.currentDay > progressData.campaign.totalDays : false;
   
@@ -154,9 +157,6 @@ export default function Progress() {
   }
 
   const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
-  
-  // Animated counter for percentage
-  const animatedPercentage = useAnimatedCounter(progress.percentage, 500);
 
   // Trigger animations when data loads
   useEffect(() => {
