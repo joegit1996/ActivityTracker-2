@@ -96,8 +96,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin Authentication Routes
 
-  // POST /api/api/admin/login - Admin login endpoint
-  app.post('/api/api/admin/login', validateInput(z.object({
+  // POST /api/admin/login - Admin login endpoint
+  app.post('/api/admin/login', validateInput(z.object({
     username: z.string().min(1, "Username is required"),
     password: z.string().min(1, "Password is required")
   })), async (req, res) => {
@@ -142,8 +142,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GET /api/api/admin/me - Get current admin info from token
-  app.get('/api/api/admin/me', authenticateToken, async (req, res) => {
+  // GET /api/admin/me - Get current admin info from token
+  app.get('/api/admin/me', authenticateToken, async (req, res) => {
     try {
       const admin = await storage.getAdmin(req.admin.id);
       if (!admin) {
@@ -162,8 +162,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // POST /api/api/admin/logout - Logout admin and blacklist token
-  app.post('/api/api/admin/logout', authenticateToken, (req: any, res) => {
+  // POST /api/admin/logout - Logout admin and blacklist token
+  app.post('/api/admin/logout', authenticateToken, (req: any, res) => {
     try {
       // Add token to blacklist
       const token = req.token;
