@@ -215,14 +215,14 @@ export default function Progress() {
 
         {/* Reward Card */}
         {!isCompleted ? (
-          // Normal state - clean and simple
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+          // Normal state - clean and simple with subtle distinction
+          <div className="bg-blue-50/30 rounded-2xl p-6 shadow-md border-l-4 border-blue-500 border border-gray-100 space-y-4">
             <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Trophy className={`text-primary text-xl ${animationsTriggered ? 'animated-trophy' : ''}`} />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 mb-1">{campaign.reward.title}</h3>
+                <h3 className="font-bold text-gray-900 mb-1">{campaign.reward.title}</h3>
                 <p className="text-gray-600 text-sm">{campaign.reward.description}</p>
               </div>
               <div className="text-primary font-semibold text-sm">{animatedPercentage}%</div>
