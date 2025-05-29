@@ -66,8 +66,11 @@ An advanced internationalized Activity Streak Web App that provides a dynamic, e
    SESSION_SECRET=your-session-secret
    JWT_SECRET=your-jwt-secret
    
-   # Optional: Webhook
+   # Optional: Webhook Token for milestone completion API
    WEBHOOK_TOKEN=your-webhook-token
+   
+   # Optional: Port Configuration
+   PORT=5000
    ```
 
 4. **Database Setup**
@@ -81,20 +84,56 @@ An advanced internationalized Activity Streak Web App that provides a dynamic, e
 
 The app will be available at `http://localhost:5000`
 
+## Docker Deployment
+
+### Building the Docker Image
+```bash
+docker build -t activity-streak-app .
+```
+
+### Running with Docker
+```bash
+docker run -p 80:5000 \
+  -e NODE_ENV=production \
+  -e DB_HOST=your-production-db \
+  -e DB_USER=your-db-user \
+  -e DB_PASSWORD=your-db-password \
+  -e DB_NAME=your-db-name \
+  -e SESSION_SECRET=your-session-secret \
+  -e JWT_SECRET=your-jwt-secret \
+  -e WEBHOOK_TOKEN=your-webhook-token \
+  activity-streak-app
+```
+
+### Health Check
+The Docker container includes a health check endpoint at `/api/health` that monitors:
+- Server status
+- Application uptime
+- Environment information
+
 ## API Endpoints
 
 ### Public Endpoints
-- `GET /api/progress/:userId/:campaignId` - Get user progress for a campaign
-- `POST /api/complete-milestone` - Complete a milestone (webhook)
+- `GET /api/health` - Health check for monitoring
+- `GET /api/progress/:userId/:campaignId?lang=en|ar` - Get user progress for a campaign
+- `POST /api/complete-task` - Complete a milestone (webhook with token authentication)
 
-### Admin Endpoints
-- `POST /api/login` - Admin login
-- `POST /api/logout` - Admin logout
+### Admin Authentication
+- `POST /api/login` - Admin login (returns JWT token)
+- `POST /api/logout` - Admin logout (blacklists token)
 - `GET /api/me` - Get current admin info
-- `GET /api/admin/campaigns` - Get all campaigns
-- `GET /api/admin/campaigns/:id/milestones` - Get campaign milestones
-- `GET /api/admin/completions` - Get all milestone completions
-- `GET /api/admin/campaign-completions` - Get campaign completions
+
+### Admin Panel APIs (require JWT authentication)
+- `GET /api/admin/campaigns` - List all campaigns
+- `POST /api/admin/campaigns` - Create new campaign
+- `PUT /api/admin/campaigns/:id` - Update campaign
+- `DELETE /api/admin/campaigns/:id` - Delete campaign
+- `GET /api/admin/milestones/:campaignId` - Get campaign milestones
+- `POST /api/admin/milestones` - Create milestone
+- `PUT /api/admin/milestones/:id` - Update milestone
+- `DELETE /api/admin/milestones/:id` - Delete milestone
+- `GET /api/admin/completions` - View all milestone completions
+- `GET /api/admin/campaign-completions` - View campaign winners
 
 ## Database Schema
 
@@ -109,21 +148,21 @@ The app will be available at `http://localhost:5000`
 ## Usage
 
 ### Admin Panel
-1. Navigate to `/web/en/admin` or `/web/ar/admin`
+1. Navigate to `/admin`
 2. Login with admin credentials
 3. Manage campaigns, view user progress, and track completions
 
 ### User Progress
 Users can view their progress at:
-- English: `/web/en/progress/:userId/:campaignId`
-- Arabic: `/web/ar/progress/:userId/:campaignId`
+- English: `/web/en/progress/:campaignId` (user ID auto-detected or specified via query param)
+- Arabic: `/web/ar/progress/:campaignId`
 
 ### Webhook Integration
 The app supports milestone completion via webhook:
 ```bash
-POST /api/complete-milestone
+POST /api/complete-task
 Content-Type: application/json
-Authorization: Bearer <WEBHOOK_TOKEN>
+X-API-Token: <WEBHOOK_TOKEN>
 
 {
   "user_id": 12344,
