@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide Vite error overlay on mobile devices */
+@media (max-width: 768px) {
+  [data-vite-plugin="runtime-error-plugin"],
+  .vite-error-overlay,
+  [id*="vite-error"],
+  [class*="vite-error"],
+  [data-vite*="error"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
 /* Prevent horizontal overflow and white stripes on mobile */
 html, body {
   overflow-x: hidden;
