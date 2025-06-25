@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
-import { Trophy, Lock, CheckCircle, X, Flame } from "lucide-react";
+import { Trophy, Lock, CheckCircle, X, Flame, Gift, Banknote } from "lucide-react";
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
-import type { ProgressResponse } from "@/lib/types";
+import type { ProgressResponse, LocalizedMiniReward } from "@/lib/types";
 
 // Custom hook for animated counter
 function useAnimatedCounter(end: number, duration: number = 500) {
@@ -165,7 +165,20 @@ export default function Progress() {
     );
   }
 
-  const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
+  const { campaign, progress, streak, tasks, previousDays, nextDay, miniRewards } = progressData;
+
+  // Group mini rewards by after_day_number, but only for valid days
+  const miniRewardsByDay = (miniRewards || []).reduce((acc: Record<number, LocalizedMiniReward[]>, reward) => {
+    if (reward.after_day_number < campaign.totalDays) {
+      if (!acc[reward.after_day_number]) acc[reward.after_day_number] = [];
+      acc[reward.after_day_number].push(reward);
+    }
+    return acc;
+  }, {} as Record<number, LocalizedMiniReward[]>);
+
+  const completedDays = previousDays.length;
+  const totalDays = campaign.totalDays;
+  const days = Array.from({ length: totalDays }, (_, i) => i + 1);
 
   return (
     <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto overflow-x-hidden w-full">
@@ -222,11 +235,15 @@ export default function Progress() {
           <div className="bg-blue-50/30 rounded-2xl p-6 shadow-md border-l-4 border-blue-500 border border-gray-100 space-y-4">
             <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Trophy className={`text-primary text-xl ${animationsTriggered ? 'animated-trophy' : ''}`} />
+                {/* Animated cash icon for reward */}
+                <Banknote className={`text-green-500 text-xl`} style={{ animation: 'spin 2s linear infinite' }} />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-1">{campaign.reward.title}</h3>
-                <p className="text-gray-600 text-sm">{campaign.reward.description}</p>
+                <h3 className="font-bold text-gray-900 mb-1">
+                  {i18n.language === 'ar'
+                    ? 'أكمل جميع المهام لتحصل على جائزة نقدية كبيرة'
+                    : 'Complete all milestones for a big CASH reward'}
+                </h3>
               </div>
               <div className="text-primary font-semibold text-sm">{animatedPercentage}%</div>
             </div>
@@ -269,111 +286,119 @@ export default function Progress() {
           </div>
         )}
 
-        {/* Previous Days (if any) */}
-        {previousDays.length > 0 && (
-          <div className="space-y-3">
-            {previousDays.map((day) => (
-              <div key={day.number} className="bg-green-50 rounded-xl p-4 border border-green-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-green-800 font-medium text-sm">{t('progress.dayCompleted', { number: day.number })}</span>
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                    <CheckCircle className="text-white text-xs" />
-                  </div>
-                </div>
-                <p className="text-green-700 text-xs mt-1">
-                  {t('progress.completedOn', { date: new Date(day.completedAt).toLocaleDateString() })}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Current Day Tasks */}
-        {progress.currentDay <= campaign.totalDays && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">{t('progress.day', { number: progress.currentDay })}</h3>
-              <div className="text-sm text-gray-600">
-                {tasks.filter(t => t.completed).length}/{tasks.length}
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-600">
-              {t('progress.completeCurrentDay')}
-            </p>
-
-            {tasks.map((task) => (
-              <div 
-                key={task.id}
-                className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border rounded-xl transition-colors ${
-                  task.completed 
-                    ? 'border-green-200 bg-green-50' 
-                    : 'border-gray-200 hover:border-primary/30 cursor-pointer'
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 ${
-                  task.completed ? 'bg-green-500' : 'bg-primary'
-                }`}>
-                  {task.completed ? <CheckCircle className="w-4 h-4" /> : task.number}
-                </div>
-                <div className="flex-1">
-                  <h4 className={`font-medium ${task.completed ? 'text-green-800' : 'text-gray-900'}`}>
-                    {task.title}
-                  </h4>
-                  <p className={`text-sm mt-1 ${task.completed ? 'text-green-600' : 'text-gray-600'}`}>
-                    {task.description}
-                  </p>
-                </div>
-                <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center ${
-                  task.completed 
-                    ? 'border-green-500 bg-green-500' 
-                    : 'border-gray-300'
-                }`}>
-                  {task.completed && <CheckCircle className="text-white text-xs" />}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Remaining Days Overview */}
-        {progress.currentDay < campaign.totalDays && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
-            <div className="space-y-3">
-              {Array.from({ length: campaign.totalDays - progress.currentDay }, (_, index) => {
-                const dayNumber = progress.currentDay + 1 + index;
-              
-                return (
-                  <div
-                    key={dayNumber}
-                    className="flex items-center justify-between p-4 rounded-xl border transition-colors border-gray-200 bg-gray-50"
-                  >
-                    <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold bg-gray-400">
-                        {dayNumber}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-600">
-                          {t('progress.day', { number: dayNumber })}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {t('progress.lockedDay', { number: dayNumber })}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Lock className="w-4 h-4 text-gray-400" />
+        {/* Unified timeline: render day card, then mini rewards (if not last day) */}
+        <div className="space-y-3">
+          {days.map((day) => {
+            // Determine day state
+            const isCompleted = previousDays.some(d => d.number === day);
+            const isCurrent = progress.currentDay === day;
+            const isFuture = day > progress.currentDay;
+            // Render day card
+            return (
+              <div key={day}>
+                <div
+                  className={
+                    isCompleted
+                      ? "bg-green-50 rounded-xl p-4 border border-green-200"
+                      : isCurrent
+                      ? "bg-white rounded-xl p-4 border-2 border-primary"
+                      : "bg-gray-50 rounded-xl p-4 border border-gray-200 opacity-80"
+                  }
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={
+                      isCompleted
+                        ? "text-green-800 font-medium text-sm"
+                        : isCurrent
+                        ? "text-primary font-semibold text-sm"
+                        : "text-gray-500 font-medium text-sm"
+                    }>
+                      {isCompleted
+                        ? t('progress.dayCompleted', { number: day })
+                        : t('progress.day', { number: day })}
+                    </span>
+                    <div className={
+                      isCompleted
+                        ? "w-6 h-6 bg-green-500 rounded-full flex items-center justify-center"
+                        : isCurrent
+                        ? "w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                        : "w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center"
+                    }>
+                      {isCompleted ? (
+                        <CheckCircle className="text-white text-xs" />
+                      ) : isCurrent ? (
+                        <span className="w-5 h-5 flex items-center justify-center">
+                          <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        </span>
+                      ) : (
+                        <span className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 shadow-sm">
+                          <Lock className="w-4 h-4 text-gray-500" />
+                        </span>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-
-
+                  {isCompleted && (
+                    <p className="text-green-700 text-xs mt-1">
+                      {t('progress.completedOn', { date: new Date(previousDays.find(d => d.number === day)?.completedAt || '').toLocaleDateString() })}
+                    </p>
+                  )}
+                  {isCurrent && (
+                    <>
+                      <p className="text-gray-600 text-xs mt-1">{t('progress.completeCurrentDay')}</p>
+                      <div className="mt-4 space-y-3">
+                        {tasks.map((task) => (
+                          <div 
+                            key={task.id}
+                            className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border rounded-xl transition-colors ${
+                              task.completed 
+                                ? 'border-green-200 bg-green-50' 
+                                : 'border-gray-200 hover:border-primary/30 cursor-pointer'
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 ${
+                              task.completed ? 'bg-green-500' : 'bg-primary'
+                            }`}>
+                              {task.completed ? <CheckCircle className="w-4 h-4" /> : task.number}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className={`font-medium ${task.completed ? 'text-green-800' : 'text-gray-900'}`}>{task.title}</h4>
+                              <p className={`text-sm mt-1 ${task.completed ? 'text-green-600' : 'text-gray-600'}`}>{task.description}</p>
+                            </div>
+                            <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center ${
+                              task.completed 
+                                ? 'border-green-500 bg-green-500' 
+                                : 'border-gray-300'
+                            }`}>
+                              {task.completed && <CheckCircle className="text-white text-xs" />}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                {/* Mini rewards after this day (if not last day) */}
+                {day < totalDays && (miniRewardsByDay[day] || []).map((reward) => {
+                  // Unlocked if the day is completed
+                  const unlocked = previousDays.some(d => d.number === day);
+                  return (
+                    <div
+                      key={reward.id}
+                      className={`flex items-center gap-3 mt-2 p-3 border rounded transition-opacity ${unlocked ? "bg-yellow-50" : "bg-gray-100 opacity-60"}`}
+                    >
+                      <Gift className={`w-5 h-5 ${unlocked ? "text-yellow-500" : "text-gray-400"}`} />
+                      <div className="flex-1">
+                        <div className="font-medium">{reward.title}</div>
+                        <div className="text-sm text-gray-600">{reward.description}</div>
+                      </div>
+                      {!unlocked && <Lock className="w-4 h-4 text-gray-400 ml-2" />}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

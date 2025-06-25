@@ -14,12 +14,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertCampaignSchema, insertMilestoneSchema } from "@shared/schema";
+import { insertCampaignSchema, insertMilestoneSchema, insertMiniRewardSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Settings, Users, Trophy, CheckCircle, LogOut } from "lucide-react";
+import { Plus, Edit, Trash2, Settings, Users, Trophy, CheckCircle, LogOut, Gift } from "lucide-react";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { z } from "zod";
+import { MiniReward, InsertMiniReward } from "@/lib/types";
 
 const campaignFormSchema = insertCampaignSchema.extend({
   total_days: z.number().min(1).max(365),
@@ -50,6 +51,7 @@ export default function Admin() {
   const [selectedCampaign, setSelectedCampaign] = useState<number | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<any>(null);
   const [editingMilestone, setEditingMilestone] = useState<any>(null);
+  const [editingMiniReward, setEditingMiniReward] = useState<any>(null);
 
   // Queries
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
@@ -61,7 +63,11 @@ export default function Admin() {
     enabled: !!selectedCampaign,
   });
 
-
+  // Mini rewards query
+  const { data: miniRewards = [] } = useQuery({
+    queryKey: [`/admin/api/campaigns/${selectedCampaign}/mini-rewards`],
+    enabled: !!selectedCampaign,
+  });
 
   // Campaign mutations
   const createCampaignMutation = useMutation({
@@ -116,6 +122,36 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/admin/campaigns/${selectedCampaign}/milestones`] });
       toast({ title: "Milestone deleted successfully!" });
+    },
+  });
+
+  // Mini rewards mutations
+  const createMiniRewardMutation = useMutation({
+    mutationFn: (data: InsertMiniReward) =>
+      apiRequest("POST", `/admin/api/campaigns/${selectedCampaign}/mini-rewards`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/admin/api/campaigns/${selectedCampaign}/mini-rewards`] });
+      toast({ title: "Mini reward created successfully!" });
+      setEditingMiniReward(null);
+    },
+  });
+
+  const updateMiniRewardMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: InsertMiniReward }) =>
+      apiRequest("PUT", `/admin/api/mini-rewards/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/admin/api/campaigns/${selectedCampaign}/mini-rewards`] });
+      toast({ title: "Mini reward updated successfully!" });
+      setEditingMiniReward(null);
+    },
+  });
+
+  const deleteMiniRewardMutation = useMutation({
+    mutationFn: (id: number) =>
+      apiRequest("DELETE", `/admin/api/mini-rewards/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/admin/api/campaigns/${selectedCampaign}/mini-rewards`] });
+      toast({ title: "Mini reward deleted successfully!" });
     },
   });
 
@@ -432,6 +468,107 @@ export default function Admin() {
     );
   };
 
+  // MiniRewardForm component
+  const MiniRewardForm = ({ miniReward, onClose }: { miniReward?: MiniReward; onClose: () => void }) => {
+    const form = useForm<InsertMiniReward>({
+      resolver: zodResolver(insertMiniRewardSchema),
+      defaultValues: miniReward || {
+        campaign_id: selectedCampaign || 1,
+        title_en: "",
+        title_ar: "",
+        description_en: "",
+        description_ar: "",
+        after_day_number: 1,
+      },
+    });
+    const onSubmit = (data: InsertMiniReward) => {
+      if (miniReward) {
+        updateMiniRewardMutation.mutate({ id: miniReward.id, data });
+      } else {
+        createMiniRewardMutation.mutate(data);
+      }
+    };
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="after_day_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>After Day Number</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="title_en"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>English Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="title_ar"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Arabic Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description_en"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>English Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description_ar"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Arabic Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex space-x-2">
+            <Button type="submit" disabled={createMiniRewardMutation.isPending || updateMiniRewardMutation.isPending}>
+              {miniReward ? "Update" : "Create"} Mini Reward
+            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Form>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -462,7 +599,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="campaigns" className="flex items-center space-x-2">
               <Trophy className="w-4 h-4" />
               <span>Campaigns</span>
@@ -470,6 +607,10 @@ export default function Admin() {
             <TabsTrigger value="milestones" className="flex items-center space-x-2">
               <Settings className="w-4 h-4" />
               <span>Milestones</span>
+            </TabsTrigger>
+            <TabsTrigger value="mini-rewards" className="flex items-center space-x-2">
+              <Gift className="w-4 h-4" />
+              <span>Mini Rewards</span>
             </TabsTrigger>
           </TabsList>
 
@@ -623,6 +764,100 @@ export default function Admin() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => deleteMilestoneMutation.mutate(milestone.id)}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="mini-rewards" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Mini Rewards</h2>
+              <div className="flex items-center space-x-4">
+                <Select value={selectedCampaign?.toString()} onValueChange={value => setSelectedCampaign(parseInt(value))}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select Campaign" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(campaigns as any[]).map((campaign: any) => (
+                      <SelectItem key={campaign.id} value={campaign.id.toString()}>
+                        {campaign.title_en}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedCampaign && (
+                  <Dialog open={!!editingMiniReward} onOpenChange={open => !open && setEditingMiniReward(null)}>
+                    <DialogTrigger asChild>
+                      <Button onClick={() => setEditingMiniReward({})}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Mini Reward
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>
+                          {editingMiniReward?.id ? "Edit Mini Reward" : "Create New Mini Reward"}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <MiniRewardForm
+                        miniReward={editingMiniReward?.id ? editingMiniReward : null}
+                        onClose={() => setEditingMiniReward(null)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            </div>
+            {selectedCampaign && (
+              <div className="space-y-4">
+                {Object.entries((miniRewards as MiniReward[]).reduce((acc: Record<number, MiniReward[]>, reward) => {
+                  const day = reward.after_day_number;
+                  if (!acc[day]) acc[day] = [];
+                  acc[day].push(reward);
+                  return acc;
+                }, {})).map(([dayNumber, dayRewards]: [string, MiniReward[]]) => (
+                  <Card key={dayNumber}>
+                    <CardHeader>
+                      <CardTitle>After Day {dayNumber}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {dayRewards.map((reward: MiniReward) => (
+                          <div key={reward.id} className="flex items-center justify-between p-3 border rounded">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                                  ID: {reward.id}
+                                </span>
+                                <Gift className="w-4 h-4 text-yellow-500" />
+                                <p className="font-medium">EN: {reward.title_en}</p>
+                                <p className="font-medium">AR: {reward.title_ar}</p>
+                              </div>
+                              <p className="text-sm text-gray-600">EN: {reward.description_en}</p>
+                              <p className="text-sm text-gray-600">AR: {reward.description_ar}</p>
+                              <p className="text-xs text-gray-500">After Day: {reward.after_day_number}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingMiniReward(reward)}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => deleteMiniRewardMutation.mutate(reward.id)}
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>
