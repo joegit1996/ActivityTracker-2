@@ -500,7 +500,7 @@ export default function Admin() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {campaigns.map((campaign: any) => (
+              {(campaigns as any[]).map((campaign: any) => (
                 <Card key={campaign.id} className="relative">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -554,7 +554,7 @@ export default function Admin() {
                     <SelectValue placeholder="Select Campaign" />
                   </SelectTrigger>
                   <SelectContent>
-                    {campaigns.map((campaign: any) => (
+                    {(campaigns as any[]).map((campaign: any) => (
                       <SelectItem key={campaign.id} value={campaign.id.toString()}>
                         {campaign.title_en}
                       </SelectItem>
@@ -606,9 +606,9 @@ export default function Admin() {
                                 <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                                   ID: {milestone.id}
                                 </span>
-                                <p className="font-medium">{milestone.title}</p>
+                                <p className="font-medium">{milestone.title_en}</p>
                               </div>
-                              <p className="text-sm text-gray-600">{milestone.description}</p>
+                              <p className="text-sm text-gray-600">{milestone.description_en}</p>
                               <p className="text-xs text-gray-500">Order: {milestone.order_index}</p>
                             </div>
                             <div className="flex space-x-2">

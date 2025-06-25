@@ -1,21 +1,20 @@
 # Activity Streak Web App
 
-An advanced internationalized Activity Streak Web App that provides a dynamic, engaging user experience for tracking personal progress across multilingual campaigns.
+A modern, internationalized Activity Streak Web App for tracking progress across multilingual campaigns, with a robust admin dashboard and real-time updates.
 
 ## Features
 
-- **Multilingual Support**: Full Arabic and English support with RTL/LTR text alignment
-- **Progress Tracking**: Visual progress bars, streak counters, and completion percentages
-- **Campaign Management**: Admin interface for creating and managing campaigns
-- **Milestone System**: Daily tasks with completion tracking
-- **Responsive Design**: Mobile-first design optimized for all devices
-- **Real-time Updates**: Dynamic progress updates and animations
-- **Admin Dashboard**: Complete campaign and user management
+- **Multilingual**: English & Arabic (RTL/LTR)
+- **Progress Tracking**: Visual streaks, progress bars, completion
+- **Campaign & Milestone Management**: Full admin UI
+- **Responsive**: Mobile-first, works on all devices
+- **Real-time**: Dynamic updates, smooth UX
+- **Secure**: JWT authentication, session management
 
 ## Tech Stack
 
 ### Frontend
-- React with TypeScript
+- React (TypeScript)
 - Vite for build tooling
 - Tailwind CSS for styling
 - Shadcn/ui components
@@ -25,223 +24,152 @@ An advanced internationalized Activity Streak Web App that provides a dynamic, e
 - Framer Motion for animations
 
 ### Backend
-- Express.js with TypeScript
+- Express.js (TypeScript)
 - MySQL database
 - Drizzle ORM
 - JWT authentication
 - bcrypt for password hashing
+- dotenv
 - Express Rate Limiting
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+ (Node 20+ supported; see troubleshooting for port issues)
 - MySQL database
-- npm or yarn
+- npm (or yarn)
 
-## Installation
+## Installation & Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd activity-streak-app
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup**
-   
-   Create a `.env` file in the root directory with the following variables:
-   ```env
-   # Database Configuration
-   DB_HOST=your-mysql-host
-   DB_USER=your-mysql-username
-   DB_PASSWORD=your-mysql-password
-   DB_NAME=your-database-name
-   DB_PORT=3306
-   
-   # Authentication
-   SESSION_SECRET=your-session-secret
-   JWT_SECRET=your-jwt-secret
-   
-   # Optional: Webhook Token for milestone completion API
-   WEBHOOK_TOKEN=your-webhook-token
-   
-   # Environment Configuration
-   NODE_ENV=development
-   PORT=5000
-   DOMAIN=appstreak.q84sale.com
-   ```
-
-4. **Database Setup**
-   
-   The application will create the necessary MySQL tables automatically. Ensure your MySQL user has CREATE table permissions.
-
-5. **Start the application**
-   ```bash
-   npm run dev
-   ```
-
-The app will be available at `http://localhost:5000`
-
-## Docker Deployment
-
-### Building the Docker Image
+### 1. Clone the Repository
 ```bash
-docker build -t activity-streak-app .
+git clone <your-repo-url>
+cd ActivityTracker-2
 ```
 
-### Running with Docker
+### 2. Install Dependencies
 ```bash
-docker run -p 80:5000 \
-  -e NODE_ENV=production \
-  -e PORT=5000 \
-  -e DB_HOST=your-production-db \
-  -e DB_USER=your-db-user \
-  -e DB_PASSWORD=your-db-password \
-  -e DB_NAME=your-db-name \
-  -e SESSION_SECRET=your-session-secret \
-  -e JWT_SECRET=your-jwt-secret \
-  -e WEBHOOK_TOKEN=your-webhook-token \
-  activity-streak-app
+npm install
+npm install --save-dev @types/node @types/express
+dotenv # If not already installed
 ```
 
-### Running on Different Port
-```bash
-docker run -p 8080:8080 \
-  -e PORT=8080 \
-  -e NODE_ENV=production \
-  -e DB_HOST=your-production-db \
-  -e DB_USER=your-db-user \
-  -e DB_PASSWORD=your-db-password \
-  -e DB_NAME=your-db-name \
-  -e SESSION_SECRET=your-session-secret \
-  -e JWT_SECRET=your-jwt-secret \
-  -e WEBHOOK_TOKEN=your-webhook-token \
-  activity-streak-app
-```
+### 3. Environment Variables
+Create a `.env` file in the project root:
+```env
+# Database Configuration
+DB_HOST=your-mysql-host
+DB_USER=your-mysql-username
+DB_PASSWORD=your-mysql-password
+DB_NAME=your-database-name
+DB_PORT=3306
 
-### Health Check
-The Docker container includes a health check endpoint at `/health` that monitors:
-- Server status
-- Application uptime
-- Environment information
+# Authentication
+SESSION_SECRET=your-session-secret
+JWT_SECRET=your-jwt-secret
+
+# Webhook Token for milestone completion API
+WEBHOOK_TOKEN=your-webhook-token
+
+# Environment
+NODE_ENV=development
+PORT=5000 # Change if port 5000 is in use
+DOMAIN=appstreak.q84sale.com
+```
+**Troubleshooting:**
+- If environment variables are not being read, ensure `.env` is saved, not empty, and in the project root.
+- If you see `DB_USER: undefined`, delete and re-create `.env`.
+
+### 4. Database Setup
+- The app auto-creates tables if your MySQL user has CREATE permissions.
+- You can use `npm run db:push` to push schema changes (Drizzle ORM).
+
+### 5. Running the App
+- **Development:**
+  ```bash
+  npm run dev
+  ```
+  - If you see `EADDRINUSE: address already in use`, change `PORT` in `.env` (e.g., `PORT=5001`).
+  - If you see `ENOTSUP: operation not supported on socket`, remove the `host` option from `server.listen` (already fixed in this repo).
+- **Production Build:**
+  ```bash
+  npm run build
+  npm run preview
+  ```
+
+## Admin Panel
+- Visit: `http://localhost:<PORT>/admin`
+- Login with your admin credentials (default: `admin`/`admin123` if seeded)
+- Manage campaigns and milestones
+- **Milestone Titles:**
+  - Milestone titles are now shown using `title_en` (English) or `title_ar` (Arabic). If you see missing titles, ensure your milestones have these fields populated.
 
 ## API Reference
 
-### Frontend Web Pages
-- `/` - Main application homepage
-- `/web/en/progress/:userId` - English progress tracking page
-- `/web/ar/progress/:userId` - Arabic progress tracking page (RTL layout)
-- `/web/en/admin` - English admin dashboard
-- `/web/ar/admin` - Arabic admin dashboard
-- `/admin` - Admin login page
+### Authentication
+- All `/admin` endpoints require a JWT token (login via `/admin/login`).
+- Pass the token as `Authorization: Bearer <token>`.
 
-### Public API Endpoints
-- `GET /health` - Health check for monitoring and Docker
-- `GET /api/progress/:userId/:campaignId?lang=en|ar` - Get user progress for specific campaign
+### Main Endpoints
+- `GET /health` — Health check
+- `GET /api/progress/:userId/:campaignId?lang=en|ar` — User progress
+- `POST /api/milestone/complete` — Complete a milestone (requires `WEBHOOK_TOKEN`)
+- `GET /admin/campaigns/:campaignId/milestones` — Milestones for a campaign (JWT required)
 
-### Webhook API (Token Required)
-- `POST /api/milestone/complete` - Complete a milestone task
-
-### Admin Management API (JWT Required)
-
-**Authentication:**
-- `POST /admin/login` - Admin login
-- `GET /admin/me` - Get current admin details
-- `POST /admin/logout` - Admin logout
-
-**Campaign Management:**
-- `GET /admin/campaigns` - List all campaigns
-- `POST /api/campaigns` - Create new campaign
-- `PUT /api/campaigns/:id` - Update campaign
-- `DELETE /api/campaigns/:id` - Delete campaign
-
-**Milestone Management:**
-- `GET /admin/campaigns/:campaignId/milestones` - Get milestones for campaign
-- `POST /api/milestones` - Create new milestone
-- `PUT /api/milestones/:id` - Update milestone
-- `DELETE /api/milestones/:id` - Delete milestone
-
-## Database Schema
-
-### Tables
-- **users**: User information and language preferences
-- **campaigns**: Campaign details in multiple languages
-- **milestones**: Daily tasks within campaigns
-- **milestone_completions**: User progress tracking
-- **admins**: Admin user accounts
-- **campaign_completions**: Full campaign completion tracking
-
-## Usage
-
-### Admin Panel
-1. Navigate to `/admin`
-2. Login with admin credentials
-3. Manage campaigns, view user progress, and track completions
-
-### User Progress
-Users can view their progress at:
-- English: `/web/en/progress/:userId` 
-- Arabic: `/web/ar/progress/:userId`
-
-### Webhook Integration
-The app supports milestone completion via webhook:
-```bash
-POST /api/milestone/complete
-Content-Type: application/json
-Authorization: Bearer <WEBHOOK_TOKEN>
-# Or alternatively:
-X-API-Token: <WEBHOOK_TOKEN>
-
-{
-  "user_id": 100,
-  "campaign_id": 1,
-  "day_number": 1,
-  "milestone_id": 2
-}
+## Project Structure
 ```
-
-## Development
-
-### Project Structure
-```
-├── client/                 # React frontend
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── pages/          # Application pages
-│   │   ├── lib/            # Utilities and configurations
-│   │   └── i18n/           # Internationalization files
-├── server/                 # Express backend
-│   ├── db.ts              # Database connection
-│   ├── routes.ts          # API routes
-│   ├── storage.ts         # Database operations
-│   └── index.ts           # Server entry point
-├── shared/                 # Shared types and schemas
+ActivityTracker-2/
+├── client/           # React frontend
+│   └── src/
+│       ├── components/
+│       ├── hooks/
+│       ├── pages/
+│       ├── lib/
+│       └── i18n/
+├── server/           # Express backend
+│   ├── db.ts
+│   ├── routes.ts
+│   ├── storage.ts
+│   └── index.ts
+├── shared/           # Shared types and schemas
+├── .env              # Environment variables
+├── package.json
 └── README.md
 ```
 
-### Scripts
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run db:push` - Push database schema changes
+## Scripts
+- `npm run dev` — Start dev server
+- `npm run build` — Build frontend & backend
+- `npm run preview` — Preview production build
+- `npm run db:push` — Push DB schema (Drizzle)
+
+## Docker Usage
+- **Build:**
+  ```bash
+  docker build -t activity-streak-app .
+  ```
+- **Run:**
+  ```bash
+  docker run -p 5000:5000 --env-file .env activity-streak-app
+  ```
+  - Or set env vars with `-e` flags as needed
+- **Health Check:**
+  - Visit `/health` endpoint inside the container
+
+## Troubleshooting & Tips
+- **Port in use:** Change `PORT` in `.env` if you see `EADDRINUSE` errors
+- **ENOTSUP error:** Use only `server.listen(port, ...)` (already fixed)
+- **Environment variables not loading:** Ensure `.env` is not empty, is in the root, and is saved
+- **TypeScript errors:** Ensure `@types/node` and `@types/express` are installed and `tsconfig.json` includes them in `types`
+- **Milestone titles not showing:** The frontend now uses `milestone.title_en`/`milestone.title_ar` — update your data if needed
 
 ## Contributing
-
-1. Fork the repository
+1. Fork the repo
 2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+3. Make changes & add tests
+4. Submit a pull request
 
 ## License
-
-This project is licensed under the MIT License.
+MIT
 
 ## Support
-
-For support or questions, please contact the development team.
+For questions or support, contact the development team.
