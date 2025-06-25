@@ -1,15 +1,17 @@
 # Activity Streak Web App
 
-A modern, internationalized Activity Streak Web App for tracking progress across multilingual campaigns, with a robust admin dashboard and real-time updates.
+A modern, internationalized Activity Streak Web App for tracking progress across multilingual campaigns, with a robust admin dashboard, mini rewards, and real-time updates.
 
 ## Features
 
 - **Multilingual**: English & Arabic (RTL/LTR)
-- **Progress Tracking**: Visual streaks, progress bars, completion
-- **Campaign & Milestone Management**: Full admin UI
+- **Progress Tracking**: Visual streaks, progress bars, completion, and mini rewards
+- **Campaign, Milestone & Mini Reward Management**: Full admin UI for all
+- **Mini Rewards**: Configurable rewards shown between days, managed from admin panel
 - **Responsive**: Mobile-first, works on all devices
 - **Real-time**: Dynamic updates, smooth UX
 - **Secure**: JWT authentication, session management
+- **Animated UI**: Animated icons for rewards, smooth transitions
 
 ## Tech Stack
 
@@ -22,6 +24,7 @@ A modern, internationalized Activity Streak Web App for tracking progress across
 - Wouter for routing
 - i18next for internationalization
 - Framer Motion for animations
+- Lucide icons (including animated banknote for cash rewards)
 
 ### Backend
 - Express.js (TypeScript)
@@ -50,7 +53,6 @@ cd ActivityTracker-2
 ```bash
 npm install
 npm install --save-dev @types/node @types/express
-dotenv # If not already installed
 ```
 
 ### 3. Environment Variables
@@ -82,6 +84,7 @@ DOMAIN=appstreak.q84sale.com
 ### 4. Database Setup
 - The app auto-creates tables if your MySQL user has CREATE permissions.
 - You can use `npm run db:push` to push schema changes (Drizzle ORM).
+- **Mini Rewards:** Ensure your DB has the `mini_rewards` table (see migrations or schema).
 
 ### 5. Running the App
 - **Development:**
@@ -99,9 +102,37 @@ DOMAIN=appstreak.q84sale.com
 ## Admin Panel
 - Visit: `http://localhost:<PORT>/admin`
 - Login with your admin credentials (default: `admin`/`admin123` if seeded)
-- Manage campaigns and milestones
+- Manage campaigns, milestones, and mini rewards
+- **Mini Rewards:**
+  - Add, edit, and delete mini rewards for each campaign
+  - Each mini reward has English & Arabic title/description, and is shown after a specific day
+  - Mini rewards are displayed between days on the user progress timeline
 - **Milestone Titles:**
-  - Milestone titles are now shown using `title_en` (English) or `title_ar` (Arabic). If you see missing titles, ensure your milestones have these fields populated.
+  - Milestone titles are shown using `title_en` (English) or `title_ar` (Arabic). If you see missing titles, ensure your milestones have these fields populated.
+- **Admin UI Improvements:**
+  - All fields for mini rewards (EN/AR) are now visible and editable
+  - Editing a mini reward pre-fills all values
+
+## Mini Rewards
+- **What are Mini Rewards?**
+  - Configurable rewards shown between days on the progress timeline
+  - Managed from the admin panel under the "Mini Rewards" tab
+  - Each reward can have English and Arabic title/description
+  - Shown to users after completing the specified day
+  - Locked/unlocked state is visually indicated
+
+## Progress Page & User Experience
+- **Animated Banknote Icon:**
+  - The main reward card now shows an animated spinning banknote icon (Lucide) if the user hasn't completed all days
+  - Text: "Complete all milestones for a big CASH reward" (or Arabic translation)
+- **Timeline:**
+  - Unified timeline: for each day, the day card is shown, and any mini rewards for that day are rendered immediately after
+  - Mini rewards are never duplicated or misplaced
+  - Locked/unlocked state for mini rewards is visually clear
+- **Current Day:**
+  - The current day's milestones/tasks are shown inside the day's card
+- **Locked Days:**
+  - Locked days have a visually improved lock icon inside a soft gray circle
 
 ## API Reference
 
@@ -111,9 +142,10 @@ DOMAIN=appstreak.q84sale.com
 
 ### Main Endpoints
 - `GET /health` — Health check
-- `GET /api/progress/:userId/:campaignId?lang=en|ar` — User progress
+- `GET /api/progress/:userId/:campaignId?lang=en|ar` — User progress (includes mini rewards)
 - `POST /api/milestone/complete` — Complete a milestone (requires `WEBHOOK_TOKEN`)
 - `GET /admin/campaigns/:campaignId/milestones` — Milestones for a campaign (JWT required)
+- `GET /admin/api/campaigns/:campaignId/mini-rewards` — Mini rewards for a campaign (JWT required)
 
 ## Project Structure
 ```
@@ -161,6 +193,7 @@ ActivityTracker-2/
 - **Environment variables not loading:** Ensure `.env` is not empty, is in the root, and is saved
 - **TypeScript errors:** Ensure `@types/node` and `@types/express` are installed and `tsconfig.json` includes them in `types`
 - **Milestone titles not showing:** The frontend now uses `milestone.title_en`/`milestone.title_ar` — update your data if needed
+- **Mini rewards not showing:** Ensure your DB has the `mini_rewards` table and your API returns them for the campaign
 
 ## Contributing
 1. Fork the repo
