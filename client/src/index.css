@@ -35,6 +35,39 @@
   }
 }
 
+/* RTL Progress Bar Support */
+.rtl-progress {
+  direction: rtl;
+}
+.rtl-progress .animated-progress-fill {
+  left: auto;
+  right: 0;
+  background: linear-gradient(270deg, #3b82f6, #1d4ed8);
+  animation: progress-fill-rtl 500ms ease-out forwards;
+}
+.rtl-progress .animated-progress-fill::after {
+  animation: progress-shimmer-rtl 1.5s ease-in-out infinite;
+  left: auto;
+  right: 0;
+  transform: translateX(100%);
+}
+@keyframes progress-fill-rtl {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+@keyframes progress-shimmer-rtl {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 .animated-progress {
   position: relative;
   height: 12px;

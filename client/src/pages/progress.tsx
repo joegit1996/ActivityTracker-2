@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import type { ProgressResponse, LocalizedMiniReward } from "@/lib/types";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSackDollar } from '@fortawesome/free-solid-svg-icons';
+import { faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 
 // Custom hook for animated counter
 function useAnimatedCounter(end: number, duration: number = 500) {
@@ -215,7 +215,7 @@ export default function Progress() {
             </span>
           </div>
           {/* Animated Progress Bar */}
-          <div className={`animated-progress ${i18n.language === 'ar' ? 'transform scale-x-[-1]' : ''}`}> 
+          <div className={`animated-progress${i18n.language === 'ar' ? ' rtl-progress' : ''}`}> 
             <div 
               className="animated-progress-fill"
               style={{ 
@@ -232,7 +232,7 @@ export default function Progress() {
                   : 'Complete all milestones for a big CASH reward'}{' '}
                 <span role="img" aria-label="prize">🎁</span>
               </h3>
-              <FontAwesomeIcon icon={faSackDollar} beat className="mx-auto mt-2 text-blue-900 p-4" style={{ fontSize: 90 }} />
+              <FontAwesomeIcon icon={faMoneyBillWave} beat className="mx-auto mt-2 text-blue-900 p-4" style={{ fontSize: 90 }} />
             </div>
           )}
         </div>
