@@ -32,6 +32,14 @@ export interface PreviousDay {
   completedAt: string;
 }
 
+export interface LocalizedMiniReward {
+  id: number;
+  campaign_id: number;
+  title: string;
+  description: string;
+  after_day_number: number;
+}
+
 export interface ProgressResponse {
   campaign: Campaign;
   progress: Progress;
@@ -39,4 +47,17 @@ export interface ProgressResponse {
   tasks: Task[];
   previousDays: PreviousDay[];
   nextDay: number | null;
+  miniRewards: LocalizedMiniReward[];
 }
+
+export interface MiniReward {
+  id: number;
+  campaign_id: number;
+  title_en: string;
+  title_ar: string;
+  description_en: string;
+  description_ar: string;
+  after_day_number: number;
+}
+
+export type InsertMiniReward = Omit<MiniReward, 'id'>;

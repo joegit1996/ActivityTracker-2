@@ -25,3 +25,13 @@ export function getLocalizedMilestone(milestone: Milestone, language: SupportedL
     number: milestone.order_index + 1
   };
 }
+
+export function getLocalizedMiniReward(miniReward: any, language: SupportedLanguage = 'en') {
+  return {
+    id: miniReward.id,
+    campaign_id: miniReward.campaign_id,
+    title: language === 'ar' ? miniReward.title_ar : miniReward.title_en,
+    description: language === 'ar' ? miniReward.description_ar : miniReward.description_en,
+    after_day_number: miniReward.after_day_number,
+  };
+}

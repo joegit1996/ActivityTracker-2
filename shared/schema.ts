@@ -164,3 +164,27 @@ export const completeTaskSchema = z.object({
 });
 
 export type CompleteTaskRequest = z.infer<typeof completeTaskSchema>;
+
+export const mini_rewards = mysqlTable("mini_rewards", {
+  id: serial("id").primaryKey(),
+  campaign_id: int("campaign_id").notNull(),
+  title_en: varchar("title_en", { length: 255 }).notNull(),
+  title_ar: varchar("title_ar", { length: 255 }).notNull(),
+  description_en: text("description_en").notNull(),
+  description_ar: text("description_ar").notNull(),
+  after_day_number: int("after_day_number").notNull(),
+});
+
+export const miniRewardsRelations = relations(mini_rewards, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [mini_rewards.campaign_id],
+    references: [campaigns.id],
+  }),
+}));
+
+export const insertMiniRewardSchema = createInsertSchema(mini_rewards).omit({
+  id: true,
+});
+
+export type MiniReward = typeof mini_rewards.$inferSelect;
+export type InsertMiniReward = z.infer<typeof insertMiniRewardSchema>;

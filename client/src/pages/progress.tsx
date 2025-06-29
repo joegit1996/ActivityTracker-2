@@ -7,6 +7,8 @@ import { Trophy, Lock, CheckCircle, X, Flame, Gift, Banknote } from "lucide-reac
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import type { ProgressResponse, LocalizedMiniReward } from "@/lib/types";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSackDollar } from '@fortawesome/free-solid-svg-icons';
 
 // Custom hook for animated counter
 function useAnimatedCounter(end: number, duration: number = 500) {
@@ -193,8 +195,8 @@ export default function Progress() {
           <p className="text-gray-600 text-base">{t('app.subtitle')}</p>
         </div>
 
-        {/* Streak Progress */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        {/* Streak Progress + Reward Section (merged) */}
+        <div className="bg-blue-50 rounded-2xl p-6 shadow-sm border border-blue-200">
           <div className="flex justify-between items-center mb-4">
             <span className="text-gray-900 font-medium">
               {t('progress.currentStreak')}: <span className="text-primary font-semibold">{streak.currentDays} {t('progress.days')}</span>
@@ -204,7 +206,6 @@ export default function Progress() {
               <span className="text-sm font-normal text-gray-600 ml-1">{t('progress.complete')}</span>
             </span>
           </div>
-          
           <div className="flex justify-between items-center mb-3">
             <span className="text-xs text-gray-500">
               {i18n.language === 'ar' ? `${t('progress.dayLabel')} 1` : `${t('progress.dayLabel')} 1`}
@@ -213,9 +214,8 @@ export default function Progress() {
               {i18n.language === 'ar' ? `${t('progress.dayLabel')} ${campaign.totalDays}` : `${t('progress.dayLabel')} ${campaign.totalDays}`}
             </span>
           </div>
-          
           {/* Animated Progress Bar */}
-          <div className={`animated-progress ${i18n.language === 'ar' ? 'transform scale-x-[-1]' : ''}`}>
+          <div className={`animated-progress ${i18n.language === 'ar' ? 'transform scale-x-[-1]' : ''}`}> 
             <div 
               className="animated-progress-fill"
               style={{ 
@@ -223,68 +223,19 @@ export default function Progress() {
               } as React.CSSProperties}
             ></div>
           </div>
-          
-
+          {/* Reward merged below progress bar */}
+          {!isCompleted && (
+            <div className="flex flex-col items-center mt-6">
+              <h3 className="font-bold text-blue-900 text-lg mb-2 text-center">
+                {i18n.language === 'ar'
+                  ? 'أكمل جميع المهام لتحصل على جائزة نقدية كبيرة'
+                  : 'Complete all milestones for a big CASH reward'}{' '}
+                <span role="img" aria-label="prize">🎁</span>
+              </h3>
+              <FontAwesomeIcon icon={faSackDollar} beat className="mx-auto mt-2 text-blue-900 p-4" style={{ fontSize: 90 }} />
+            </div>
+          )}
         </div>
-
-
-
-        {/* Reward Card */}
-        {!isCompleted ? (
-          // Normal state - clean and simple with subtle distinction
-          <div className="bg-blue-50/30 rounded-2xl p-6 shadow-md border-l-4 border-blue-500 border border-gray-100 space-y-4">
-            <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                {/* Animated cash icon for reward */}
-                <Banknote className={`text-green-500 text-xl`} style={{ animation: 'spin 2s linear infinite' }} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-1">
-                  {i18n.language === 'ar'
-                    ? 'أكمل جميع المهام لتحصل على جائزة نقدية كبيرة'
-                    : 'Complete all milestones for a big CASH reward'}
-                </h3>
-              </div>
-              <div className="text-primary font-semibold text-sm">{animatedPercentage}%</div>
-            </div>
-          </div>
-        ) : (
-          // Completed state - refined celebration
-          <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-6 shadow-lg border-2 border-yellow-300">
-            {/* Header with trophy */}
-            <div className="text-center mb-4">
-              <div className="mx-auto w-16 h-16 bg-yellow-200 rounded-full flex items-center justify-center mb-3">
-                <Trophy className="text-yellow-600 text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-yellow-800 mb-1">{campaign.reward.title}</h3>
-              <p className="text-yellow-700 text-sm">{campaign.reward.description}</p>
-              <div className="inline-block bg-yellow-200 rounded-full px-3 py-1 mt-2">
-                <span className="text-yellow-800 font-semibold text-sm">100% {t('progress.complete')}</span>
-              </div>
-            </div>
-            
-            {/* Congratulations section */}
-            <div className="bg-white/80 rounded-xl p-4 text-center">
-              <div className={`flex items-center justify-center gap-2 mb-3 ${
-                lang === 'ar' ? 'flex-row-reverse' : 'flex-row'
-              }`}>
-                <span className="text-xl">🎉</span>
-                <h4 className="text-lg font-bold text-gray-800">
-                  {t('progress.congratulations')}
-                </h4>
-              </div>
-              
-              {/* Reward message */}
-              {(campaign as any).rewardCode && (
-                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                  <p className="text-gray-800 font-medium text-base leading-relaxed">
-                    {(campaign as any).rewardCode}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Unified timeline: render day card, then mini rewards (if not last day) */}
         <div className="space-y-3">
