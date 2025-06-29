@@ -24,7 +24,8 @@ A modern, internationalized Activity Streak Web App for tracking progress across
 - Wouter for routing
 - i18next for internationalization
 - Framer Motion for animations
-- Lucide icons (including animated banknote for cash rewards)
+- Lucide icons
+- Font Awesome (animated icons, e.g., sack dollar for rewards)
 
 ### Backend
 - Express.js (TypeScript)
@@ -34,6 +35,9 @@ A modern, internationalized Activity Streak Web App for tracking progress across
 - bcrypt for password hashing
 - dotenv
 - Express Rate Limiting
+
+### Fonts
+- Uses the SakrPro font family globally (see `client/public/fonts/` and `client/src/index.css` for customization)
 
 ## Prerequisites
 
@@ -53,6 +57,8 @@ cd ActivityTracker-2
 ```bash
 npm install
 npm install --save-dev @types/node @types/express
+# For animated reward icon:
+npm install --save @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons
 ```
 
 ### 3. Environment Variables
@@ -122,8 +128,8 @@ DOMAIN=appstreak.q84sale.com
   - Locked/unlocked state is visually indicated
 
 ## Progress Page & User Experience
-- **Animated Banknote Icon:**
-  - The main reward card now shows an animated spinning banknote icon (Lucide) if the user hasn't completed all days
+- **Animated Reward Icon:**
+  - The main reward section now shows an animated Font Awesome sack dollar icon (blue, with padding) if the user hasn't completed all days
   - Text: "Complete all milestones for a big CASH reward" (or Arabic translation)
 - **Timeline:**
   - Unified timeline: for each day, the day card is shown, and any mini rewards for that day are rendered immediately after
@@ -206,3 +212,6 @@ MIT
 
 ## Support
 For questions or support, contact the development team.
+
+## Security Note
+Database credentials are read from `.env` and are **never logged** or exposed. (Console logging removed from server/db.ts)
