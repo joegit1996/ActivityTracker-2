@@ -223,6 +223,22 @@ export default function Progress() {
               } as React.CSSProperties}
             ></div>
           </div>
+
+          {/* Golden Reward Section on Completion */}
+          {isCompleted && (
+            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-5 my-6 flex flex-col items-center shadow-md">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-yellow-500 text-2xl">🏆</span>
+                <span className="font-extrabold text-yellow-800 text-lg text-center">
+                  {campaign.reward.title}
+                </span>
+              </div>
+              <div className="text-yellow-700 text-center text-base font-medium">
+                {campaign.reward.description}
+              </div>
+            </div>
+          )}
+
           {/* Reward merged below progress bar */}
           {!isCompleted && (
             <div className="flex flex-col items-center mt-6">
