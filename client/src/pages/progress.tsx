@@ -9,6 +9,7 @@ import confetti from "canvas-confetti";
 import type { ProgressResponse, LocalizedMiniReward } from "@/lib/types";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
+import { useUserId } from "@/hooks/use-user-id";
 
 // Custom hook for animated counter
 function useAnimatedCounter(end: number, duration: number = 500) {
@@ -42,9 +43,12 @@ function useAnimatedCounter(end: number, duration: number = 500) {
 }
 
 export default function Progress() {
-  const { userId, lang, campaignId } = useParams();
+  const { lang, campaignId } = useParams();
   const { t, i18n } = useTranslation();
   const [animationsTriggered, setAnimationsTriggered] = useState(false);
+
+  // Use the new hook for robust userId extraction
+  const { userId, error: userIdError, loading: userIdLoading } = useUserId();
 
   // Set language and HTML attributes based on URL
   useEffect(() => {
@@ -55,19 +59,38 @@ export default function Progress() {
     }
   }, [lang, i18n]);
   
+  const isValidUserId = typeof userId === 'string' && userId.trim() !== '';
+
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
     queryKey: ["/api/progress", userId, campaignId, lang],
     queryFn: async () => {
+      if (!isValidUserId) {
+        throw new Error('User ID is missing or invalid.');
+      }
       const url = campaignId 
         ? `/api/progress/${userId}/${campaignId}?lang=${lang || 'en'}`
         : `/api/progress/${userId}?lang=${lang || 'en'}`;
       const response = await fetch(url);
+      const contentType = response.headers.get('content-type');
       if (!response.ok) {
-        throw new Error("Failed to fetch progress");
+        let errorText = await response.text();
+        console.error('[Progress] Error response:', errorText);
+        throw new Error(`Failed to fetch progress: ${response.status}`);
       }
-      return response.json();
+      if (!contentType || !contentType.includes('application/json')) {
+        let errorText = await response.text();
+        console.error('[Progress] Non-JSON response:', errorText);
+        throw new Error('Server returned non-JSON response');
+      }
+      try {
+        return await response.json();
+      } catch (err) {
+        let errorText = await response.text();
+        console.error('[Progress] JSON parse error. Response body:', errorText);
+        throw new Error('Invalid JSON response from server');
+      }
     },
-    enabled: !!userId,
+    enabled: isValidUserId,
   });
 
   // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY EARLY RETURNS
@@ -130,6 +153,40 @@ export default function Progress() {
       }
     }
   }, [isCompleted, progressData]);
+
+  // Handle userId loading and error states
+  if (!isValidUserId && !userIdLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h1>
+          <p className="text-gray-600">User ID is missing or invalid in the URL and could not be determined automatically.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (userIdLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading user information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (userIdError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h1>
+          <p className="text-gray-600">{userIdError}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

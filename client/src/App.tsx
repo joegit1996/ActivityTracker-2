@@ -17,6 +17,21 @@ function LanguageRouter() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
+    // Normalize double slashes in the URL (except protocol)
+    if (typeof window !== 'undefined') {
+      const { pathname, search, hash } = window.location;
+      if (pathname.includes('//')) {
+        // Avoid replacing protocol (e.g., http://)
+        const normalized = pathname.replace(/\/\/+/, '/').replace(/\/\/+/, '/');
+        if (normalized !== pathname) {
+          window.location.replace(normalized + search + hash);
+          return;
+        }
+      }
+    }
+  }, [location]);
+
+  useEffect(() => {
     // Skip language detection for admin and login routes
     if (location.startsWith('/admin') || location.startsWith('/login')) {
       return;
@@ -57,7 +72,14 @@ function LanguageRouter() {
       </Route>
       
       {/* Web application routes with language prefixes */}
+      <Route path="/web/:lang/progress//:campaignId" >
+        {(params) => {
+          setLocation(`/web/${params.lang}/progress/${params.campaignId}`);
+          return null;
+        }}
+      </Route>
       <Route path="/web/:lang/progress/:userId/:campaignId?" component={Progress} />
+      <Route path="/web/:lang/progress/:campaignId?" component={Progress} />
       
       {/* Legacy routes - redirect to new structure */}
       <Route path="/:lang/progress/:userId/:campaignId?">

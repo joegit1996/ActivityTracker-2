@@ -215,3 +215,36 @@ For questions or support, contact the development team.
 
 ## Security Note
 Database credentials are read from `.env` and are **never logged** or exposed. (Console logging removed from server/db.ts)
+
+## User ID Extraction & Cookie Flow (v3+)
+
+### Robust User ID Handling
+- The progress page now supports extracting the user ID from multiple sources:
+  - **URL param**: If present and non-empty, used directly.
+  - **Placeholder or missing**: If the URL contains `/web/en/progress/{{userid}}/1` or `/web/en/progress//1`, the app will:
+    - Read the `_xyzW` cookie for a token.
+    - Call the external API (`/external-api/api/v1/users/auth/user`) to fetch the user ID.
+    - Automatically update the URL to include the resolved user ID for shareability and clarity.
+- If both the URL and cookie flow fail, a user-friendly error is shown.
+
+### Router Normalization
+- The router now automatically normalizes double slashes in URLs (e.g., `/web/en/progress//1` → `/web/en/progress/1`).
+- URLs with the placeholder `{{userid}}` are also supported and replaced with the real user ID after resolution.
+
+### Vite Proxy Setup
+- The Vite dev server proxies:
+  - `/api` → `http://localhost:5001` (Express backend)
+  - `/external-api` → `https://services.q84sale.com` (external user info API)
+- This allows the frontend to call both local and external APIs without CORS or CSP issues in development.
+
+### Defensive Error Handling
+- All fetch calls now check for valid JSON responses and handle HTML or error responses gracefully.
+- The progress page will never attempt to fetch with an invalid or empty user ID.
+
+### Example Flows
+- `/web/en/progress/12345/1` → Uses userId from URL.
+- `/web/en/progress//1` or `/web/en/progress/{{userid}}/1` → Uses cookie flow, updates URL to `/web/en/progress/<realUserId>/1`.
+
+### Why This Matters
+- This makes the app robust for webviews, deep links, and SSO scenarios where the user ID may not be in the URL.
+- Ensures a seamless experience for both direct and embedded usage.
