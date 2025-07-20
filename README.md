@@ -1,21 +1,22 @@
 # Activity Streak Web App
 
-An advanced internationalized Activity Streak Web App that provides a dynamic, engaging user experience for tracking personal progress across multilingual campaigns.
+A modern, internationalized Activity Streak Web App for tracking progress across multilingual campaigns, with a robust admin dashboard, mini rewards, and real-time updates.
 
 ## Features
 
-- **Multilingual Support**: Full Arabic and English support with RTL/LTR text alignment
-- **Progress Tracking**: Visual progress bars, streak counters, and completion percentages
-- **Campaign Management**: Admin interface for creating and managing campaigns
-- **Milestone System**: Daily tasks with completion tracking
-- **Responsive Design**: Mobile-first design optimized for all devices
-- **Real-time Updates**: Dynamic progress updates and animations
-- **Admin Dashboard**: Complete campaign and user management
+- **Multilingual**: English & Arabic (RTL/LTR)
+- **Progress Tracking**: Visual streaks, progress bars, completion, and mini rewards
+- **Campaign, Milestone & Mini Reward Management**: Full admin UI for all
+- **Mini Rewards**: Configurable rewards shown between days, managed from admin panel
+- **Responsive**: Mobile-first, works on all devices
+- **Real-time**: Dynamic updates, smooth UX
+- **Secure**: JWT authentication, session management
+- **Animated UI**: Animated icons for rewards, smooth transitions
 
 ## Tech Stack
 
 ### Frontend
-- React with TypeScript
+- React (TypeScript)
 - Vite for build tooling
 - Tailwind CSS for styling
 - Shadcn/ui components
@@ -23,225 +24,267 @@ An advanced internationalized Activity Streak Web App that provides a dynamic, e
 - Wouter for routing
 - i18next for internationalization
 - Framer Motion for animations
+- Lucide icons
+- Font Awesome (animated icons, e.g., sack dollar for rewards)
 
 ### Backend
-- Express.js with TypeScript
+- Express.js (TypeScript)
 - MySQL database
 - Drizzle ORM
 - JWT authentication
 - bcrypt for password hashing
+- dotenv
 - Express Rate Limiting
+
+### Fonts
+- Uses the SakrPro font family globally (see `client/public/fonts/` and `client/src/index.css` for customization)
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+ (Node 20+ supported; see troubleshooting for port issues)
 - MySQL database
-- npm or yarn
+- npm (or yarn)
 
-## Installation
+## Installation & Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd activity-streak-app
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup**
-   
-   Create a `.env` file in the root directory with the following variables:
-   ```env
-   # Database Configuration
-   DB_HOST=your-mysql-host
-   DB_USER=your-mysql-username
-   DB_PASSWORD=your-mysql-password
-   DB_NAME=your-database-name
-   DB_PORT=3306
-   
-   # Authentication
-   SESSION_SECRET=your-session-secret
-   JWT_SECRET=your-jwt-secret
-   
-   # Optional: Webhook Token for milestone completion API
-   WEBHOOK_TOKEN=your-webhook-token
-   
-   # Environment Configuration
-   NODE_ENV=development
-   PORT=5000
-   DOMAIN=appstreak.q84sale.com
-   ```
-
-4. **Database Setup**
-   
-   The application will create the necessary MySQL tables automatically. Ensure your MySQL user has CREATE table permissions.
-
-5. **Start the application**
-   ```bash
-   npm run dev
-   ```
-
-The app will be available at `http://localhost:5000`
-
-## Docker Deployment
-
-### Building the Docker Image
+### 1. Clone the Repository
 ```bash
-docker build -t activity-streak-app .
+git clone <your-repo-url>
+cd ActivityTracker-2
 ```
 
-### Running with Docker
+### 2. Install Dependencies
 ```bash
-docker run -p 80:5000 \
-  -e NODE_ENV=production \
-  -e PORT=5000 \
-  -e DB_HOST=your-production-db \
-  -e DB_USER=your-db-user \
-  -e DB_PASSWORD=your-db-password \
-  -e DB_NAME=your-db-name \
-  -e SESSION_SECRET=your-session-secret \
-  -e JWT_SECRET=your-jwt-secret \
-  -e WEBHOOK_TOKEN=your-webhook-token \
-  activity-streak-app
+npm install
+npm install --save-dev @types/node @types/express
+# For animated reward icon:
+npm install --save @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons
 ```
 
-### Running on Different Port
-```bash
-docker run -p 8080:8080 \
-  -e PORT=8080 \
-  -e NODE_ENV=production \
-  -e DB_HOST=your-production-db \
-  -e DB_USER=your-db-user \
-  -e DB_PASSWORD=your-db-password \
-  -e DB_NAME=your-db-name \
-  -e SESSION_SECRET=your-session-secret \
-  -e JWT_SECRET=your-jwt-secret \
-  -e WEBHOOK_TOKEN=your-webhook-token \
-  activity-streak-app
-```
+### 3. Environment Variables
+Create a `.env` file in the project root:
+```env
+# Database Configuration
+DB_HOST=your-mysql-host
+DB_USER=your-mysql-username
+DB_PASSWORD=your-mysql-password
+DB_NAME=your-database-name
+DB_PORT=3306
 
-### Health Check
-The Docker container includes a health check endpoint at `/health` that monitors:
-- Server status
-- Application uptime
-- Environment information
+# Authentication
+SESSION_SECRET=your-session-secret
+JWT_SECRET=your-jwt-secret
+
+# Webhook Token for milestone completion API
+WEBHOOK_TOKEN=your-webhook-token
+
+# Environment
+NODE_ENV=development
+PORT=5000 # Change if port 5000 is in use
+DOMAIN=appstreak.q84sale.com
+```
+**Troubleshooting:**
+- If environment variables are not being read, ensure `.env` is saved, not empty, and in the project root.
+- If you see `DB_USER: undefined`, delete and re-create `.env`.
+
+### 4. Database Setup
+- The app auto-creates tables if your MySQL user has CREATE permissions.
+- You can use `npm run db:push` to push schema changes (Drizzle ORM).
+- **Mini Rewards:** Ensure your DB has the `mini_rewards` table (see migrations or schema).
+
+### 5. Running the App
+- **Development:**
+  ```bash
+  npm run dev
+  ```
+  - If you see `EADDRINUSE: address already in use`, change `PORT` in `.env` (e.g., `PORT=5001`).
+  - If you see `ENOTSUP: operation not supported on socket`, remove the `host` option from `server.listen` (already fixed in this repo).
+- **Production Build:**
+  ```bash
+  npm run build
+  npm run preview
+  ```
+
+## Admin Panel
+- Visit: `http://localhost:<PORT>/admin`
+- Login with your admin credentials (default: `admin`/`admin123` if seeded)
+- Manage campaigns, milestones, and mini rewards
+- **Mini Rewards:**
+  - Add, edit, and delete mini rewards for each campaign
+  - Each mini reward has English & Arabic title/description, and is shown after a specific day
+  - Mini rewards are displayed between days on the user progress timeline
+- **Milestone Titles:**
+  - Milestone titles are shown using `title_en` (English) or `title_ar` (Arabic). If you see missing titles, ensure your milestones have these fields populated.
+- **Admin UI Improvements:**
+  - All fields for mini rewards (EN/AR) are now visible and editable
+  - Editing a mini reward pre-fills all values
+
+## Mini Rewards
+- **What are Mini Rewards?**
+  - Configurable rewards shown between days on the progress timeline
+  - Managed from the admin panel under the "Mini Rewards" tab
+  - Each reward can have English and Arabic title/description
+  - Shown to users after completing the specified day
+  - Locked/unlocked state is visually indicated
+
+## Progress Page & User Experience
+- **Animated Reward Icon:**
+  - The main reward section now shows an animated Font Awesome sack dollar icon (blue, with padding) if the user hasn't completed all days
+  - Text: "Complete all milestones for a big CASH reward" (or Arabic translation)
+- **Timeline:**
+  - Unified timeline: for each day, the day card is shown, and any mini rewards for that day are rendered immediately after
+  - Mini rewards are never duplicated or misplaced
+  - Locked/unlocked state for mini rewards is visually clear
+- **Current Day:**
+  - The current day's milestones/tasks are shown inside the day's card
+- **Locked Days:**
+  - Locked days have a visually improved lock icon inside a soft gray circle
 
 ## API Reference
 
-### Frontend Web Pages
-- `/` - Main application homepage
-- `/web/en/progress/:userId` - English progress tracking page
-- `/web/ar/progress/:userId` - Arabic progress tracking page (RTL layout)
-- `/web/en/admin` - English admin dashboard
-- `/web/ar/admin` - Arabic admin dashboard
-- `/admin` - Admin login page
+### Authentication
+- All `/admin` endpoints require a JWT token (login via `/admin/login`).
+- Pass the token as `Authorization: Bearer <token>`.
 
-### Public API Endpoints
-- `GET /health` - Health check for monitoring and Docker
-- `GET /api/progress/:userId/:campaignId?lang=en|ar` - Get user progress for specific campaign
+### Main Endpoints
+- `GET /health` — Health check
+- `GET /api/progress/:userId/:campaignId?lang=en|ar` — User progress (includes mini rewards)
+- `POST /api/milestone/complete` — Complete a milestone (requires `WEBHOOK_TOKEN`)
+- `GET /admin/campaigns/:campaignId/milestones` — Milestones for a campaign (JWT required)
+- `GET /admin/api/campaigns/:campaignId/mini-rewards` — Mini rewards for a campaign (JWT required)
 
-### Webhook API (Token Required)
-- `POST /api/milestone/complete` - Complete a milestone task
-
-### Admin Management API (JWT Required)
-
-**Authentication:**
-- `POST /admin/login` - Admin login
-- `GET /admin/me` - Get current admin details
-- `POST /admin/logout` - Admin logout
-
-**Campaign Management:**
-- `GET /admin/campaigns` - List all campaigns
-- `POST /api/campaigns` - Create new campaign
-- `PUT /api/campaigns/:id` - Update campaign
-- `DELETE /api/campaigns/:id` - Delete campaign
-
-**Milestone Management:**
-- `GET /admin/campaigns/:campaignId/milestones` - Get milestones for campaign
-- `POST /api/milestones` - Create new milestone
-- `PUT /api/milestones/:id` - Update milestone
-- `DELETE /api/milestones/:id` - Delete milestone
-
-## Database Schema
-
-### Tables
-- **users**: User information and language preferences
-- **campaigns**: Campaign details in multiple languages
-- **milestones**: Daily tasks within campaigns
-- **milestone_completions**: User progress tracking
-- **admins**: Admin user accounts
-- **campaign_completions**: Full campaign completion tracking
-
-## Usage
-
-### Admin Panel
-1. Navigate to `/admin`
-2. Login with admin credentials
-3. Manage campaigns, view user progress, and track completions
-
-### User Progress
-Users can view their progress at:
-- English: `/web/en/progress/:userId` 
-- Arabic: `/web/ar/progress/:userId`
-
-### Webhook Integration
-The app supports milestone completion via webhook:
-```bash
-POST /api/milestone/complete
-Content-Type: application/json
-Authorization: Bearer <WEBHOOK_TOKEN>
-# Or alternatively:
-X-API-Token: <WEBHOOK_TOKEN>
-
-{
-  "user_id": 100,
-  "campaign_id": 1,
-  "day_number": 1,
-  "milestone_id": 2
-}
+## Project Structure
 ```
-
-## Development
-
-### Project Structure
-```
-├── client/                 # React frontend
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── pages/          # Application pages
-│   │   ├── lib/            # Utilities and configurations
-│   │   └── i18n/           # Internationalization files
-├── server/                 # Express backend
-│   ├── db.ts              # Database connection
-│   ├── routes.ts          # API routes
-│   ├── storage.ts         # Database operations
-│   └── index.ts           # Server entry point
-├── shared/                 # Shared types and schemas
+ActivityTracker-2/
+├── client/           # React frontend
+│   └── src/
+│       ├── components/
+│       ├── hooks/
+│       ├── pages/
+│       ├── lib/
+│       └── i18n/
+├── server/           # Express backend
+│   ├── db.ts
+│   ├── routes.ts
+│   ├── storage.ts
+│   └── index.ts
+├── shared/           # Shared types and schemas
+├── .env              # Environment variables
+├── package.json
 └── README.md
 ```
 
-### Scripts
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run db:push` - Push database schema changes
+## Scripts
+- `npm run dev` — Start dev server
+- `npm run build` — Build frontend & backend
+- `npm run preview` — Preview production build
+- `npm run db:push` — Push DB schema (Drizzle)
+
+## Docker Usage
+- **Build:**
+  ```bash
+  docker build -t activity-streak-app .
+  ```
+- **Run:**
+  ```bash
+  docker run -p 5000:5000 --env-file .env activity-streak-app
+  ```
+  - Or set env vars with `-e` flags as needed
+- **Health Check:**
+  - Visit `/health` endpoint inside the container
+
+## Troubleshooting & Tips
+- **Port in use:** Change `PORT` in `.env` if you see `EADDRINUSE` errors
+- **ENOTSUP error:** Use only `server.listen(port, ...)` (already fixed)
+- **Environment variables not loading:** Ensure `.env` is not empty, is in the root, and is saved
+- **TypeScript errors:** Ensure `@types/node` and `@types/express` are installed and `tsconfig.json` includes them in `types`
+- **Milestone titles not showing:** The frontend now uses `milestone.title_en`/`milestone.title_ar` — update your data if needed
+- **Mini rewards not showing:** Ensure your DB has the `mini_rewards` table and your API returns them for the campaign
 
 ## Contributing
-
-1. Fork the repository
+1. Fork the repo
 2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+3. Make changes & add tests
+4. Submit a pull request
 
 ## License
-
-This project is licensed under the MIT License.
+MIT
 
 ## Support
+For questions or support, contact the development team.
 
-For support or questions, please contact the development team.
+## Security Note
+Database credentials are read from `.env` and are **never logged** or exposed. (Console logging removed from server/db.ts)
+
+## User ID Extraction & Cookie Flow (v3+)
+
+### Robust User ID Handling
+- The progress page now supports extracting the user ID from multiple sources:
+  - **URL param**: If present and non-empty, used directly.
+  - **Placeholder or missing**: If the URL contains `/web/en/progress/{{userid}}/1` or `/web/en/progress//1`, the app will:
+    - Read the `_xyzW` cookie for a token.
+    - Call the external API (`/external-api/api/v1/users/auth/user`) to fetch the user ID.
+    - Automatically update the URL to include the resolved user ID for shareability and clarity.
+- If both the URL and cookie flow fail, a user-friendly error is shown.
+
+### Router Normalization
+- The router now automatically normalizes double slashes in URLs (e.g., `/web/en/progress//1` → `/web/en/progress/1`).
+- URLs with the placeholder `{{userid}}` are also supported and replaced with the real user ID after resolution.
+
+### Vite Proxy Setup
+- The Vite dev server proxies:
+  - `/api` → `http://localhost:5001` (Express backend)
+  - `/external-api` → `https://services.q84sale.com` (external user info API)
+- This allows the frontend to call both local and external APIs without CORS or CSP issues in development.
+
+### Defensive Error Handling
+- All fetch calls now check for valid JSON responses and handle HTML or error responses gracefully.
+- The progress page will never attempt to fetch with an invalid or empty user ID.
+
+### Example Flows
+- `/web/en/progress/12345/1` → Uses userId from URL.
+- `/web/en/progress//1` or `/web/en/progress/{{userid}}/1` → Uses cookie flow, updates URL to `/web/en/progress/<realUserId>/1`.
+
+### Why This Matters
+- This makes the app robust for webviews, deep links, and SSO scenarios where the user ID may not be in the URL.
+- Ensures a seamless experience for both direct and embedded usage.
+
+## Docker Deployment
+
+### Prerequisites
+- [Docker](https://www.docker.com/) installed on your machine
+- A `.env` file in the project root with your database and app environment variables (see `.env.example` if available)
+- A running and accessible database (MySQL)
+
+### Build the Docker Image
+```sh
+docker build -t activitytracker-app .
+```
+
+### Run the Docker Container
+```sh
+docker run -p 5001:5001 --env-file .env activitytracker-app
+```
+- This maps port 5001 on your machine to port 5001 in the container (adjust if your app uses a different port)
+- The `--env-file .env` flag loads environment variables from your `.env` file
+
+### Access the App
+- Open [http://localhost:5001](http://localhost:5001) in your browser
+- If you have a `/health` endpoint, check [http://localhost:5001/health](http://localhost:5001/health)
+
+### Troubleshooting
+- If you see `port is already allocated`, stop the previous container or use a different port:
+  ```sh
+  docker ps
+  docker stop <container_id>
+  ```
+- If you see database connection errors, check your `.env` file and ensure your database is running and accessible from the container
+
+### Stopping the Container
+- To stop the running container:
+  ```sh
+  docker ps
+  docker stop <container_id>
+  ```
+
+---

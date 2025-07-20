@@ -28,4 +28,19 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/external-api': {
+        target: 'https://services.q84sale.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/external-api/, ''),
+      },
+    },
+  },
 });

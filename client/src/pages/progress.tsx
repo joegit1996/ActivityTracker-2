@@ -3,10 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
-import { Trophy, Lock, CheckCircle, X, Flame } from "lucide-react";
+import { Trophy, Lock, CheckCircle, X, Flame, Gift, Banknote } from "lucide-react";
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
-import type { ProgressResponse } from "@/lib/types";
+import type { ProgressResponse, LocalizedMiniReward } from "@/lib/types";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
+import { useUserId } from "@/hooks/use-user-id";
 
 // Custom hook for animated counter
 function useAnimatedCounter(end: number, duration: number = 500) {
@@ -40,9 +43,12 @@ function useAnimatedCounter(end: number, duration: number = 500) {
 }
 
 export default function Progress() {
-  const { userId, lang, campaignId } = useParams();
+  const { lang, campaignId } = useParams();
   const { t, i18n } = useTranslation();
   const [animationsTriggered, setAnimationsTriggered] = useState(false);
+
+  // Use the new hook for robust userId extraction
+  const { userId, error: userIdError, loading: userIdLoading } = useUserId();
 
   // Set language and HTML attributes based on URL
   useEffect(() => {
@@ -53,19 +59,38 @@ export default function Progress() {
     }
   }, [lang, i18n]);
   
+  const isValidUserId = typeof userId === 'string' && userId.trim() !== '';
+
   const { data: progressData, isLoading, error } = useQuery<ProgressResponse>({
     queryKey: ["/api/progress", userId, campaignId, lang],
     queryFn: async () => {
+      if (!isValidUserId) {
+        throw new Error('User ID is missing or invalid.');
+      }
       const url = campaignId 
         ? `/api/progress/${userId}/${campaignId}?lang=${lang || 'en'}`
         : `/api/progress/${userId}?lang=${lang || 'en'}`;
       const response = await fetch(url);
+      const contentType = response.headers.get('content-type');
       if (!response.ok) {
-        throw new Error("Failed to fetch progress");
+        let errorText = await response.text();
+        console.error('[Progress] Error response:', errorText);
+        throw new Error(`Failed to fetch progress: ${response.status}`);
       }
-      return response.json();
+      if (!contentType || !contentType.includes('application/json')) {
+        let errorText = await response.text();
+        console.error('[Progress] Non-JSON response:', errorText);
+        throw new Error('Server returned non-JSON response');
+      }
+      try {
+        return await response.json();
+      } catch (err) {
+        let errorText = await response.text();
+        console.error('[Progress] JSON parse error. Response body:', errorText);
+        throw new Error('Invalid JSON response from server');
+      }
     },
-    enabled: !!userId,
+    enabled: isValidUserId,
   });
 
   // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY EARLY RETURNS
@@ -129,6 +154,40 @@ export default function Progress() {
     }
   }, [isCompleted, progressData]);
 
+  // Handle userId loading and error states
+  if (!isValidUserId && !userIdLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h1>
+          <p className="text-gray-600">User ID is missing or invalid in the URL and could not be determined automatically.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (userIdLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading user information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (userIdError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h1>
+          <p className="text-gray-600">{userIdError}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-6 px-4">
@@ -165,7 +224,20 @@ export default function Progress() {
     );
   }
 
-  const { campaign, progress, streak, tasks, previousDays, nextDay } = progressData;
+  const { campaign, progress, streak, tasks, previousDays, nextDay, miniRewards } = progressData;
+
+  // Group mini rewards by after_day_number, but only for valid days
+  const miniRewardsByDay = (miniRewards || []).reduce((acc: Record<number, LocalizedMiniReward[]>, reward) => {
+    if (reward.after_day_number < campaign.totalDays) {
+      if (!acc[reward.after_day_number]) acc[reward.after_day_number] = [];
+      acc[reward.after_day_number].push(reward);
+    }
+    return acc;
+  }, {} as Record<number, LocalizedMiniReward[]>);
+
+  const completedDays = previousDays.length;
+  const totalDays = campaign.totalDays;
+  const days = Array.from({ length: totalDays }, (_, i) => i + 1);
 
   return (
     <div className="bg-gray-50 py-6 px-4 pb-safe-bottom min-h-screen overflow-y-auto overflow-x-hidden w-full">
@@ -180,8 +252,8 @@ export default function Progress() {
           <p className="text-gray-600 text-base">{t('app.subtitle')}</p>
         </div>
 
-        {/* Streak Progress */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        {/* Streak Progress + Reward Section (merged) */}
+        <div className="bg-blue-50 rounded-2xl p-6 shadow-sm border border-blue-200">
           <div className="flex justify-between items-center mb-4">
             <span className="text-gray-900 font-medium">
               {t('progress.currentStreak')}: <span className="text-primary font-semibold">{streak.currentDays} {t('progress.days')}</span>
@@ -191,7 +263,6 @@ export default function Progress() {
               <span className="text-sm font-normal text-gray-600 ml-1">{t('progress.complete')}</span>
             </span>
           </div>
-          
           <div className="flex justify-between items-center mb-3">
             <span className="text-xs text-gray-500">
               {i18n.language === 'ar' ? `${t('progress.dayLabel')} 1` : `${t('progress.dayLabel')} 1`}
@@ -200,9 +271,8 @@ export default function Progress() {
               {i18n.language === 'ar' ? `${t('progress.dayLabel')} ${campaign.totalDays}` : `${t('progress.dayLabel')} ${campaign.totalDays}`}
             </span>
           </div>
-          
           {/* Animated Progress Bar */}
-          <div className={`animated-progress ${i18n.language === 'ar' ? 'transform scale-x-[-1]' : ''}`}>
+          <div className={`animated-progress${i18n.language === 'ar' ? ' rtl-progress' : ''}`}> 
             <div 
               className="animated-progress-fill"
               style={{ 
@@ -210,170 +280,149 @@ export default function Progress() {
               } as React.CSSProperties}
             ></div>
           </div>
-          
 
+          {/* Golden Reward Section on Completion */}
+          {isCompleted && (
+            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-5 my-6 flex flex-col items-center shadow-md">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-yellow-500 text-2xl">🏆</span>
+                <span className="font-extrabold text-yellow-800 text-lg text-center">
+                  {campaign.reward.title}
+                </span>
+              </div>
+              <div className="text-yellow-700 text-center text-base font-medium">
+                {campaign.reward.description}
+              </div>
+            </div>
+          )}
+
+          {/* Reward merged below progress bar */}
+          {!isCompleted && (
+            <div className="flex flex-col items-center mt-6">
+              <h3 className="font-bold text-blue-900 text-lg mb-2 text-center">
+                {i18n.language === 'ar'
+                  ? 'أكمل جميع المهام لتحصل على جائزة نقدية كبيرة'
+                  : 'Complete all milestones for a big CASH reward'}{' '}
+                <span role="img" aria-label="prize">🎁</span>
+              </h3>
+              <FontAwesomeIcon icon={faMoneyBillWave} beat className="mx-auto mt-2 text-blue-900 p-4" style={{ fontSize: 90 }} />
+            </div>
+          )}
         </div>
 
-
-
-        {/* Reward Card */}
-        {!isCompleted ? (
-          // Normal state - clean and simple with subtle distinction
-          <div className="bg-blue-50/30 rounded-2xl p-6 shadow-md border-l-4 border-blue-500 border border-gray-100 space-y-4">
-            <div className={`flex items-start ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Trophy className={`text-primary text-xl ${animationsTriggered ? 'animated-trophy' : ''}`} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-1">{campaign.reward.title}</h3>
-                <p className="text-gray-600 text-sm">{campaign.reward.description}</p>
-              </div>
-              <div className="text-primary font-semibold text-sm">{animatedPercentage}%</div>
-            </div>
-          </div>
-        ) : (
-          // Completed state - refined celebration
-          <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-6 shadow-lg border-2 border-yellow-300">
-            {/* Header with trophy */}
-            <div className="text-center mb-4">
-              <div className="mx-auto w-16 h-16 bg-yellow-200 rounded-full flex items-center justify-center mb-3">
-                <Trophy className="text-yellow-600 text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-yellow-800 mb-1">{campaign.reward.title}</h3>
-              <p className="text-yellow-700 text-sm">{campaign.reward.description}</p>
-              <div className="inline-block bg-yellow-200 rounded-full px-3 py-1 mt-2">
-                <span className="text-yellow-800 font-semibold text-sm">100% {t('progress.complete')}</span>
-              </div>
-            </div>
-            
-            {/* Congratulations section */}
-            <div className="bg-white/80 rounded-xl p-4 text-center">
-              <div className={`flex items-center justify-center gap-2 mb-3 ${
-                lang === 'ar' ? 'flex-row-reverse' : 'flex-row'
-              }`}>
-                <span className="text-xl">🎉</span>
-                <h4 className="text-lg font-bold text-gray-800">
-                  {t('progress.congratulations')}
-                </h4>
-              </div>
-              
-              {/* Reward message */}
-              {(campaign as any).rewardCode && (
-                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                  <p className="text-gray-800 font-medium text-base leading-relaxed">
-                    {(campaign as any).rewardCode}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Previous Days (if any) */}
-        {previousDays.length > 0 && (
-          <div className="space-y-3">
-            {previousDays.map((day) => (
-              <div key={day.number} className="bg-green-50 rounded-xl p-4 border border-green-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-green-800 font-medium text-sm">{t('progress.dayCompleted', { number: day.number })}</span>
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                    <CheckCircle className="text-white text-xs" />
-                  </div>
-                </div>
-                <p className="text-green-700 text-xs mt-1">
-                  {t('progress.completedOn', { date: new Date(day.completedAt).toLocaleDateString() })}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Current Day Tasks */}
-        {progress.currentDay <= campaign.totalDays && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">{t('progress.day', { number: progress.currentDay })}</h3>
-              <div className="text-sm text-gray-600">
-                {tasks.filter(t => t.completed).length}/{tasks.length}
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-600">
-              {t('progress.completeCurrentDay')}
-            </p>
-
-            {tasks.map((task) => (
-              <div 
-                key={task.id}
-                className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border rounded-xl transition-colors ${
-                  task.completed 
-                    ? 'border-green-200 bg-green-50' 
-                    : 'border-gray-200 hover:border-primary/30 cursor-pointer'
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 ${
-                  task.completed ? 'bg-green-500' : 'bg-primary'
-                }`}>
-                  {task.completed ? <CheckCircle className="w-4 h-4" /> : task.number}
-                </div>
-                <div className="flex-1">
-                  <h4 className={`font-medium ${task.completed ? 'text-green-800' : 'text-gray-900'}`}>
-                    {task.title}
-                  </h4>
-                  <p className={`text-sm mt-1 ${task.completed ? 'text-green-600' : 'text-gray-600'}`}>
-                    {task.description}
-                  </p>
-                </div>
-                <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center ${
-                  task.completed 
-                    ? 'border-green-500 bg-green-500' 
-                    : 'border-gray-300'
-                }`}>
-                  {task.completed && <CheckCircle className="text-white text-xs" />}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Remaining Days Overview */}
-        {progress.currentDay < campaign.totalDays && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
-            <div className="space-y-3">
-              {Array.from({ length: campaign.totalDays - progress.currentDay }, (_, index) => {
-                const dayNumber = progress.currentDay + 1 + index;
-              
-                return (
-                  <div
-                    key={dayNumber}
-                    className="flex items-center justify-between p-4 rounded-xl border transition-colors border-gray-200 bg-gray-50"
-                  >
-                    <div className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold bg-gray-400">
-                        {dayNumber}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-600">
-                          {t('progress.day', { number: dayNumber })}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {t('progress.lockedDay', { number: dayNumber })}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Lock className="w-4 h-4 text-gray-400" />
+        {/* Unified timeline: render day card, then mini rewards (if not last day) */}
+        <div className="space-y-3">
+          {days.map((day) => {
+            // Determine day state
+            const isCompleted = previousDays.some(d => d.number === day);
+            const isCurrent = progress.currentDay === day;
+            const isFuture = day > progress.currentDay;
+            // Render day card
+            return (
+              <div key={day}>
+                <div
+                  className={
+                    isCompleted
+                      ? "bg-green-50 rounded-xl p-4 border border-green-200"
+                      : isCurrent
+                      ? "bg-white rounded-xl p-4 border-2 border-primary"
+                      : "bg-gray-50 rounded-xl p-4 border border-gray-200 opacity-80"
+                  }
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={
+                      isCompleted
+                        ? "text-green-800 font-medium text-sm"
+                        : isCurrent
+                        ? "text-primary font-semibold text-sm"
+                        : "text-gray-500 font-medium text-sm"
+                    }>
+                      {isCompleted
+                        ? t('progress.dayCompleted', { number: day })
+                        : t('progress.day', { number: day })}
+                    </span>
+                    <div className={
+                      isCompleted
+                        ? "w-6 h-6 bg-green-500 rounded-full flex items-center justify-center"
+                        : isCurrent
+                        ? "w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                        : "w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center"
+                    }>
+                      {isCompleted ? (
+                        <CheckCircle className="text-white text-xs" />
+                      ) : isCurrent ? (
+                        <span className="w-5 h-5 flex items-center justify-center">
+                          <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        </span>
+                      ) : (
+                        <span className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 shadow-sm">
+                          <Lock className="w-4 h-4 text-gray-500" />
+                        </span>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-
-
+                  {isCompleted && (
+                    <p className="text-green-700 text-xs mt-1">
+                      {t('progress.completedOn', { date: new Date(previousDays.find(d => d.number === day)?.completedAt || '').toLocaleDateString() })}
+                    </p>
+                  )}
+                  {isCurrent && (
+                    <>
+                      <p className="text-gray-600 text-xs mt-1">{t('progress.completeCurrentDay')}</p>
+                      <div className="mt-4 space-y-3">
+                        {tasks.map((task) => (
+                          <div 
+                            key={task.id}
+                            className={`flex items-center ${lang === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border rounded-xl transition-colors ${
+                              task.completed 
+                                ? 'border-green-200 bg-green-50' 
+                                : 'border-gray-200 hover:border-primary/30 cursor-pointer'
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 ${
+                              task.completed ? 'bg-green-500' : 'bg-primary'
+                            }`}>
+                              {task.completed ? <CheckCircle className="w-4 h-4" /> : task.number}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className={`font-medium ${task.completed ? 'text-green-800' : 'text-gray-900'}`}>{task.title}</h4>
+                              <p className={`text-sm mt-1 ${task.completed ? 'text-green-600' : 'text-gray-600'}`}>{task.description}</p>
+                            </div>
+                            <div className={`w-6 h-6 border-2 rounded-full flex items-center justify-center ${
+                              task.completed 
+                                ? 'border-green-500 bg-green-500' 
+                                : 'border-gray-300'
+                            }`}>
+                              {task.completed && <CheckCircle className="text-white text-xs" />}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                {/* Mini rewards after this day (if not last day) */}
+                {day < totalDays && (miniRewardsByDay[day] || []).map((reward) => {
+                  // Unlocked if the day is completed
+                  const unlocked = previousDays.some(d => d.number === day);
+                  return (
+                    <div
+                      key={reward.id}
+                      className={`flex items-center gap-3 mt-2 p-3 border rounded transition-opacity ${unlocked ? "bg-yellow-50" : "bg-gray-100 opacity-60"}`}
+                    >
+                      <Gift className={`w-5 h-5 ${unlocked ? "text-yellow-500" : "text-gray-400"}`} />
+                      <div className="flex-1">
+                        <div className="font-medium">{reward.title}</div>
+                        <div className="text-sm text-gray-600">{reward.description}</div>
+                      </div>
+                      {!unlocked && <Lock className="w-4 h-4 text-gray-400 ml-2" />}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

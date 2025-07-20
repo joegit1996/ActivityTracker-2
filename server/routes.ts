@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { completeTaskSchema, insertMilestoneSchema, insertAdminSchema } from "@shared/schema";
-import { getLocalizedCampaign, getLocalizedMilestone, type SupportedLanguage } from "@shared/utils";
+import { completeTaskSchema, insertMilestoneSchema, insertAdminSchema, insertMiniRewardSchema } from "@shared/schema";
+import { getLocalizedCampaign, getLocalizedMilestone, type SupportedLanguage, getLocalizedMiniReward } from "@shared/utils";
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import jwt from "jsonwebtoken";
@@ -296,6 +296,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const localizedCampaign = getLocalizedCampaign(activeCampaign, language);
       
+      // Get and localize mini rewards
+      const miniRewardsRaw = await storage.getMiniRewardsByCampaign(activeCampaign.id);
+      const miniRewards = miniRewardsRaw.map((reward) => getLocalizedMiniReward(reward, language));
+
       res.json({
         campaign: localizedCampaign,
         progress: {
@@ -308,7 +312,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         tasks: tasksWithCompletion,
         previousDays,
-        nextDay: currentDay < activeCampaign.total_days ? currentDay + 1 : null
+        nextDay: currentDay < activeCampaign.total_days ? currentDay + 1 : null,
+        miniRewards
       });
 
     } catch (error) {
@@ -677,6 +682,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating user:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // === Mini Rewards Admin Endpoints ===
+  // List all mini rewards for a campaign
+  app.get('/admin/api/campaigns/:campaignId/mini-rewards', authenticateToken, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId, 10);
+      const miniRewards = await storage.getMiniRewardsByCampaign(campaignId);
+      res.json(miniRewards);
+    } catch (error) {
+      console.error('Get mini rewards error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Create a new mini reward for a campaign
+  app.post('/admin/api/campaigns/:campaignId/mini-rewards', authenticateToken, validateInput(insertMiniRewardSchema), async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId, 10);
+      const miniReward = await storage.createMiniReward({ ...req.validatedData, campaign_id: campaignId });
+      res.status(201).json(miniReward);
+    } catch (error) {
+      console.error('Create mini reward error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Update a mini reward
+  app.put('/admin/api/mini-rewards/:id', authenticateToken, validateInput(insertMiniRewardSchema.partial()), async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const miniReward = await storage.updateMiniReward(id, req.validatedData);
+      res.json(miniReward);
+    } catch (error) {
+      console.error('Update mini reward error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Delete a mini reward
+  app.delete('/admin/api/mini-rewards/:id', authenticateToken, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      await storage.deleteMiniReward(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Delete mini reward error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 

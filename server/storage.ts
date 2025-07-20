@@ -5,7 +5,8 @@ import {
   type Milestone, type InsertMilestone,
   type MilestoneCompletion, type InsertMilestoneCompletion,
   type Admin, type InsertAdmin,
-  type CampaignCompletion, type InsertCampaignCompletion
+  type CampaignCompletion, type InsertCampaignCompletion,
+  mini_rewards, type MiniReward, type InsertMiniReward
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -49,6 +50,13 @@ export interface IStorage {
   getAllCampaignCompletions(): Promise<CampaignCompletion[]>;
   markCampaignComplete(userId: number, campaignId: number): Promise<CampaignCompletion>;
   isCampaignCompleted(userId: number, campaignId: number): Promise<boolean>;
+
+  // Mini Rewards
+  getMiniRewardsByCampaign(campaignId: number): Promise<MiniReward[]>;
+  getMiniReward(id: number): Promise<MiniReward | undefined>;
+  createMiniReward(miniReward: InsertMiniReward): Promise<MiniReward>;
+  updateMiniReward(id: number, miniReward: Partial<InsertMiniReward>): Promise<MiniReward>;
+  deleteMiniReward(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -306,6 +314,48 @@ export class DatabaseStorage implements IStorage {
         eq(campaign_completions.campaign_id, campaignId)
       ));
     return !!completion;
+  }
+
+  // Mini Rewards
+  async getMiniRewardsByCampaign(campaignId: number): Promise<MiniReward[]> {
+    return await db
+      .select()
+      .from(mini_rewards)
+      .where(eq(mini_rewards.campaign_id, campaignId))
+      .orderBy(mini_rewards.after_day_number);
+  }
+
+  async getMiniReward(id: number): Promise<MiniReward | undefined> {
+    const [miniReward] = await db.select().from(mini_rewards).where(eq(mini_rewards.id, id));
+    return miniReward || undefined;
+  }
+
+  async createMiniReward(insertMiniReward: InsertMiniReward): Promise<MiniReward> {
+    const [result] = await db
+      .insert(mini_rewards)
+      .values(insertMiniReward)
+      .$returningId();
+    const [miniReward] = await db
+      .select()
+      .from(mini_rewards)
+      .where(eq(mini_rewards.id, result.id));
+    return miniReward;
+  }
+
+  async updateMiniReward(id: number, updateData: Partial<InsertMiniReward>): Promise<MiniReward> {
+    await db
+      .update(mini_rewards)
+      .set(updateData)
+      .where(eq(mini_rewards.id, id));
+    const [miniReward] = await db
+      .select()
+      .from(mini_rewards)
+      .where(eq(mini_rewards.id, id));
+    return miniReward;
+  }
+
+  async deleteMiniReward(id: number): Promise<void> {
+    await db.delete(mini_rewards).where(eq(mini_rewards.id, id));
   }
 }
 
