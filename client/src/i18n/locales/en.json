@@ -25,7 +25,11 @@
     "completeToUnlock": "Complete Milestones to Unlock",
     "congratulations": "Congratulations!",
     "rewardCode": "Reward",
-    "complete": "Complete"
+    "complete": "Complete",
+    "streakFailedTitle": "Streak Failed",
+    "streakFailedMessage": "You couldn't complete the missions on day {{day}}.",
+    "streakFailedReason": "Reason: {{reason}}",
+    "startNewStreak": "Start New Streak"
   },
   "admin": {
     "title": "Admin Panel",

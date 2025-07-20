@@ -6,7 +6,8 @@ import {
   type MilestoneCompletion, type InsertMilestoneCompletion,
   type Admin, type InsertAdmin,
   type CampaignCompletion, type InsertCampaignCompletion,
-  mini_rewards, type MiniReward, type InsertMiniReward
+  mini_rewards, type MiniReward, type InsertMiniReward,
+  campaign_failures, type CampaignFailure, type InsertCampaignFailure
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -57,6 +58,11 @@ export interface IStorage {
   createMiniReward(miniReward: InsertMiniReward): Promise<MiniReward>;
   updateMiniReward(id: number, miniReward: Partial<InsertMiniReward>): Promise<MiniReward>;
   deleteMiniReward(id: number): Promise<void>;
+
+  // Campaign Failures
+  getCampaignFailure(userId: number, campaignId: number): Promise<CampaignFailure | undefined>;
+  createCampaignFailure(userId: number, campaignId: number, failedDay: number, reason?: string): Promise<CampaignFailure>;
+  isCampaignFailed(userId: number, campaignId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -356,6 +362,41 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMiniReward(id: number): Promise<void> {
     await db.delete(mini_rewards).where(eq(mini_rewards.id, id));
+  }
+
+  // Campaign Failures
+  async getCampaignFailure(userId: number, campaignId: number): Promise<CampaignFailure | undefined> {
+    const [failure] = await db
+      .select()
+      .from(campaign_failures)
+      .where(and(
+        eq(campaign_failures.user_id, userId),
+        eq(campaign_failures.campaign_id, campaignId)
+      ));
+    return failure;
+  }
+
+  async createCampaignFailure(userId: number, campaignId: number, failedDay: number, reason?: string): Promise<CampaignFailure> {
+    const [result] = await db
+      .insert(campaign_failures)
+      .values({ user_id: userId, campaign_id: campaignId, failed_day: failedDay, reason })
+      .$returningId();
+    const [failure] = await db
+      .select()
+      .from(campaign_failures)
+      .where(eq(campaign_failures.id, result.id));
+    return failure;
+  }
+
+  async isCampaignFailed(userId: number, campaignId: number): Promise<boolean> {
+    const [failure] = await db
+      .select()
+      .from(campaign_failures)
+      .where(and(
+        eq(campaign_failures.user_id, userId),
+        eq(campaign_failures.campaign_id, campaignId)
+      ));
+    return !!failure;
   }
 }
 

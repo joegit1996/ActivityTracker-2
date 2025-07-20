@@ -25,7 +25,11 @@
     "completeToUnlock": "أكمل المعالم للفتح",
     "congratulations": "تهانينا!",
     "rewardCode": "المكافأة",
-    "complete": "مكتمل"
+    "complete": "مكتمل",
+    "streakFailedTitle": "انتهت السلسلة",
+    "streakFailedMessage": "لم تتمكن من إكمال المهام في اليوم {{day}}.",
+    "streakFailedReason": "السبب: {{reason}}",
+    "startNewStreak": "ابدأ سلسلة جديدة"
   },
   "admin": {
     "title": "لوحة الإدارة",

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { log } from "./vite";
+import { log } from "./logger";
 
 const app = express();
 app.use(express.json());
@@ -55,7 +55,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
-    const { serveStatic } = await import("./vite");
+    const { serveStatic } = await import("./static");
     serveStatic(app);
   }
 

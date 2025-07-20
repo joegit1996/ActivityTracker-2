@@ -195,6 +195,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API to mark a user's campaign as failed for a specific day
+  app.post("/api/streak/fail", async (req, res) => {
+    try {
+      const { userId, campaignId, day } = req.body;
+      if (!userId || !campaignId || !day) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      // Check if already failed
+      const existing = await storage.getCampaignFailure(userId, campaignId);
+      if (existing) {
+        return res.status(400).json({ error: "Streak already failed for this user/campaign" });
+      }
+      const reasonEn = `Did not complete missions on day ${day}`;
+      const reasonAr = `لم تقم بإكمال المهام في اليوم ${day}`;
+      // Store both reasons (concatenated, or you can add a new column for Arabic if needed)
+      const failure = await storage.createCampaignFailure(userId, campaignId, day, reasonEn + ' | ' + reasonAr);
+      res.json({ success: true, failure, reasonEn, reasonAr });
+    } catch (error) {
+      console.error("Error failing streak:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // GET user progress for specific campaign
   app.get("/api/progress/:userId/:campaignId", async (req, res) => {
     try {
@@ -220,6 +243,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user completions for specified campaign
       const completions = await storage.getUserCompletions(userId, activeCampaign.id);
+      // Check for failure
+      const failure = await storage.getCampaignFailure(userId, activeCampaign.id);
       
       // Calculate progress
       const totalMilestones = await storage.getMilestonesByCampaign(activeCampaign.id);
@@ -287,9 +312,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return new Date(completion.completed_at) > new Date(latest.completed_at) ? completion : latest;
           });
           
+          // Get localized milestone titles for this day
+          const localizedMilestones = dayMilestones.map(milestone => ({
+            id: milestone.id,
+            title: getLocalizedMilestone(milestone, language).title
+          }));
+          
           previousDays.push({
             number: day,
-            completedAt: latestCompletion.completed_at
+            completedAt: latestCompletion.completed_at,
+            milestones: localizedMilestones
           });
         }
       }
@@ -313,7 +345,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tasks: tasksWithCompletion,
         previousDays,
         nextDay: currentDay < activeCampaign.total_days ? currentDay + 1 : null,
-        miniRewards
+        miniRewards,
+        failed: !!failure,
+        failedDay: failure?.failed_day,
+        failReason: failure?.reason
       });
 
     } catch (error) {

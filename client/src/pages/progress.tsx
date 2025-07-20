@@ -224,6 +224,31 @@ export default function Progress() {
     );
   }
 
+  if (progressData?.failed) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-xl border-0">
+          <CardContent className="p-8 text-center">
+            {/* Icon */}
+            <div className="w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+            
+            {/* Title */}
+            <h1 className="text-2xl font-bold text-red-700 mb-3">
+              {t('progress.streakFailedTitle')}
+            </h1>
+            
+            {/* Message */}
+            <p className="text-gray-700 leading-relaxed">
+              {t('progress.streakFailedMessage', { day: progressData.failedDay })}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const { campaign, progress, streak, tasks, previousDays, nextDay, miniRewards } = progressData;
 
   // Group mini rewards by after_day_number, but only for valid days
@@ -362,9 +387,20 @@ export default function Progress() {
                     </div>
                   </div>
                   {isCompleted && (
-                    <p className="text-green-700 text-xs mt-1">
-                      {t('progress.completedOn', { date: new Date(previousDays.find(d => d.number === day)?.completedAt || '').toLocaleDateString() })}
-                    </p>
+                    <>
+                      <p className="text-green-700 text-xs mt-1">
+                        {t('progress.completedOn', { date: new Date(previousDays.find(d => d.number === day)?.completedAt || '').toLocaleDateString() })}
+                      </p>
+                      {previousDays.find(d => d.number === day)?.milestones && (
+                        <div className="mt-2 space-y-1">
+                          {previousDays.find(d => d.number === day)?.milestones?.map((milestone: { id: number; title: string }) => (
+                            <p key={milestone.id} className="text-green-600 text-xs">
+                              • {milestone.title}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
                   {isCurrent && (
                     <>

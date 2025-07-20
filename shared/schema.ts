@@ -64,6 +64,18 @@ export const campaign_completions = mysqlTable("campaign_completions", {
   uniqueUserCampaign: unique("unique_user_campaign").on(table.user_id, table.campaign_id),
 }));
 
+// Campaign failures table - tracks users who failed streaks for campaigns
+export const campaign_failures = mysqlTable("campaign_failures", {
+  id: serial("id").primaryKey(),
+  user_id: int("user_id").notNull(),
+  campaign_id: int("campaign_id").notNull(),
+  failed_day: int("failed_day").notNull(),
+  reason: varchar("reason", { length: 255 }),
+  failed_at: timestamp("failed_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueUserCampaign: unique("unique_user_campaign_failure").on(table.user_id, table.campaign_id),
+}));
+
 // Relations
 export const campaignsRelations = relations(campaigns, ({ many }) => ({
   milestones: many(milestones),
@@ -136,6 +148,11 @@ export const insertCampaignCompletionSchema = createInsertSchema(campaign_comple
   completed_at: true,
 });
 
+export const insertCampaignFailureSchema = createInsertSchema(campaign_failures).omit({
+  id: true,
+  failed_at: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -154,6 +171,9 @@ export type InsertAdmin = z.infer<typeof insertAdminSchema>;
 
 export type CampaignCompletion = typeof campaign_completions.$inferSelect;
 export type InsertCampaignCompletion = z.infer<typeof insertCampaignCompletionSchema>;
+
+export type CampaignFailure = typeof campaign_failures.$inferSelect;
+export type InsertCampaignFailure = Omit<CampaignFailure, "id" | "failed_at">;
 
 // API schemas
 export const completeTaskSchema = z.object({

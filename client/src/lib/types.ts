@@ -30,6 +30,10 @@ export interface Task {
 export interface PreviousDay {
   number: number;
   completedAt: string;
+  milestones?: Array<{
+    id: number;
+    title: string;
+  }>;
 }
 
 export interface LocalizedMiniReward {
@@ -41,13 +45,22 @@ export interface LocalizedMiniReward {
 }
 
 export interface ProgressResponse {
-  campaign: Campaign;
-  progress: Progress;
-  streak: Streak;
-  tasks: Task[];
-  previousDays: PreviousDay[];
+  campaign: any;
+  progress: {
+    currentDay: number;
+    completedDays: number;
+    percentage: number;
+  };
+  streak: {
+    currentDays: number;
+  };
+  tasks: any[];
+  previousDays: any[];
   nextDay: number | null;
-  miniRewards: LocalizedMiniReward[];
+  miniRewards?: any[];
+  failed?: boolean;
+  failedDay?: number;
+  failReason?: string;
 }
 
 export interface MiniReward {

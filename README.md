@@ -6,6 +6,8 @@ A modern, internationalized Activity Tracker Web App for tracking user progress 
 
 - **🌍 Multilingual**: Full support for English & Arabic (RTL/LTR)
 - **📊 Progress Tracking**: Visual streaks, progress bars, completion tracking, and mini rewards
+- **🎯 Milestone Display**: Show completed milestone titles for each finished day
+- **❌ Streak Failure System**: Track and display failed streaks with localized reasons
 - **⚙️ Admin Dashboard**: Complete management UI for campaigns, milestones, and mini rewards
 - **🎁 Mini Rewards System**: Configurable rewards displayed between progress days
 - **📱 Responsive Design**: Mobile-first approach, works seamlessly on all devices
@@ -213,8 +215,9 @@ The app supports multiple methods for identifying users:
 ### Public Endpoints
 ```
 GET  /health                              # Application health check
-GET  /api/progress/:userId/:campaignId    # User progress data
+GET  /api/progress/:userId/:campaignId    # User progress data (includes milestone titles)
 POST /api/milestone/complete              # Complete a milestone (webhook)
+POST /api/streak/fail                     # Mark user streak as failed
 ```
 
 ### Admin Endpoints (JWT Required)
@@ -232,6 +235,67 @@ DELETE /admin/mini-rewards/:id            # Delete mini reward
 ```
 Authorization: Bearer <jwt-token>         # For admin endpoints
 Content-Type: application/json           # For POST/PUT requests
+```
+
+### API Details
+
+#### Streak Failure Endpoint
+```
+POST /api/streak/fail
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "campaignId": 1,
+  "day": 5
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "failure": {
+    "id": 1,
+    "user_id": 1,
+    "campaign_id": 1,
+    "failed_day": 5,
+    "reason": "Did not complete missions on day 5 | لم تقم بإكمال المهام في اليوم 5",
+    "failed_at": "2025-07-20T12:28:47.000Z"
+  },
+  "reasonEn": "Did not complete missions on day 5",
+  "reasonAr": "لم تقم بإكمال المهام في اليوم 5"
+}
+```
+
+#### Enhanced Progress Response
+The `/api/progress/:userId/:campaignId` endpoint now includes:
+- **Milestone titles** for each completed day
+- **Failure information** if the streak has failed
+- **Localized content** based on `?lang=ar` or `?lang=en` query parameter
+
+```json
+{
+  "previousDays": [
+    {
+      "number": 1,
+      "completedAt": "2025-05-27T18:43:31.000Z",
+      "milestones": [
+        {
+          "id": 1,
+          "title": "Post Your First Item2"
+        },
+        {
+          "id": 2,
+          "title": "Complete Your Profile"
+        }
+      ]
+    }
+  ],
+  "failed": true,
+  "failedDay": 5,
+  "failReason": "Did not complete missions on day 5 | لم تقم بإكمال المهام في اليوم 5"
+}
 ```
 
 ## 📁 Project Structure
@@ -289,6 +353,26 @@ npm run db:push              # Push schema changes to database
 # Type Checking
 npm run check                # Run TypeScript type checking
 ```
+
+## 🆕 Recent Updates
+
+### v2.1.0 - Enhanced Streak Management
+- **✨ Streak Failure System**: Added comprehensive streak failure tracking with bilingual support
+- **📋 Milestone Display**: Completed days now show all milestone titles that were accomplished
+- **🌐 Improved Localization**: Enhanced Arabic/English language switching with proper RTL support
+- **🔧 API Enhancements**: 
+  - New `/api/streak/fail` endpoint for marking failed streaks
+  - Enhanced `/api/progress` response to include milestone titles and failure information
+- **🎨 UI Improvements**: 
+  - Cleaner streak failed UI with appropriate messaging
+  - Better milestone visualization in completed day cards
+  - Improved error handling and user feedback
+
+### v2.0.0 - Docker & Production Ready
+- **🐳 Full Docker Support**: Multi-stage builds with optimized production images
+- **🔧 Build System Fixes**: Resolved Vite bundling issues for production deployment
+- **📊 Enhanced Progress Tracking**: Added detailed milestone completion tracking
+- **🔐 Security Improvements**: Better static file serving and API route protection
 
 ## 🐛 Troubleshooting
 
