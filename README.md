@@ -248,3 +248,43 @@ Database credentials are read from `.env` and are **never logged** or exposed. (
 ### Why This Matters
 - This makes the app robust for webviews, deep links, and SSO scenarios where the user ID may not be in the URL.
 - Ensures a seamless experience for both direct and embedded usage.
+
+## Docker Deployment
+
+### Prerequisites
+- [Docker](https://www.docker.com/) installed on your machine
+- A `.env` file in the project root with your database and app environment variables (see `.env.example` if available)
+- A running and accessible database (MySQL)
+
+### Build the Docker Image
+```sh
+docker build -t activitytracker-app .
+```
+
+### Run the Docker Container
+```sh
+docker run -p 5001:5001 --env-file .env activitytracker-app
+```
+- This maps port 5001 on your machine to port 5001 in the container (adjust if your app uses a different port)
+- The `--env-file .env` flag loads environment variables from your `.env` file
+
+### Access the App
+- Open [http://localhost:5001](http://localhost:5001) in your browser
+- If you have a `/health` endpoint, check [http://localhost:5001/health](http://localhost:5001/health)
+
+### Troubleshooting
+- If you see `port is already allocated`, stop the previous container or use a different port:
+  ```sh
+  docker ps
+  docker stop <container_id>
+  ```
+- If you see database connection errors, check your `.env` file and ensure your database is running and accessible from the container
+
+### Stopping the Container
+- To stop the running container:
+  ```sh
+  docker ps
+  docker stop <container_id>
+  ```
+
+---

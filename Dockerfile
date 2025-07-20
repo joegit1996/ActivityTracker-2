@@ -29,9 +29,8 @@ RUN addgroup -g 1001 -S nodejs && \
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies and required build dependencies
+# Install production dependencies only (do not install vite or @vitejs/plugin-react)
 RUN npm ci --only=production && \
-    npm install vite @vitejs/plugin-react && \
     npm cache clean --force
 
 # Copy built application from builder stage
@@ -43,9 +42,8 @@ COPY --from=builder --chown=activityapp:nodejs /app/vite.config.ts ./vite.config
 RUN mkdir -p ./dist/public && \
     mv ./dist/public/* ./dist/public/ || true
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=5000
+# Set environment variables (use .env or deployment environment for PORT and secrets)
+# ENV PORT=5000  # Removed, use .env or deployment environment instead
 
 # Expose port (configurable via environment)
 EXPOSE ${PORT}
