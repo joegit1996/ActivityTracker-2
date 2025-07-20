@@ -1,250 +1,421 @@
-# Activity Streak Web App
+# Activity Tracker Web App
 
-A modern, internationalized Activity Streak Web App for tracking progress across multilingual campaigns, with a robust admin dashboard, mini rewards, and real-time updates.
+A modern, internationalized Activity Tracker Web App for tracking user progress across multilingual campaigns, with a robust admin dashboard, mini rewards system, and real-time updates.
 
-## Features
+## 🌟 Features
 
-- **Multilingual**: English & Arabic (RTL/LTR)
-- **Progress Tracking**: Visual streaks, progress bars, completion, and mini rewards
-- **Campaign, Milestone & Mini Reward Management**: Full admin UI for all
-- **Mini Rewards**: Configurable rewards shown between days, managed from admin panel
-- **Responsive**: Mobile-first, works on all devices
-- **Real-time**: Dynamic updates, smooth UX
-- **Secure**: JWT authentication, session management
-- **Animated UI**: Animated icons for rewards, smooth transitions
+- **🌍 Multilingual**: Full support for English & Arabic (RTL/LTR)
+- **📊 Progress Tracking**: Visual streaks, progress bars, completion tracking, and mini rewards
+- **⚙️ Admin Dashboard**: Complete management UI for campaigns, milestones, and mini rewards
+- **🎁 Mini Rewards System**: Configurable rewards displayed between progress days
+- **📱 Responsive Design**: Mobile-first approach, works seamlessly on all devices
+- **⚡ Real-time Updates**: Dynamic data updates with smooth user experience
+- **🔐 Secure Authentication**: JWT-based authentication with session management
+- **🎨 Animated UI**: Smooth animations, animated reward icons, and transitions
+- **🍪 Smart User ID Resolution**: Robust user ID extraction from URLs and cookies
+- **🐳 Docker Ready**: Full containerization support for easy deployment
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 ### Frontend
-- React (TypeScript)
-- Vite for build tooling
-- Tailwind CSS for styling
-- Shadcn/ui components
-- React Query for data management
-- Wouter for routing
-- i18next for internationalization
-- Framer Motion for animations
-- Lucide icons
-- Font Awesome (animated icons, e.g., sack dollar for rewards)
+- **React** (TypeScript) - Modern UI framework
+- **Vite** - Fast build tooling and development server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Shadcn/ui** - High-quality component library
+- **TanStack Query** - Powerful data synchronization
+- **Wouter** - Minimalist routing
+- **i18next** - Internationalization framework
+- **Framer Motion** - Smooth animations
+- **Lucide Icons** & **Font Awesome** - Beautiful icon sets
 
 ### Backend
-- Express.js (TypeScript)
-- MySQL database
-- Drizzle ORM
-- JWT authentication
-- bcrypt for password hashing
-- dotenv
-- Express Rate Limiting
+- **Express.js** (TypeScript) - Web application framework
+- **MySQL** - Relational database
+- **Drizzle ORM** - Type-safe database toolkit
+- **JWT** - Secure authentication tokens
+- **bcrypt** - Password hashing
+- **Express Rate Limiting** - API protection
 
-### Fonts
-- Uses the SakrPro font family globally (see `client/public/fonts/` and `client/src/index.css` for customization)
+### Development Tools
+- **ESBuild** - Fast JavaScript bundler
+- **TypeScript** - Type safety
+- **PostCSS** - CSS processing
+- **Docker** - Containerization
 
-## Prerequisites
+## 📋 Prerequisites
 
-- Node.js 18+ (Node 20+ supported; see troubleshooting for port issues)
-- MySQL database
-- npm (or yarn)
+- **Node.js** 18+ (Node 20+ supported)
+- **MySQL** database (local or remote)
+- **npm** or **yarn** package manager
+- **Docker** (optional, for containerized deployment)
 
-## Installation & Setup
+## 🚀 Quick Start
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/joegit1996/ActivityTracker-2.git
 cd ActivityTracker-2
 ```
 
 ### 2. Install Dependencies
 ```bash
 npm install
-npm install --save-dev @types/node @types/express
-# For animated reward icon:
-npm install --save @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons
 ```
 
-### 3. Environment Variables
-Create a `.env` file in the project root:
+### 3. Environment Configuration
+Create a `.env` file in the project root with the following variables:
+
 ```env
 # Database Configuration
-DB_HOST=your-mysql-host
+DB_HOST=localhost
 DB_USER=your-mysql-username
 DB_PASSWORD=your-mysql-password
 DB_NAME=your-database-name
 DB_PORT=3306
 
-# Authentication
-SESSION_SECRET=your-session-secret
-JWT_SECRET=your-jwt-secret
+# Authentication Secrets
+SESSION_SECRET=your-secure-session-secret-here
+JWT_SECRET=your-secure-jwt-secret-here
 
-# Webhook Token for milestone completion API
-WEBHOOK_TOKEN=your-webhook-token
+# API Security
+WEBHOOK_TOKEN=your-webhook-token-for-milestone-completion
 
-# Environment
+# Application Settings
 NODE_ENV=development
-PORT=5000 # Change if port 5000 is in use
-DOMAIN=appstreak.q84sale.com
+PORT=5000
+DOMAIN=localhost
+
+# External API (if using cookie-based user resolution)
+EXTERNAL_API_BASE_URL=https://services.q84sale.com
 ```
-**Troubleshooting:**
-- If environment variables are not being read, ensure `.env` is saved, not empty, and in the project root.
-- If you see `DB_USER: undefined`, delete and re-create `.env`.
+
+**💡 Environment Variables Tips:**
+- Use strong, unique secrets for `SESSION_SECRET` and `JWT_SECRET`
+- Change `PORT` if 5000 is already in use on your system
+- Ensure your MySQL user has CREATE permissions for automatic table creation
 
 ### 4. Database Setup
-- The app auto-creates tables if your MySQL user has CREATE permissions.
-- You can use `npm run db:push` to push schema changes (Drizzle ORM).
-- **Mini Rewards:** Ensure your DB has the `mini_rewards` table (see migrations or schema).
+The application will automatically create required tables when you first run it, provided your MySQL user has the necessary permissions.
 
-### 5. Running the App
-- **Development:**
-  ```bash
-  npm run dev
-  ```
-  - If you see `EADDRINUSE: address already in use`, change `PORT` in `.env` (e.g., `PORT=5001`).
-  - If you see `ENOTSUP: operation not supported on socket`, remove the `host` option from `server.listen` (already fixed in this repo).
-- **Production Build:**
-  ```bash
-  npm run build
-  npm run preview
-  ```
+To manually push schema changes:
+```bash
+npm run db:push
+```
 
-## Admin Panel
-- Visit: `http://localhost:<PORT>/admin`
-- Login with your admin credentials (default: `admin`/`admin123` if seeded)
-- Manage campaigns, milestones, and mini rewards
-- **Mini Rewards:**
-  - Add, edit, and delete mini rewards for each campaign
-  - Each mini reward has English & Arabic title/description, and is shown after a specific day
-  - Mini rewards are displayed between days on the user progress timeline
-- **Milestone Titles:**
-  - Milestone titles are shown using `title_en` (English) or `title_ar` (Arabic). If you see missing titles, ensure your milestones have these fields populated.
-- **Admin UI Improvements:**
-  - All fields for mini rewards (EN/AR) are now visible and editable
-  - Editing a mini reward pre-fills all values
+### 5. Run the Application
 
-## Mini Rewards
-- **What are Mini Rewards?**
-  - Configurable rewards shown between days on the progress timeline
-  - Managed from the admin panel under the "Mini Rewards" tab
-  - Each reward can have English and Arabic title/description
-  - Shown to users after completing the specified day
-  - Locked/unlocked state is visually indicated
+#### Development Mode
+```bash
+npm run dev
+```
+The app will be available at `http://localhost:5000` (or your configured PORT).
 
-## Progress Page & User Experience
-- **Animated Reward Icon:**
-  - The main reward section now shows an animated Font Awesome sack dollar icon (blue, with padding) if the user hasn't completed all days
-  - Text: "Complete all milestones for a big CASH reward" (or Arabic translation)
-- **Timeline:**
-  - Unified timeline: for each day, the day card is shown, and any mini rewards for that day are rendered immediately after
-  - Mini rewards are never duplicated or misplaced
-  - Locked/unlocked state for mini rewards is visually clear
-- **Current Day:**
-  - The current day's milestones/tasks are shown inside the day's card
-- **Locked Days:**
-  - Locked days have a visually improved lock icon inside a soft gray circle
+#### Production Build
+```bash
+npm run build
+npm start
+```
 
-## API Reference
+## 🐳 Docker Deployment
 
-### Authentication
-- All `/admin` endpoints require a JWT token (login via `/admin/login`).
-- Pass the token as `Authorization: Bearer <token>`.
+### Prerequisites for Docker
+- Docker installed and running
+- `.env` file configured (see Environment Configuration above)
+- Accessible MySQL database
 
-### Main Endpoints
-- `GET /health` — Health check
-- `GET /api/progress/:userId/:campaignId?lang=en|ar` — User progress (includes mini rewards)
-- `POST /api/milestone/complete` — Complete a milestone (requires `WEBHOOK_TOKEN`)
-- `GET /admin/campaigns/:campaignId/milestones` — Milestones for a campaign (JWT required)
-- `GET /admin/api/campaigns/:campaignId/mini-rewards` — Mini rewards for a campaign (JWT required)
+### Build the Docker Image
+```bash
+docker build -t activitytracker-app .
+```
 
-## Project Structure
+### Run with Docker
+```bash
+# Using .env file (recommended)
+docker run -p 5001:5001 --env-file .env activitytracker-app
+
+# Or with individual environment variables
+docker run -p 5001:5001 \
+  -e DB_HOST=your-db-host \
+  -e DB_USER=your-db-user \
+  -e DB_PASSWORD=your-db-password \
+  -e DB_NAME=your-db-name \
+  -e JWT_SECRET=your-jwt-secret \
+  -e SESSION_SECRET=your-session-secret \
+  activitytracker-app
+```
+
+### Access the Application
+- Main app: `http://localhost:5001`
+- Health check: `http://localhost:5001/health`
+- Admin panel: `http://localhost:5001/admin`
+
+### Docker Management
+```bash
+# List running containers
+docker ps
+
+# Stop a container
+docker stop <container_id>
+
+# View container logs
+docker logs <container_id>
+
+# Remove unused containers and images
+docker system prune
+```
+
+## 👨‍💼 Admin Panel
+
+Access the admin dashboard at `http://localhost:<PORT>/admin`
+
+### Default Credentials
+- **Username:** `admin`
+- **Password:** `admin123`
+
+*⚠️ Change these credentials in production!*
+
+### Admin Features
+- **Campaign Management**: Create, edit, and manage activity campaigns
+- **Milestone Configuration**: Set up progress milestones with multilingual support
+- **Mini Rewards System**: Configure rewards shown between progress days
+- **User Progress Monitoring**: View user activity and completion rates
+- **Multilingual Content**: Manage English and Arabic content versions
+
+### Mini Rewards Configuration
+- Add rewards that appear between specific days
+- Set English (`title_en`, `description_en`) and Arabic (`title_ar`, `description_ar`) content
+- Configure unlock conditions and visual states
+- Preview how rewards appear in the user timeline
+
+## 🎯 User Experience Features
+
+### Progress Tracking
+- **Visual Timeline**: Clear day-by-day progress visualization
+- **Milestone Completion**: Track individual goal achievements
+- **Animated Rewards**: Font Awesome animated icons for engagement
+- **Completion Status**: Clear locked/unlocked states for content
+
+### Smart User ID Resolution
+The app supports multiple methods for identifying users:
+
+1. **Direct URL**: `/web/en/progress/12345/1` - Uses user ID from URL
+2. **Cookie Resolution**: `/web/en/progress//1` - Extracts user ID from cookies
+3. **Placeholder Replacement**: `/web/en/progress/{{userid}}/1` - Replaces placeholder with actual ID
+
+### Internationalization
+- **Language Support**: English (LTR) and Arabic (RTL)
+- **Dynamic Switching**: Users can change language preference
+- **Localized Content**: All text, dates, and numbers respect locale settings
+- **RTL Layout**: Proper right-to-left layout for Arabic content
+
+## 🔧 API Reference
+
+### Public Endpoints
+```
+GET  /health                              # Application health check
+GET  /api/progress/:userId/:campaignId    # User progress data
+POST /api/milestone/complete              # Complete a milestone (webhook)
+```
+
+### Admin Endpoints (JWT Required)
+```
+POST /admin/login                         # Admin authentication
+GET  /admin/campaigns                     # List all campaigns
+GET  /admin/campaigns/:id/milestones      # Campaign milestones
+GET  /admin/campaigns/:id/mini-rewards    # Campaign mini rewards
+POST /admin/campaigns/:id/mini-rewards    # Create mini reward
+PUT  /admin/mini-rewards/:id              # Update mini reward
+DELETE /admin/mini-rewards/:id            # Delete mini reward
+```
+
+### Request Headers
+```
+Authorization: Bearer <jwt-token>         # For admin endpoints
+Content-Type: application/json           # For POST/PUT requests
+```
+
+## 📁 Project Structure
+
 ```
 ActivityTracker-2/
-├── client/           # React frontend
+├── client/                    # React frontend application
+│   ├── public/               # Static assets
+│   │   ├── fonts/           # SakrPro font family
+│   │   └── kim-cash.gif     # Reward animations
 │   └── src/
-│       ├── components/
-│       ├── hooks/
-│       ├── pages/
-│       ├── lib/
-│       └── i18n/
-├── server/           # Express backend
-│   ├── db.ts
-│   ├── routes.ts
-│   ├── storage.ts
-│   └── index.ts
-├── shared/           # Shared types and schemas
-├── .env              # Environment variables
-├── package.json
-└── README.md
+│       ├── components/      # Reusable UI components
+│       │   └── ui/         # Shadcn/ui component library
+│       ├── hooks/          # Custom React hooks
+│       ├── pages/          # Application pages/routes
+│       ├── lib/            # Utility functions and configurations
+│       └── i18n/           # Internationalization setup
+│           └── locales/    # Translation files (en.json, ar.json)
+├── server/                   # Express.js backend
+│   ├── db.ts              # Database connection and configuration
+│   ├── routes.ts          # API route definitions
+│   ├── storage.ts         # File storage utilities
+│   ├── index.ts           # Main server entry point
+│   └── vite.ts            # Vite development middleware
+├── shared/                   # Shared code between frontend/backend
+│   ├── schema.ts          # Database schema definitions
+│   └── utils.ts           # Shared utility functions
+├── attached_assets/          # Documentation and design assets
+├── .env                     # Environment variables (create from template)
+├── Dockerfile              # Docker container configuration
+├── package.json            # Node.js dependencies and scripts
+├── tailwind.config.ts      # Tailwind CSS configuration
+├── vite.config.ts          # Vite build configuration
+└── drizzle.config.ts       # Database ORM configuration
 ```
 
-## Scripts
-- `npm run dev` — Start dev server
-- `npm run build` — Build frontend & backend
-- `npm run preview` — Preview production build
-- `npm run db:push` — Push DB schema (Drizzle)
+## 📜 Available Scripts
 
-## Docker Usage
-- **Build:**
-  ```bash
-  docker build -t activity-streak-app .
-  ```
-- **Run:**
-  ```bash
-  docker run -p 5000:5000 --env-file .env activity-streak-app
-  ```
-  - Or set env vars with `-e` flags as needed
-- **Health Check:**
-  - Visit `/health` endpoint inside the container
+```bash
+# Development
+npm run dev                   # Start development server with hot reload
+npm run dev:frontend         # Start only Vite frontend dev server
 
-## Troubleshooting & Tips
-- **Port in use:** Change `PORT` in `.env` if you see `EADDRINUSE` errors
-- **ENOTSUP error:** Use only `server.listen(port, ...)` (already fixed)
-- **Environment variables not loading:** Ensure `.env` is not empty, is in the root, and is saved
-- **TypeScript errors:** Ensure `@types/node` and `@types/express` are installed and `tsconfig.json` includes them in `types`
-- **Milestone titles not showing:** The frontend now uses `milestone.title_en`/`milestone.title_ar` — update your data if needed
-- **Mini rewards not showing:** Ensure your DB has the `mini_rewards` table and your API returns them for the campaign
+# Building
+npm run build                # Build both client and server for production
+npm run build:client        # Build only the React frontend
+npm run build:server        # Build only the Express backend
 
-## Contributing
-1. Fork the repo
-2. Create a feature branch
-3. Make changes & add tests
-4. Submit a pull request
+# Production
+npm start                    # Start production server
 
-## License
-MIT
+# Database
+npm run db:push              # Push schema changes to database
 
-## Support
-For questions or support, contact the development team.
+# Type Checking
+npm run check                # Run TypeScript type checking
+```
 
-## Security Note
-Database credentials are read from `.env` and are **never logged** or exposed. (Console logging removed from server/db.ts)
+## 🐛 Troubleshooting
 
-## User ID Extraction & Cookie Flow (v3+)
+### Common Issues and Solutions
 
-### Robust User ID Handling
-- The progress page now supports extracting the user ID from multiple sources:
-  - **URL param**: If present and non-empty, used directly.
-  - **Placeholder or missing**: If the URL contains `/web/en/progress/{{userid}}/1` or `/web/en/progress//1`, the app will:
-    - Read the `_xyzW` cookie for a token.
-    - Call the external API (`/external-api/api/v1/users/auth/user`) to fetch the user ID.
-    - Automatically update the URL to include the resolved user ID for shareability and clarity.
-- If both the URL and cookie flow fail, a user-friendly error is shown.
+#### Port Already in Use
+```bash
+# Error: EADDRINUSE: address already in use :::5000
+```
+**Solution:** Change the PORT in your `.env` file:
+```env
+PORT=5001
+```
 
-### Router Normalization
-- The router now automatically normalizes double slashes in URLs (e.g., `/web/en/progress//1` → `/web/en/progress/1`).
-- URLs with the placeholder `{{userid}}` are also supported and replaced with the real user ID after resolution.
+#### Database Connection Issues
+```bash
+# Error: DB_USER, DB_PASSWORD, and DB_NAME must be set
+```
+**Solutions:**
+1. Ensure `.env` file exists and is properly formatted
+2. Verify database credentials are correct
+3. Check that MySQL server is running and accessible
+4. Ensure database user has proper permissions
 
-### Vite Proxy Setup
-- The Vite dev server proxies:
-  - `/api` → `http://localhost:5001` (Express backend)
-  - `/external-api` → `https://services.q84sale.com` (external user info API)
-- This allows the frontend to call both local and external APIs without CORS or CSP issues in development.
+#### Docker Port Conflicts
+```bash
+# Error: port is already allocated
+```
+**Solution:** Use a different host port:
+```bash
+docker run -p 5002:5001 --env-file .env activitytracker-app
+```
 
-### Defensive Error Handling
-- All fetch calls now check for valid JSON responses and handle HTML or error responses gracefully.
-- The progress page will never attempt to fetch with an invalid or empty user ID.
+#### Environment Variables Not Loading
+**Solutions:**
+1. Ensure `.env` file is in the project root directory
+2. Check that `.env` file is not empty
+3. Restart the development server after making changes
+4. Verify file encoding is UTF-8
 
-### Example Flows
-- `/web/en/progress/12345/1` → Uses userId from URL.
-- `/web/en/progress//1` or `/web/en/progress/{{userid}}/1` → Uses cookie flow, updates URL to `/web/en/progress/<realUserId>/1`.
+#### Missing Vite Dependencies in Docker
+```bash
+# Error: Cannot find package 'vite'
+```
+**Solution:** This is typically resolved by rebuilding the Docker image:
+```bash
+docker build --no-cache -t activitytracker-app .
+```
 
-### Why This Matters
-- This makes the app robust for webviews, deep links, and SSO scenarios where the user ID may not be in the URL.
-- Ensures a seamless experience for both direct and embedded usage.
+#### TypeScript Compilation Errors
+**Solution:** Ensure all type dependencies are installed:
+```bash
+npm install --save-dev @types/node @types/express
+```
+
+### Performance Tips
+- Use `npm run build` for production deployments
+- Enable database connection pooling for high-traffic scenarios
+- Consider using a CDN for static assets in production
+- Implement Redis caching for frequently accessed data
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes** with proper commit messages
+4. **Add tests** for new functionality
+5. **Ensure all tests pass**: `npm run check`
+6. **Submit a pull request** with a clear description
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Use meaningful commit messages
+- Add JSDoc comments for public APIs
+- Ensure responsive design for all new UI components
+- Test both English and Arabic language modes
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For questions, bug reports, or feature requests:
+
+1. **Issues**: Create an issue on [GitHub](https://github.com/joegit1996/ActivityTracker-2/issues)
+2. **Documentation**: Check this README and inline code comments
+3. **Community**: Join our discussions on GitHub
+
+## 🔒 Security
+
+### Important Security Notes
+- Database credentials are never logged or exposed in console output
+- JWT tokens are securely generated and validated
+- Session secrets should be strong and unique in production
+- Admin credentials should be changed from defaults immediately
+
+### Reporting Security Issues
+Please report security vulnerabilities privately by emailing the development team rather than creating public issues.
+
+---
+
+## 📊 Advanced Configuration
+
+### Custom Font Integration
+The app uses SakrPro font family by default. To customize:
+
+1. Add your fonts to `client/public/fonts/`
+2. Update `client/src/index.css` with new font-face declarations
+3. Modify `tailwind.config.ts` to include new font families
+
+### External API Integration
+The app supports external user authentication APIs. Configure in your environment:
+
+```env
+EXTERNAL_API_BASE_URL=https://your-api-domain.com
+```
+
+### Proxy Configuration
+For development, Vite proxies are configured to handle:
+- `/api` → Express backend (`http://localhost:5001`)
+- `/external-api` → External authentication service
+
+This prevents CORS issues during development while maintaining clean production URLs.
+
+---
+
+**Built with ❤️ using modern web technologies**
