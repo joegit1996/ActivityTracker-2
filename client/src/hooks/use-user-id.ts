@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { getCookie } from "@/lib/utils";
 
 interface UseUserIdResult {
@@ -17,6 +18,7 @@ interface UseUserIdResult {
  */
 export function useUserId(): UseUserIdResult {
   // Try to get userId from URL params
+  const { t } = useTranslation();
   const params = useParams();
   const [location, setLocation] = useLocation();
   const urlUserId = params.userId;
@@ -36,7 +38,7 @@ export function useUserId(): UseUserIdResult {
     const token = getCookie("_xyzW");
     console.log("[useUserId] Token from _xyzW cookie:", token);
     if (!token) {
-      setError("No token found in _xyzW cookie");
+      setError(t('common.signInMessage'));
       setLoading(false);
       return;
     }

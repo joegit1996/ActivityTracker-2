@@ -25,11 +25,13 @@
     "completeToUnlock": "أكمل المعالم للفتح",
     "congratulations": "تهانينا!",
     "rewardCode": "المكافأة",
-    "complete": "مكتمل",
     "streakFailedTitle": "انتهت السلسلة",
     "streakFailedMessage": "لم تتمكن من إكمال المهام في اليوم {{day}}.",
     "streakFailedReason": "السبب: {{reason}}",
-    "startNewStreak": "ابدأ سلسلة جديدة"
+    "startNewStreak": "ابدأ سلسلة جديدة",
+    "signInRequired": "تسجيل الدخول مطلوب",
+    "signInMessage": "يرجى تسجيل الدخول إلى Q84Sale أولاً لعرض تقدم نشاطك",
+    "signInButton": "تسجيل الدخول إلى Q84Sale"
   },
   "admin": {
     "title": "لوحة الإدارة",
@@ -69,6 +71,8 @@
     "updated": "تم التحديث",
     "deleted": "تم الحذف",
     "confirm": "تأكيد",
-    "confirmDelete": "هل أنت متأكد من الحذف؟"
+    "confirmDelete": "هل أنت متأكد من الحذف؟",
+    "signInRequired": "تسجيل الدخول مطلوب",
+    "signInMessage": "يرجى تسجيل الدخول إلى Q84Sale أولاً لعرض تقدم نشاطك"
   }
 }

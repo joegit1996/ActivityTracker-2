@@ -107,16 +107,16 @@ npm run db:push
 ### 5. Run the Application
 
 #### Development Mode
-```bash
-npm run dev
-```
+  ```bash
+  npm run dev
+  ```
 The app will be available at `http://localhost:5000` (or your configured PORT).
 
 #### Production Build
-```bash
-npm run build
+  ```bash
+  npm run build
 npm start
-```
+  ```
 
 ## 🐳 Docker Deployment
 
@@ -418,13 +418,13 @@ docker run -p 5002:5001 --env-file .env activitytracker-app
 # Error: Cannot find package 'vite'
 ```
 **Solution:** This is typically resolved by rebuilding the Docker image:
-```bash
+  ```bash
 docker build --no-cache -t activitytracker-app .
-```
+  ```
 
 #### TypeScript Compilation Errors
 **Solution:** Ensure all type dependencies are installed:
-```bash
+  ```bash
 npm install --save-dev @types/node @types/express
 ```
 
