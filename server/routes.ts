@@ -102,6 +102,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Proxy endpoint for Q84Sale user authentication API
+  // This forwards requests to the actual Q84Sale API
+  app.get('/external-api/api/v1/users/auth/user', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
+    
+    console.log('[Q84Sale API Proxy] Received request with token:', token?.substring(0, 20) + '...');
+    
+    if (!token) {
+      return res.status(401).json({ error: 'Authorization token required' });
+    }
+    
+    try {
+      // Forward request to actual Q84Sale API
+      const response = await fetch('https://services.q84sale.com/api/v1/users/auth/user', {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'accept-language': 'en-US,en;q=0.9',
+          'application-source': 'q84sale',
+          'authorization': `Bearer ${token}`,
+          'content-type': 'application/json',
+          'device-id': 'web_user_0ca45faf-56f8-4ac6-80ef-b5a8e1ebb92b',
+          'origin': 'https://www.q84sale.com',
+          'referer': 'https://www.q84sale.com/',
+          'user-agent': 'ActivityTracker/1.0 (Web)',
+          'version-number': 'web',
+          'x-custom-authorization': 'com.forsale.forsale.web 1752574771 e9a6806fa169c33b0345afb4618970377acf6996',
+        },
+      });
+      
+      console.log('[Q84Sale API Proxy] Response status:', response.status);
+      
+      if (!response.ok) {
+        console.error('[Q84Sale API Proxy] API error:', response.status, response.statusText);
+        return res.status(response.status).json({ 
+          error: 'External API error', 
+          status: response.status,
+          message: response.statusText 
+        });
+      }
+      
+      const data = await response.json();
+      console.log('[Q84Sale API Proxy] Successfully retrieved user ID:', data?.data?.user?.user_id);
+      
+      // Forward the response from Q84Sale API
+      res.json(data);
+      
+    } catch (error) {
+      console.error('[Q84Sale API Proxy] Network error:', error);
+      res.status(500).json({ 
+        error: 'Failed to connect to external API',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Security headers
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -160,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /admin/me - Get current admin info from token
-  app.get('/admin/me', authenticateToken, async (req, res) => {
+  app.get('/admin/me', authenticateToken, async (req: any, res) => {
     try {
       const admin = await storage.getAdmin(req.admin.id);
       if (!admin) {
