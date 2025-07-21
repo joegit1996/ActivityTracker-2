@@ -54,21 +54,22 @@ const milestoneRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
-// Security middleware for API token validation
+// Security middleware for API key validation
 function validateApiToken(req: any, res: any, next: any) {
   const authToken = req.headers.authorization?.replace('Bearer ', '');
-  const apiToken = req.headers['x-api-token'];
-  const token = authToken || apiToken;
-  const validToken = process.env.API_TOKEN || process.env.WEBHOOK_TOKEN || 'ea86ee11694aa30b0723961ef65b76a31418e23c1c5430fc66d7f1cf2a00585a';
+  const apiKey = req.headers['x-api-key'];
+  const token = authToken || apiKey;
+  const validToken = process.env.API_KEY || process.env.WEBHOOK_TOKEN || 'ea86ee11694aa30b0723961ef65b76a31418e23c1c5430fc66d7f1cf2a00585a';
   
-  console.log('Token validation debug:', {
+  console.log('API key validation debug:', {
     receivedToken: token,
     expectedToken: validToken,
-    webhookToken: process.env.WEBHOOK_TOKEN
+    webhookToken: process.env.WEBHOOK_TOKEN,
+    apiKey: process.env.API_KEY
   });
   
   if (!token || token !== validToken) {
-    return res.status(401).json({ error: "Unauthorized: Invalid API token" });
+    return res.status(401).json({ error: "Unauthorized: Invalid API key" });
   }
   
   next();
