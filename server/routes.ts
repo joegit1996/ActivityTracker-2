@@ -278,13 +278,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET user progress for specific campaign
   app.get("/api/progress/:userId/:campaignId", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      let userId = parseInt(req.params.userId);
       const campaignId = parseInt(req.params.campaignId);
-      
+      // Fallback: extract token from _xyzW cookie and call Q84Sale API if userId is invalid
       if (isNaN(userId)) {
-        return res.status(400).json({ error: "Invalid user ID" });
+        const xyzW = req.cookies?._xyzW;
+        let token = undefined;
+        if (xyzW && typeof xyzW === 'string') {
+          const parts = xyzW.split('|');
+          token = parts.length > 1 ? parts[1] : parts[0];
+        }
+        if (token) {
+          try {
+            const response = await fetch('https://services.q84sale.com/api/v1/users/auth/user', {
+              method: 'GET',
+              headers: {
+                'accept': 'application/json',
+                'accept-language': 'en-US,en;q=0.9',
+                'application-source': 'q84sale',
+                'authorization': `Bearer ${token}`,
+                'content-type': 'application/json',
+                'device-id': 'web_user_0ca45faf-56f8-4ac6-80ef-b5a8e1ebb92b',
+                'origin': 'https://www.q84sale.com',
+                'referer': 'https://www.q84sale.com/',
+                'user-agent': 'ActivityTracker/1.0 (Web)',
+                'version-number': 'web',
+                'x-custom-authorization': 'com.forsale.forsale.web 1752574771 e9a6806fa169c33b0345afb4618970377acf6996',
+              },
+            });
+            if (response.ok) {
+              const data = await response.json();
+              userId = data?.data?.user?.user_id;
+            } else {
+              return res.status(401).json({ error: 'Failed to resolve user ID from Q84Sale API', status: response.status });
+            }
+          } catch (err) {
+            return res.status(500).json({ error: 'Error calling Q84Sale API', details: err instanceof Error ? err.message : err });
+          }
+        }
       }
-      
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID (not in URL or could not resolve from _xyzW token)" });
+      }
       if (isNaN(campaignId)) {
         return res.status(400).json({ error: "Invalid campaign ID" });
       }
@@ -390,6 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const miniRewards = miniRewardsRaw.map((reward) => getLocalizedMiniReward(reward, language));
 
       res.json({
+        debugUserId: userId, // Move to top level for visibility
         campaign: localizedCampaign,
         progress: {
           currentDay,
@@ -494,6 +530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const localizedCampaign = getLocalizedCampaign(activeCampaign, language);
       
       res.json({
+        debugUserId: userId, // Move to top level for visibility
         campaign: localizedCampaign,
         progress: {
           currentDay,
