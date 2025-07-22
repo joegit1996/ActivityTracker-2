@@ -73,6 +73,7 @@
     "confirm": "Confirm",
     "confirmDelete": "Are you sure you want to delete this?",
     "signInRequired": "Sign In Required",
-    "signInMessage": "Please sign in to Q84Sale first to view your activity progress"
+    "signInMessage": "Please sign in to Q84Sale first to view your activity progress",
+    "signInRestartMessage": "You need to sign in and restart the application, then try to open your streak again"
   }
 }
